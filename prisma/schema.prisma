@@ -1,0 +1,350 @@
+// Kalika Tours & Travels database schema.
+//
+// An Enquiry is a request from a visitor. It is NOT a booking.
+// The business contacts the customer and confirms availability first;
+// a Booking model can later reference an Enquiry without changing this one.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Where the enquiry first came from.
+enum EnquirySource {
+  WEBSITE
+  WHATSAPP
+  INSTAGRAM
+  OTHER
+}
+
+/// Where the enquiry is in the business follow-up.
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+/// Matches the services offered on the website.
+enum TravelType {
+  OUTSTATION
+  FAMILY
+  GROUP
+  PILGRIMAGE
+  CORPORATE
+}
+
+/// Delivery state of the "new enquiry" email to the business.
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model Enquiry {
+  id                 String             @id @default(uuid()) @db.Uuid
+  fullName           String             @db.VarChar(80)
+  /// E.164 format, for example +919876543210
+  phone              String             @db.VarChar(16)
+  email              String?            @db.VarChar(254)
+  travelType         TravelType
+  destination        String             @db.VarChar(120)
+  travelDate         DateTime           @db.Date
+  returnDate         DateTime           @db.Date
+  passengerCount     Int                @db.SmallInt
+  message            String?            @db.VarChar(1000)
+  /// Language of the page the enquiry was sent from (en or mr)
+  locale             String             @default("en") @db.VarChar(5)
+  status             EnquiryStatus      @default(NEW)
+  source             EnquirySource      @default(WEBSITE)
+  notificationStatus NotificationStatus @default(PENDING)
+  notifiedAt         DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  /// Soft delete: hidden from the admin API but kept for records
+  deletedAt          DateTime?
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@index([deletedAt])
+  @@map("enquiries")
+}
+
+/// What an admin may do. Permissions per role live in lib/auth/permissions.ts.
+enum AdminRole {
+  /// Developer: everything, including admin users, settings and the audit log
+  SUPER_ADMIN
+  /// Business owner: enquiries and website content, no system controls
+  CONTENT_ADMIN
+}
+
+model Admin {
+  id                 String     @id @default(uuid()) @db.Uuid
+  email              String     @unique @db.VarChar(254)
+  name               String     @db.VarChar(80)
+  /// scrypt hash, never the raw password
+  passwordHash       String
+  /// Raising this signs the admin out everywhere
+  tokenVersion       Int        @default(0)
+  role               AdminRole  @default(CONTENT_ADMIN)
+  /// Disabled admins cannot sign in, and their sessions stop working
+  isActive           Boolean    @default(true)
+  /// Set when a Super Admin creates the account or resets its password
+  mustChangePassword Boolean    @default(false)
+  lastLoginAt        DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  auditLogs          AuditLog[]
+
+  @@index([role, isActive])
+  @@map("admins")
+}
+
+/// A record of an important admin action. Never holds passwords, tokens or secrets.
+model AuditLog {
+  id         String    @id @default(uuid()) @db.Uuid
+  /// Null once the admin account is gone; name and role are kept as they were
+  actorId    String?   @db.Uuid
+  actor      Admin?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actorName  String    @db.VarChar(80)
+  actorRole  AdminRole
+  /// e.g. "create", "update", "delete", "publish", "approve", "status_change", "role_change"
+  action     String    @db.VarChar(40)
+  /// e.g. "Offer", "GalleryItem", "Enquiry", "Admin", "SiteContent"
+  entityType String    @db.VarChar(40)
+  entityId   String?   @db.VarChar(80)
+  /// Human-readable line for the log, e.g. the offer title
+  summary    String?   @db.VarChar(300)
+  /// Small, non-sensitive details, e.g. { "from": "NEW", "to": "CONTACTED" }
+  metadata   Json?
+  createdAt  DateTime  @default(now())
+
+  @@index([createdAt(sort: Desc)])
+  @@index([entityType, createdAt(sort: Desc)])
+  @@index([actorId, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
+
+/// Fixed-window counters for rate limiting. Keys hold a hash, never a raw IP.
+model RateLimitBucket {
+  key     String   @id @db.VarChar(128)
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
+  @@map("rate_limit_buckets")
+}
+
+// ─── Content: gallery and reviews ─────────────────────────────
+
+/// Moderation state of a customer review. Only APPROVED reviews are public.
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A photograph from a real Kalika trip, managed from the admin dashboard.
+model GalleryItem {
+  id          String      @id @default(uuid()) @db.Uuid
+  /// Where the image is served from: an uploaded file (/media/...) or a bundled asset (/images/...)
+  imageUrl    String      @db.VarChar(500)
+  /// Storage key for uploaded files, so the file can be removed with the item
+  imageKey    String?     @db.VarChar(300)
+  /// Pixel size, used for natural aspect ratios without layout shift
+  width       Int?
+  height      Int?
+  /// Short title; also the image's alt text unless altText is set
+  title       String      @db.VarChar(120)
+  /// Describes the photo for screen readers
+  altText     String?     @db.VarChar(200)
+  caption     String?     @db.VarChar(500)
+  destination String?     @db.VarChar(120)
+  tripType    TravelType?
+  tripDate    DateTime?   @db.Date
+  featured    Boolean     @default(false)
+  published   Boolean     @default(false)
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([published, sortOrder])
+  @@index([featured, published])
+  @@map("gallery_items")
+}
+
+/// A review submitted by a customer. Stored as PENDING until an admin approves it.
+model Review {
+  id           String       @id @default(uuid()) @db.Uuid
+  customerName String       @db.VarChar(60)
+  rating       Int          @db.SmallInt
+  reviewText   String       @db.VarChar(1500)
+  destination  String       @db.VarChar(120)
+  tripType     TravelType?
+  /// Optional customer photo (uploaded, re-encoded, metadata stripped)
+  photoUrl     String?      @db.VarChar(500)
+  photoKey     String?      @db.VarChar(300)
+  photoWidth   Int?
+  photoHeight  Int?
+  /// Language of the page the review was sent from (en or mr)
+  locale       String       @default("en") @db.VarChar(5)
+  status       ReviewStatus @default(PENDING)
+  /// When an admin last approved or rejected it
+  moderatedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([status, createdAt(sort: Desc)])
+  @@map("reviews")
+}
+
+// ─── Website content (CMS) ────────────────────────────────────
+// Text fields have an optional Marathi version (…Mr). When it is empty,
+// the Marathi site shows the English text.
+
+/// A promotion shown on the website between its start and end dates.
+model Offer {
+  id                 String    @id @default(uuid()) @db.Uuid
+  title              String    @db.VarChar(120)
+  titleMr            String?   @db.VarChar(120)
+  shortDescription   String    @db.VarChar(240)
+  shortDescriptionMr String?   @db.VarChar(240)
+  description        String?   @db.VarChar(2000)
+  descriptionMr      String?   @db.VarChar(2000)
+  /// Small badge, e.g. "Diwali special"
+  label              String?   @db.VarChar(40)
+  labelMr            String?   @db.VarChar(40)
+  ctaText            String?   @db.VarChar(40)
+  ctaTextMr          String?   @db.VarChar(40)
+  /// A site page ("page:plan") or a web address (https://…)
+  ctaLink            String?   @db.VarChar(500)
+  imageUrl           String?   @db.VarChar(500)
+  imageKey           String?   @db.VarChar(300)
+  imageWidth         Int?
+  imageHeight        Int?
+  imageAlt           String?   @db.VarChar(200)
+  /// Shown from this moment (null = as soon as published)
+  startsAt           DateTime?
+  /// Hidden after this moment (null = until unpublished)
+  endsAt             DateTime?
+  published          Boolean   @default(false)
+  sortOrder          Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([published, startsAt, endsAt])
+  @@map("offers")
+}
+
+enum AnnouncementType {
+  INFO
+  OFFER
+  IMPORTANT
+  FESTIVE
+}
+
+/// A short notice shown in the bar at the top of the website.
+model Announcement {
+  id        String           @id @default(uuid()) @db.Uuid
+  message   String           @db.VarChar(200)
+  messageMr String?          @db.VarChar(200)
+  ctaText   String?          @db.VarChar(40)
+  ctaTextMr String?          @db.VarChar(40)
+  ctaLink   String?          @db.VarChar(500)
+  type      AnnouncementType @default(INFO)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  published Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([published, startsAt, endsAt])
+  @@map("announcements")
+}
+
+/// Editable copy for a fixed website section (hero, why Kalika, …) or the Traveller.
+/// The layout stays in code; only the fields defined in lib/cms/sections.ts are stored.
+model SiteContent {
+  /// Section key, e.g. "hero", "why", "traveller"
+  key         String    @id @db.VarChar(40)
+  /// Saved but not live yet
+  draft       Json
+  /// What the website shows; null until first published
+  published   Json?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("site_content")
+}
+
+enum DestinationCategory {
+  MAHARASHTRA
+  OTHER_STATES
+  PILGRIMAGE
+  FAMILY
+  GROUP
+  CORPORATE
+  OUTSTATION
+}
+
+model Destination {
+  id                 String              @id @default(uuid()) @db.Uuid
+  name               String              @db.VarChar(80)
+  nameMr             String?             @db.VarChar(80)
+  state              String?             @db.VarChar(80)
+  country            String              @default("India") @db.VarChar(80)
+  shortDescription   String              @db.VarChar(240)
+  shortDescriptionMr String?             @db.VarChar(240)
+  description        String?             @db.VarChar(2000)
+  descriptionMr      String?             @db.VarChar(2000)
+  category           DestinationCategory
+  imageUrl           String?             @db.VarChar(500)
+  imageKey           String?             @db.VarChar(300)
+  imageWidth         Int?
+  imageHeight        Int?
+  imageAlt           String?             @db.VarChar(200)
+  published          Boolean             @default(false)
+  sortOrder          Int                 @default(0)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([published, category, sortOrder])
+  @@map("destinations")
+}
+
+/// A service shown on the website. The enquiry form keeps its fixed trip types;
+/// enquiryType says which one "Plan This Trip" selects.
+model Service {
+  id                 String     @id @default(uuid()) @db.Uuid
+  title              String     @db.VarChar(80)
+  titleMr            String?    @db.VarChar(80)
+  shortDescription   String     @db.VarChar(240)
+  shortDescriptionMr String?    @db.VarChar(240)
+  description        String?    @db.VarChar(2000)
+  descriptionMr      String?    @db.VarChar(2000)
+  /// "Suitable for" list, one item per line
+  suitableFor        String?    @db.VarChar(1000)
+  suitableForMr      String?    @db.VarChar(1000)
+  enquiryType        TravelType
+  /// One of the icon names in lib/cms/icons.ts
+  icon               String     @default("route") @db.VarChar(30)
+  imageUrl           String?    @db.VarChar(500)
+  imageKey           String?    @db.VarChar(300)
+  imageWidth         Int?
+  imageHeight        Int?
+  imageAlt           String?    @db.VarChar(200)
+  published          Boolean    @default(false)
+  sortOrder          Int        @default(0)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@index([published, sortOrder])
+  @@map("services")
+}

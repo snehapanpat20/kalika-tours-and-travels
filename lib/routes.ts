@@ -1,0 +1,36 @@
+import type { Locale } from "@/lib/i18n/locales"
+
+/** Public pages and their URL slugs. Every link to a page is built from here. */
+export const pageSlugs = {
+  home: "",
+  about: "about",
+  services: "services",
+  destinations: "destinations",
+  traveller: "traveller",
+  gallery: "gallery",
+  reviews: "reviews",
+  contact: "contact",
+  plan: "plan-your-trip",
+} as const
+
+export type PageKey = keyof typeof pageSlugs
+
+export function pagePath(locale: Locale, page: PageKey, hash?: string): string {
+  const slug = pageSlugs[page]
+  return `/${locale}${slug ? `/${slug}` : ""}${hash ? `#${hash}` : ""}`
+}
+
+/** The trip planner, optionally pre-filled with a service and/or destination. */
+export function planPath(locale: Locale, prefill: { service?: string; destination?: string } = {}): string {
+  const query = new URLSearchParams()
+  if (prefill.service) query.set("service", prefill.service)
+  if (prefill.destination) query.set("destination", prefill.destination)
+  const text = query.toString()
+  return `${pagePath(locale, "plan")}${text ? `?${text}` : ""}`
+}
+
+/** True when `pathname` is one of the public pages that opens with a dark hero image. */
+export function hasDarkHero(pathname: string): boolean {
+  const slugs = Object.values(pageSlugs).filter(Boolean).join("|")
+  return new RegExp(`^/(en|mr)(/(${slugs}))?/?$`).test(pathname)
+}

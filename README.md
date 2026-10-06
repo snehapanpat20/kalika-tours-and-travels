@@ -1,34 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Kalika Tours & Travels
 
-## Getting Started
+Website and enquiry backend for Kalika Tours & Travels (Next.js 16, PostgreSQL, Prisma).
+Visitors send trip enquiries from the website; the business is emailed and manages them through the admin API.
 
-First, run the development server:
+- **Setting up, testing and deploying the backend:** [BACKEND_SETUP.md](BACKEND_SETUP.md)
+- **API reference:** [API.md](API.md)
+
+## Scripts
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev            # website + API on http://localhost:3000
+npm run lint
+npm run typecheck
+npm run build
+npm run db:migrate     # apply database migrations (development)
+npm run db:deploy      # apply database migrations (production)
+npm run admin:create   # create the admin login or reset its password
+npm run test:server    # start the API test server (separate *_test database)
+npm run test:api       # run the API tests against it
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` and fill it in. `DATABASE_URL` and `JWT_SECRET` are required.
 
-## Learn More
+## Layout
 
-To learn more about Next.js, take a look at the following resources:
+- `app/(site)/[locale]`: English (`/en`) and Marathi (`/mr`) customer-facing routes
+- `app/(admin)/admin`: admin route boundary
+- `app/api`: API endpoints (enquiries, admin, health)
+- `components`: UI, layout, customer and admin pieces
+- `lib`: config, i18n, validation (shared with the API), API client, SEO, errors
+- `server`: backend logic: database client, auth, email, rate limits, logging
+- `prisma`: database schema, migrations, development seed
+- `data`: supplied business facts only
+- `types`: domain contracts
+- `tests/api`: automated API tests
+- `public/images`: brand logo, and separate folders for hero, traveller, service, destination and gallery photographs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The official logo belongs only at `public/images/brand/logo.png`. It is the brand mark, not a content photograph.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Pages
 
-## Deploy on Vercel
+`/en` and `/mr` each have: home, `about`, `services`, `destinations`, `traveller`, `gallery`, `reviews`, `contact`
+and `plan-your-trip`. Paths are built with `pagePath()` / `planPath()` in `lib/routes.ts`; page copy lives under
+`pages` in the dictionaries. The Plan Your Trip page uses the same enquiry form and `POST /api/enquiries` as before.
+Gallery photos and reviews come from the database and are managed in the admin panel.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Admin panel (Business Manager)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+One admin panel at `/admin` with two roles. Every request is checked on the server (`lib/auth/permissions.ts`);
+the menu only hides what the server would refuse anyway.
+
+| Role | Can use |
+|---|---|
+| **Super Admin** | Everything: Dashboard, Enquiries, Gallery, Reviews, Website Content, Offers, Announcements, Destinations, Services, Our Traveller, **Admin Users, Settings, Activity Log** |
+| **Content Admin** | Dashboard, Enquiries, Gallery, Reviews, Website Content, Offers, Announcements, Destinations, Services, Our Traveller |
+
+- **Website Content** and **Our Traveller** edit fixed fields (text in English and Marathi, photos, button links) over the
+  built-in copy: Save draft, Preview, Publish. Empty fields keep the built-in text, so the design can't be broken.
+- **Offers** and **Announcements** are scheduled (start/end in India time) and switch on and off by themselves.
+- **Destinations** and **Services** start empty; *Import current destinations/services* copies what the site shows today.
+  Until something is published there, the website shows its built-in content.
+- Important actions are recorded in the **Activity Log** (no passwords or secrets).
+
+See *9c. Roles and the CMS* in [BACKEND_SETUP.md](BACKEND_SETUP.md) for creating accounts. Pages live in `app/(admin)/admin`,
+components in `components/admin`, CMS logic in `server/cms` and `lib/cms`.
+
+## Homepage
+
+- Design tokens (colours, type scale, radii, shadows, motion easing) live in `app/globals.css`.
+- Section components are in `components/home`. Which photograph and icon go with each item is set in `components/home/home-content.ts`. All wording is in `lib/i18n/messages/{en,mr}.ts`.
+- To replace a photograph, overwrite the file with the same name in `public/images/<folder>/`. If a file is missing, a labelled placeholder frame is shown instead.
+- Animations use `motion` (Framer Motion) and respect the visitor's reduced-motion setting.

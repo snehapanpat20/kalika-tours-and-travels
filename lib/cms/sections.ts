@@ -1,0 +1,162 @@
+import type { CmsLink } from "@/lib/cms/links"
+import type { Permission } from "@/lib/auth/permissions"
+import type { PageKey } from "@/lib/routes"
+
+/**
+ * The website text an admin may edit. Each field replaces one piece of the
+ * built-in copy (its dictionary `path`) in English and/or Marathi. Anything
+ * left empty keeps the built-in text, so an empty CMS shows the site exactly
+ * as designed. Layout, styles and structure are not editable here.
+ */
+export type ContentField = {
+  name: string
+  label: string
+  help?: string
+  multiline?: boolean
+  max: number
+  /** Dictionary path this field overrides, e.g. "home.hero.titleLead". */
+  path: string
+}
+
+export type ContentLinkDef = {
+  name: string
+  label: string
+  /** Text field holding the button label. */
+  textField: string
+  /** Where the button goes when no link is chosen. */
+  defaultLink: CmsLink
+}
+
+export type ContentSection = {
+  key: SectionKey
+  title: string
+  description: string
+  /** Where "Preview" opens. */
+  previewPage: PageKey
+  /** Hash on the preview page that scrolls to the section. */
+  previewAnchor?: string
+  /** Permission needed to edit (reading needs the matching .read). */
+  permission: Extract<Permission, "content.write" | "traveller.write">
+  fields: ContentField[]
+  image?: { label: string; help: string; minWidth: number }
+  links?: ContentLinkDef[]
+  /** The Traveller section also manages a feature list and photos. */
+  features?: boolean
+  photos?: boolean
+}
+
+export const sectionKeys = ["hero", "journeys", "why", "destinations", "gallery", "reviews", "cta", "traveller"] as const
+export type SectionKey = (typeof sectionKeys)[number]
+
+const intro = (base: string, labels: { eyebrow?: string; title?: string; description?: string } = {}): ContentField[] => [
+  { name: "eyebrow", label: labels.eyebrow ?? "Small label above the heading", max: 60, path: `${base}.eyebrow` },
+  { name: "title", label: labels.title ?? "Heading", max: 120, path: `${base}.title` },
+  { name: "description", label: labels.description ?? "Text under the heading", multiline: true, max: 400, path: `${base}.description` },
+]
+
+export const contentSections: ContentSection[] = [
+  {
+    key: "hero",
+    title: "Homepage hero",
+    description: "The big photo, headline, tagline and search box at the top of the homepage.",
+    previewPage: "home",
+    permission: "content.write",
+    fields: [
+      { name: "eyebrow", label: "Small label above the headline", max: 60, path: "home.hero.eyebrow" },
+      { name: "titleLead", label: "Headline, first part", max: 60, path: "home.hero.titleLead" },
+      { name: "titleFollow", label: "Headline, second part (shown in colour)", max: 40, path: "home.hero.titleFollow" },
+      { name: "description", label: "Handwritten tagline", multiline: true, max: 160, path: "home.hero.description" },
+      { name: "searchPlaceholder", label: "Search box hint", max: 60, path: "home.hero.searchPlaceholder" },
+      { name: "plan", label: "Search button text", max: 30, path: "home.hero.plan" },
+      { name: "imageAlt", label: "Photo description (for screen readers)", help: "Describe what the photo shows.", max: 300, path: "home.hero.imageAlt" },
+    ],
+    image: {
+      label: "Background photo",
+      help: "A wide, bright landscape at least 1600 pixels wide. The white headline sits over the top of the photo, so choose one with a calm, not-too-bright sky.",
+      minWidth: 1600,
+    },
+  },
+  {
+    key: "journeys",
+    title: "Journey categories",
+    description: "The heading above the five journey cards on the homepage.",
+    previewPage: "home",
+    previewAnchor: "journeys",
+    permission: "content.write",
+    fields: intro("home.journeys"),
+  },
+  {
+    key: "why",
+    title: "Why Kalika",
+    description: "The four reasons to travel with Kalika on the homepage.",
+    previewPage: "home",
+    permission: "content.write",
+    fields: [
+      ...intro("home.why"),
+      ...(["comfort", "together", "service", "flexible"] as const).flatMap((point, index): ContentField[] => [
+        { name: `${point}Title`, label: `Reason ${index + 1}: title`, max: 60, path: `home.why.points.${point}.title` },
+        { name: `${point}Body`, label: `Reason ${index + 1}: description`, multiline: true, max: 200, path: `home.why.points.${point}.body` },
+      ]),
+    ],
+  },
+  {
+    key: "destinations",
+    title: "Destinations introduction",
+    description: "The heading of the destinations section on the homepage.",
+    previewPage: "home",
+    permission: "content.write",
+    fields: intro("home.destinations"),
+  },
+  {
+    key: "gallery",
+    title: "Gallery introduction",
+    description: "The heading of the gallery page and the homepage photo section.",
+    previewPage: "gallery",
+    permission: "content.write",
+    fields: intro("pages.gallery"),
+  },
+  {
+    key: "reviews",
+    title: "Reviews introduction",
+    description: "The heading of the reviews page and the homepage reviews section.",
+    previewPage: "reviews",
+    permission: "content.write",
+    fields: intro("pages.reviews"),
+  },
+  {
+    key: "cta",
+    title: "Final call to action",
+    description: "The closing section near the bottom of most pages.",
+    previewPage: "home",
+    permission: "content.write",
+    fields: [...intro("home.cta"), { name: "plan", label: "Button text", max: 40, path: "home.cta.plan" }],
+  },
+  {
+    key: "traveller",
+    title: "Our Traveller",
+    description: "The vehicle: its description, features and photos, on the homepage and the Our Traveller page.",
+    previewPage: "traveller",
+    permission: "traveller.write",
+    fields: [
+      { name: "homeEyebrow", label: "Homepage: small label", max: 60, path: "home.traveller.eyebrow" },
+      { name: "homeTitle", label: "Homepage: heading", max: 120, path: "home.traveller.title" },
+      { name: "homeDescription", label: "Homepage: description", multiline: true, max: 400, path: "home.traveller.description" },
+      { name: "seater", label: "Vehicle name under 20+1", max: 60, path: "home.traveller.seater" },
+      { name: "capacity", label: "Seating line", max: 80, path: "home.traveller.capacity" },
+      { name: "pageTitleLead", label: "Traveller page: headline, first line", max: 80, path: "pages.traveller.titleLead" },
+      { name: "pageTitleFollow", label: "Traveller page: headline, second line", max: 80, path: "pages.traveller.titleFollow" },
+      { name: "pageDescription", label: "Traveller page: introduction", multiline: true, max: 400, path: "pages.traveller.description" },
+      { name: "specsTitle", label: "Traveller page: features heading", max: 120, path: "pages.traveller.specsTitle" },
+      { name: "specsBody", label: "Traveller page: features text", multiline: true, max: 300, path: "pages.traveller.specsBody" },
+    ],
+    features: true,
+    photos: true,
+  },
+]
+
+export function getSection(key: string): ContentSection | undefined {
+  return contentSections.find((section) => section.key === key)
+}
+
+export const MAX_TRAVELLER_FEATURES = 16
+export const MAX_TRAVELLER_PHOTOS = 12
