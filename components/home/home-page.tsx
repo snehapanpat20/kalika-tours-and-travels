@@ -38,7 +38,7 @@ export async function HomePage({ locale, dictionary, preview }: { locale: Locale
   return (
     <>
       <Hero locale={locale} copy={copy.hero} services={dictionary.services} overrides={hero} />
-      <OffersSection locale={locale} copy={dictionary.cms} offers={offers} />
+      <OffersSection locale={locale} copy={dictionary.cms} whatsappLabel={dictionary.nav.whatsapp} offers={offers} />
       <QuickJourneys locale={locale} copy={copy.journeys} managed={services} />
       <WhyKalika locale={locale} copy={copy.why} />
       <TravellerSection locale={locale} copy={copy.traveller} moreLabel={pages.common.meetTheTraveller} managed={traveller} />

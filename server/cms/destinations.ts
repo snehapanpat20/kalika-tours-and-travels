@@ -6,6 +6,7 @@ import { findNamedImage } from "@/lib/config/media-file"
 import { getDictionary } from "@/lib/i18n/get-dictionary"
 import type { Locale } from "@/lib/i18n/locales"
 import { AppError } from "@/lib/errors/app-error"
+import { DESTINATION_PAGE_MIN_DESCRIPTION, SLUG_MAX, SLUG_PATTERN, slugify } from "@/lib/cms/slug"
 import { describeError, logger } from "@/server/api/logger"
 import {
   formBoolean,
@@ -22,6 +23,58 @@ import {
 import { refreshPublicPages } from "@/server/content/gallery"
 import { getPrisma } from "@/server/db/prisma"
 import { bundledImageSize, removeStoredImage } from "@/server/storage/images"
+
+/** Empty means "make one from the name" (new destinations) or "keep the current one" (edits). */
+const slugField = z
+  .string()
+  .max(SLUG_MAX * 2)
+  .transform((value) => value.trim().toLowerCase())
+  .pipe(
+    z.union([
+      z.literal(""),
+      z
+        .string()
+        .max(SLUG_MAX, { error: `Web address must be ${SLUG_MAX} characters or fewer.` })
+        .regex(SLUG_PATTERN, { error: "Use only lowercase letters, numbers and single hyphens in the web address (for example: mahabaleshwar)." }),
+    ]),
+  )
+  .nullish()
+  .transform((value) => value || null)
+
+/** `base`, or `base-2`, `base-3`… — the first one no other destination uses. */
+async function freeSlug(base: string, exceptId?: string, taken: Set<string> = new Set()): Promise<string> {
+  const rows = await getPrisma().destination.findMany({
+    where: { slug: { startsWith: base }, ...(exceptId ? { id: { not: exceptId } } : {}) },
+    select: { slug: true },
+  })
+  const used = new Set([...rows.map((row) => row.slug), ...taken])
+  if (!used.has(base)) return base
+  for (let n = 2; ; n += 1) {
+    const suffix = `-${n}`
+    const candidate = `${base.slice(0, SLUG_MAX - suffix.length).replace(/-+$/, "")}${suffix}`
+    if (!used.has(candidate)) return candidate
+  }
+}
+
+/** A slug the admin typed must not already belong to another destination. */
+async function assertSlugFree(slug: string, exceptId?: string) {
+  const clash = await getPrisma().destination.findFirst({ where: { slug, ...(exceptId ? { id: { not: exceptId } } : {}) }, select: { name: true } })
+  if (clash) {
+    throw new AppError("CONFLICT", `The web address "${slug}" is already used by ${clash.name}.`, 409, [
+      { field: "slug", message: `Already used by ${clash.name}. Choose a different web address.` },
+    ])
+  }
+}
+
+/** Two saves racing for the same slug: the database unique index decides; report it like the check above. */
+function slugRace(error: unknown): never {
+  if (error && typeof error === "object" && "code" in error && error.code === "P2002") {
+    throw new AppError("CONFLICT", "That web address was just taken by another destination. Choose a different one.", 409, [
+      { field: "slug", message: "Already used. Choose a different web address." },
+    ])
+  }
+  throw error
+}
 
 export const destinationCategories = ["MAHARASHTRA", "OTHER_STATES", "PILGRIMAGE", "FAMILY", "GROUP", "CORPORATE", "OUTSTATION"] as const satisfies readonly DestinationCategory[]
 
@@ -40,6 +93,9 @@ const destinationShape = z.object({
   sortOrder: sortOrderField,
   imagePath: imagePathField,
   removeImage: formBoolean,
+  slug: slugField,
+  seoTitle: optionalText(70, "SEO title"),
+  seoDescription: optionalText(170, "Meta description"),
 })
 
 export const destinationCreateSchema = destinationShape.extend({
@@ -74,6 +130,9 @@ export function serializeDestination(item: Destination) {
     imageWidth: item.imageWidth,
     imageHeight: item.imageHeight,
     imageAlt: item.imageAlt,
+    slug: item.slug,
+    seoTitle: item.seoTitle,
+    seoDescription: item.seoDescription,
     uploaded: Boolean(item.imageKey),
     published: item.published,
     sortOrder: item.sortOrder,
@@ -84,10 +143,11 @@ export function serializeDestination(item: Destination) {
 
 export type AdminDestination = ReturnType<typeof serializeDestination>
 
-function dataFrom(input: DestinationInput): Omit<DestinationInput, "imagePath" | "removeImage"> {
+function dataFrom(input: DestinationInput): Omit<DestinationInput, "imagePath" | "removeImage" | "slug"> {
   const data = { ...input }
   delete data.imagePath
   delete data.removeImage
+  delete data.slug
   return data
 }
 
@@ -101,6 +161,7 @@ export async function adminListDestinations(query: z.infer<typeof destinationLis
       { name: { contains: search, mode: "insensitive" } },
       { state: { contains: search, mode: "insensitive" } },
       { shortDescription: { contains: search, mode: "insensitive" } },
+      { slug: { contains: search.toLowerCase() } },
     ]
   }
   const prisma = getPrisma()
@@ -123,28 +184,33 @@ export async function getDestination(id: string) {
 }
 
 export async function createDestination(input: z.infer<typeof destinationCreateSchema>, file: File | null) {
+  if (input.slug) await assertSlugFree(input.slug)
+  const slug = input.slug ?? (await freeSlug(slugify(input.name)))
   const image = await prepareImageChange({ file, imagePath: input.imagePath ?? null, remove: false }, "destinations", null)
   try {
-    const item = await getPrisma().destination.create({ data: { ...dataFrom(input), ...image.columns } as Prisma.DestinationCreateInput })
+    const item = await getPrisma().destination.create({ data: { ...dataFrom(input), slug, ...image.columns } as Prisma.DestinationCreateInput })
     refreshPublicPages()
     return serializeDestination(item)
   } catch (error) {
     await image.rollback()
-    throw error
+    slugRace(error)
   }
 }
 
 export async function updateDestination(id: string, input: DestinationInput, file: File | null) {
   const existing = await findDestination(id)
+  // A changed web address breaks old links, so it only changes when the admin types a new one.
+  const slug = input.slug && input.slug !== existing.slug ? input.slug : undefined
+  if (slug) await assertSlugFree(slug, id)
   const image = await prepareImageChange({ file, imagePath: input.imagePath ?? null, remove: Boolean(input.removeImage) }, "destinations", existing.imageKey)
   try {
-    const item = await getPrisma().destination.update({ where: { id }, data: { ...dataFrom(input), ...image.columns } })
+    const item = await getPrisma().destination.update({ where: { id }, data: { ...dataFrom(input), ...(slug ? { slug } : {}), ...image.columns } })
     await image.commit()
     refreshPublicPages()
     return { before: serializeDestination(existing), destination: serializeDestination(item) }
   } catch (error) {
     await image.rollback()
-    throw error
+    slugRace(error)
   }
 }
 
@@ -175,12 +241,16 @@ export async function importBuiltInDestinations(): Promise<number> {
   const en = getDictionary("en").pages.destinations
   const mr = getDictionary("mr").pages.destinations
   const rows: Prisma.DestinationCreateManyInput[] = []
+  const slugs = new Set<string>()
   for (const group of builtInDestinationGroups) {
     for (const [index, id] of group.places.entries()) {
       const ref = builtInPlaceImages[id]
       const url = ref ? findNamedImage(ref.category, ref.name) : null
       const size = url ? await bundledImageSize(url).catch(() => null) : null
+      const slug = await freeSlug(slugify(en.places[id].name), undefined, slugs)
+      slugs.add(slug)
       rows.push({
+        slug,
         name: en.places[id].name,
         nameMr: mr.places[id].name,
         state: group.id === "maharashtra" ? "Maharashtra" : null,
@@ -203,14 +273,43 @@ export async function importBuiltInDestinations(): Promise<number> {
 
 // ─── Public website ───────────────────────────────────────────
 
+const hasOwnPage = (item: Pick<Destination, "description">) => (item.description?.trim().length ?? 0) >= DESTINATION_PAGE_MIN_DESCRIPTION
+
 export type PublicDestination = {
   id: string
+  slug: string
   name: string
   shortDescription: string
   description: string | null
   state: string | null
   category: DestinationCategory
   image: { url: string; width: number; height: number; alt: string } | null
+  /** Whether /destinations/[slug] exists for it. */
+  hasPage: boolean
+  seoTitle: string | null
+  seoDescription: string | null
+  updatedAt: Date
+}
+
+function toPublic(locale: Locale, item: Destination): PublicDestination {
+  return {
+    id: item.id,
+    slug: item.slug,
+    name: pick(locale, item.name, item.nameMr),
+    shortDescription: pick(locale, item.shortDescription, item.shortDescriptionMr),
+    description: pick(locale, item.description, item.descriptionMr),
+    state: item.state,
+    category: item.category,
+    image:
+      item.imageUrl && item.imageWidth && item.imageHeight
+        ? { url: item.imageUrl, width: item.imageWidth, height: item.imageHeight, alt: item.imageAlt ?? "" }
+        : null,
+    hasPage: hasOwnPage(item),
+    // The SEO fields are written in English; Marathi pages use their own defaults.
+    seoTitle: locale === "en" ? item.seoTitle : null,
+    seoDescription: locale === "en" ? item.seoDescription : null,
+    updatedAt: item.updatedAt,
+  }
 }
 
 /**
@@ -225,20 +324,33 @@ export async function listLiveDestinations(locale: Locale, preview: boolean): Pr
       take: 300,
     })
     if (!rows.length) return null
-    return rows.map((item) => ({
-      id: item.id,
-      name: pick(locale, item.name, item.nameMr),
-      shortDescription: pick(locale, item.shortDescription, item.shortDescriptionMr),
-      description: pick(locale, item.description, item.descriptionMr),
-      state: item.state,
-      category: item.category,
-      image:
-        item.imageUrl && item.imageWidth && item.imageHeight
-          ? { url: item.imageUrl, width: item.imageWidth, height: item.imageHeight, alt: item.imageAlt ?? "" }
-          : null,
-    }))
+    return rows.map((item) => toPublic(locale, item))
   } catch (error) {
     logger.error("destinations_read_failed", describeError(error))
     return null
+  }
+}
+
+/** One destination's page: published (or any, while an admin previews) and with a full write-up. */
+export async function getLiveDestination(locale: Locale, slug: string, preview: boolean): Promise<PublicDestination | null> {
+  if (!SLUG_PATTERN.test(slug) || slug.length > SLUG_MAX) return null
+  const item = await getPrisma().destination.findUnique({ where: { slug } })
+  if (!item || (!item.published && !preview) || !hasOwnPage(item)) return null
+  return toPublic(locale, item)
+}
+
+/** Published destinations that have their own page, for the sitemap. */
+export async function listDestinationPages(): Promise<{ slug: string; updatedAt: Date }[]> {
+  try {
+    const rows = await getPrisma().destination.findMany({
+      where: { published: true, description: { not: null } },
+      select: { slug: true, description: true, updatedAt: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      take: 300,
+    })
+    return rows.filter(hasOwnPage).map(({ slug, updatedAt }) => ({ slug, updatedAt }))
+  } catch (error) {
+    logger.error("destination_pages_read_failed", describeError(error))
+    return []
   }
 }

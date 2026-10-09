@@ -50,7 +50,9 @@ export function PasswordForm({ setup }: { setup: boolean }) {
     })
     if (done) {
       setForm({ current: "", next: "", repeat: "" })
+      // Reload the panel so the full menu for this role appears straight away
       if (setup) router.replace("/admin")
+      router.refresh()
     }
   }
 
@@ -59,6 +61,7 @@ export function PasswordForm({ setup }: { setup: boolean }) {
       <TextField
         label={setup ? "Temporary password" : "Current password"}
         type="password"
+        autoComplete="current-password"
         value={form.current}
         onChange={(current) => setForm({ ...form, current })}
         error={save.errors.currentPassword}

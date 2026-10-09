@@ -4,6 +4,7 @@ import { PageHero } from "@/components/layout/page-hero"
 import { Reveal } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
 import { shell } from "@/components/ui/styles"
+import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { serviceOptions } from "@/data/services"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
@@ -17,12 +18,15 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 
 export default async function PlanYourTripPage(props: LocaleParams) {
   const { locale, dictionary } = await resolvePageLocale(props)
+  const crumbs = pageCrumbs(locale, dictionary, "plan")
   const copy = dictionary.pages.plan
   const contact = dictionary.home.contact
 
   return (
     <>
+      <PageStructuredData locale={locale} page="plan" crumbs={crumbs} />
       <PageHero
+        breadcrumbs={{ crumbs, label: dictionary.seo.breadcrumbLabel }}
         id="plan-page-title"
         eyebrow={copy.eyebrow}
         titleLead={copy.titleLead}

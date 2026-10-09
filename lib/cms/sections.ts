@@ -36,7 +36,7 @@ export type ContentSection = {
   /** Hash on the preview page that scrolls to the section. */
   previewAnchor?: string
   /** Permission needed to edit (reading needs the matching .read). */
-  permission: Extract<Permission, "content.write" | "traveller.write">
+  permission: Extract<Permission, "content.write" | "traveller.write" | "settings.write">
   fields: ContentField[]
   image?: { label: string; help: string; minWidth: number }
   links?: ContentLinkDef[]
@@ -45,7 +45,7 @@ export type ContentSection = {
   photos?: boolean
 }
 
-export const sectionKeys = ["hero", "journeys", "why", "destinations", "gallery", "reviews", "cta", "traveller"] as const
+export const sectionKeys = ["hero", "journeys", "why", "destinations", "gallery", "reviews", "cta", "traveller", "seo"] as const
 export type SectionKey = (typeof sectionKeys)[number]
 
 const intro = (base: string, labels: { eyebrow?: string; title?: string; description?: string } = {}): ContentField[] => [
@@ -151,6 +151,34 @@ export const contentSections: ContentSection[] = [
     ],
     features: true,
     photos: true,
+  },
+  {
+    key: "seo",
+    title: "Search engines (SEO)",
+    description: "How each page appears in Google and when shared on WhatsApp or social media. Leave a box empty to keep the current wording.",
+    previewPage: "home",
+    permission: "settings.write",
+    fields: (
+      [
+        ["home", "Home"],
+        ["about", "About"],
+        ["services", "Services"],
+        ["destinations", "Destinations"],
+        ["traveller", "Our Traveller"],
+        ["gallery", "Gallery"],
+        ["reviews", "Reviews"],
+        ["contact", "Contact"],
+        ["plan", "Plan Your Trip"],
+      ] as const
+    ).flatMap(([page, label]): ContentField[] => [
+      { name: `${page}Title`, label: `${label}: page title in Google`, help: "Best under 60 characters.", max: 70, path: `pages.meta.${page}.title` },
+      { name: `${page}Description`, label: `${label}: description in Google`, help: "Best between 120 and 160 characters.", multiline: true, max: 170, path: `pages.meta.${page}.description` },
+    ]),
+    image: {
+      label: "Sharing image",
+      help: "Shown when a page is shared on WhatsApp, Facebook or X. Use a wide image, 1200 × 630 pixels works best.",
+      minWidth: 1200,
+    },
   },
 ]
 

@@ -52,6 +52,8 @@ const toPublic = ({ id, imageUrl, width, height, title, altText, caption, destin
 /** Public pages refresh on their next visit after any content change. */
 export function refreshPublicPages() {
   revalidatePath("/(site)/[locale]", "layout")
+  // Lists destination pages, which appear and disappear as admins publish them
+  revalidatePath("/sitemap.xml")
 }
 
 const publicOrder: Prisma.GalleryItemOrderByWithRelationInput[] = [{ sortOrder: "asc" }, { tripDate: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }]

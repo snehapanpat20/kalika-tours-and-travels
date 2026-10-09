@@ -9,10 +9,13 @@ import { ImageReveal, Reveal } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
 import { Button } from "@/components/ui/button"
 import { shell } from "@/components/ui/styles"
+import { FaqSection, serviceFaqs } from "@/components/seo/faq-section"
+import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
-import { planPath } from "@/lib/routes"
+import { pagePath, planPath } from "@/lib/routes"
 import { createPageMetadata } from "@/lib/seo/metadata"
+import { serviceSchema } from "@/lib/seo/structured-data"
 import { cn } from "@/lib/utils/cn"
 import { listLiveServices } from "@/server/cms/services"
 import type { ServiceId } from "@/types/catalog"
@@ -36,6 +39,7 @@ type ServiceView = {
 
 export default async function ServicesPage(props: LocaleParams) {
   const { locale, dictionary, preview } = await resolvePageLocale(props)
+  const crumbs = pageCrumbs(locale, dictionary, "services")
   const copy = dictionary.pages.services
   const items = dictionary.home.services.items
   const managed = await listLiveServices(locale, preview)
@@ -67,7 +71,16 @@ export default async function ServicesPage(props: LocaleParams) {
 
   return (
     <>
+      <PageStructuredData
+        locale={locale}
+        page="services"
+        crumbs={crumbs}
+        extra={services.map((service) =>
+          serviceSchema({ name: service.title, description: service.body, serviceType: service.title, url: `${pagePath(locale, "services")}#${service.anchor}` }),
+        )}
+      />
       <PageHero
+        breadcrumbs={{ crumbs, label: dictionary.seo.breadcrumbLabel }}
         id="services-title"
         eyebrow={copy.eyebrow}
         titleLead={copy.titleLead}
@@ -129,6 +142,8 @@ export default async function ServicesPage(props: LocaleParams) {
           })}
         </div>
       </div>
+
+      <FaqSection id="services-faq-title" faqs={serviceFaqs(dictionary)} copy={dictionary.seo.faq} className="bg-stone" />
 
       <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>

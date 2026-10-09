@@ -14,10 +14,13 @@ import { PhotoGrid } from "@/components/traveller/photo-grid"
 import { Button } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { focusRing, shell } from "@/components/ui/styles"
+import { FaqSection, travellerFaqs } from "@/components/seo/faq-section"
+import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
 import { pagePath, planPath } from "@/lib/routes"
 import { createPageMetadata } from "@/lib/seo/metadata"
+import { travellerServiceSchema } from "@/lib/seo/structured-data"
 import { cn } from "@/lib/utils/cn"
 import { getLiveTraveller } from "@/server/cms/sections-public"
 import type { VehicleFeatureKey } from "@/types/home"
@@ -31,6 +34,7 @@ const featureOrder: VehicleFeatureKey[] = ["seats", "ac", "legroom", "luggage", 
 
 export default async function TravellerPage(props: LocaleParams) {
   const { locale, dictionary, preview } = await resolvePageLocale(props)
+  const crumbs = pageCrumbs(locale, dictionary, "traveller")
   const copy = dictionary.pages.traveller
   const vehicle = dictionary.home.traveller
   const managed = await getLiveTraveller(locale, preview)
@@ -49,7 +53,9 @@ export default async function TravellerPage(props: LocaleParams) {
 
   return (
     <>
+      <PageStructuredData locale={locale} page="traveller" crumbs={crumbs} extra={[travellerServiceSchema(locale)]} />
       <PageHero
+        breadcrumbs={{ crumbs, label: dictionary.seo.breadcrumbLabel }}
         id="traveller-page-title"
         eyebrow={copy.eyebrow}
         titleLead={copy.titleLead}
@@ -146,6 +152,8 @@ export default async function TravellerPage(props: LocaleParams) {
           </Reveal>
         </div>
       </section>
+
+      <FaqSection id="traveller-faq-title" faqs={travellerFaqs(dictionary)} copy={dictionary.seo.faq} className="bg-stone" />
 
       <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>

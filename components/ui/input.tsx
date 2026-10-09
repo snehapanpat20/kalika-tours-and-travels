@@ -1,4 +1,5 @@
 import type { ChangeEvent } from "react"
+import { PasswordInput } from "@/components/ui/password-input"
 import { controlClass } from "@/components/ui/styles"
 import { cn } from "@/lib/utils/cn"
 
@@ -41,6 +42,24 @@ export function Input({
   step,
   className,
 }: InputProps) {
+  if (type === "password") {
+    return (
+      <PasswordInput
+        id={id}
+        name={name}
+        value={value}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        disabled={disabled}
+        required={required}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
+        onChange={onChange}
+        className={cn(controlClass, className)}
+      />
+    )
+  }
   return (
     <input
       id={id}

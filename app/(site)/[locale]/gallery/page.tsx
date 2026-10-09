@@ -1,11 +1,13 @@
 import type { Metadata } from "next"
 import { GalleryWall } from "@/components/gallery/gallery-wall"
+import { CtaSection } from "@/components/home/cta-section"
 import { PageHero } from "@/components/layout/page-hero"
 import { Reveal } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
 import { Button } from "@/components/ui/button"
 import { InstagramIcon } from "@/components/ui/icons"
 import { shell } from "@/components/ui/styles"
+import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { business } from "@/data/business"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
@@ -22,12 +24,15 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 
 export default async function GalleryPage(props: LocaleParams) {
   const { locale, dictionary, preview } = await resolvePageLocale(props)
+  const crumbs = pageCrumbs(locale, dictionary, "gallery")
   const copy = dictionary.pages.gallery
   const items = await listPublishedGallery(preview)
 
   return (
     <>
+      <PageStructuredData locale={locale} page="gallery" crumbs={crumbs} />
       <PageHero
+        breadcrumbs={{ crumbs, label: dictionary.seo.breadcrumbLabel }}
         id="gallery-title"
         eyebrow={copy.eyebrow}
         titleLead={copy.title}
@@ -64,6 +69,8 @@ export default async function GalleryPage(props: LocaleParams) {
           />
         </div>
       </section>
+
+      <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>
   )
 }

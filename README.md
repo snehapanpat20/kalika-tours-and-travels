@@ -46,6 +46,8 @@ The official logo belongs only at `public/images/brand/logo.png`. It is the bran
 and `plan-your-trip`. Paths are built with `pagePath()` / `planPath()` in `lib/routes.ts`; page copy lives under
 `pages` in the dictionaries. The Plan Your Trip page uses the same enquiry form and `POST /api/enquiries` as before.
 Gallery photos and reviews come from the database and are managed in the admin panel.
+A destination with a full English write-up (200+ characters) also gets its own page at `/[locale]/destinations/[slug]`.
+Search-engine setup (titles, structured data, sitemap, robots, Search Console) is described in [docs/SEO.md](docs/SEO.md).
 
 ## Admin panel (Business Manager)
 
@@ -63,6 +65,8 @@ the menu only hides what the server would refuse anyway.
 - **Destinations** and **Services** start empty; *Import current destinations/services* copies what the site shows today.
   Until something is published there, the website shows its built-in content.
 - Important actions are recorded in the **Activity Log** (no passwords or secrets).
+- **SEO** (Super Admin): page titles, meta descriptions and the sharing image. Destinations have their own optional
+  web address, SEO title and meta description, which Content Admins may edit.
 
 See *9c. Roles and the CMS* in [BACKEND_SETUP.md](BACKEND_SETUP.md) for creating accounts. Pages live in `app/(admin)/admin`,
 components in `components/admin`, CMS logic in `server/cms` and `lib/cms`.

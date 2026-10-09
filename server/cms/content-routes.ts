@@ -6,7 +6,8 @@ import { assertAccess, type AdminProfile } from "@/server/auth/admin-session"
 import { requireSection } from "@/server/cms/site-content"
 
 /** Reading a section needs content.read, or traveller.read for the Traveller. */
-export const readPermission = (section: ContentSection) => (section.permission === "traveller.write" ? "traveller.read" : "content.read")
+export const readPermission = (section: ContentSection) =>
+  section.permission === "traveller.write" ? "traveller.read" : section.permission === "settings.write" ? "settings.read" : "content.read"
 
 /** The section for a route key, after checking the admin may read (or edit) it. */
 export async function sectionFor(admin: AdminProfile, context: { params: Promise<{ key: string }> }, mode: "read" | "write") {

@@ -19,6 +19,7 @@ export default async function AdminContentSectionPage({ params }: { params: Prom
   const section = getSection(key)
   if (!section) notFound()
   if (section.key === "traveller") redirect("/admin/traveller")
+  if (section.key === "seo") redirect("/admin/seo")
   const admin = await requireAdminPage(`/admin/content/${key}`, "content.read")
   const [data, images] = await Promise.all([sectionEditorData(key), getImageOptions()])
 

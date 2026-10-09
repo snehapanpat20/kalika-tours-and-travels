@@ -29,8 +29,13 @@ export function planPath(locale: Locale, prefill: { service?: string; destinatio
   return `${pagePath(locale, "plan")}${text ? `?${text}` : ""}`
 }
 
+/** A destination's own page (only destinations with a full write-up have one). */
+export function destinationPath(locale: Locale, slug: string): string {
+  return `${pagePath(locale, "destinations")}/${slug}`
+}
+
 /** True when `pathname` is one of the public pages that opens with a dark hero image. */
 export function hasDarkHero(pathname: string): boolean {
   const slugs = Object.values(pageSlugs).filter(Boolean).join("|")
-  return new RegExp(`^/(en|mr)(/(${slugs}))?/?$`).test(pathname)
+  return new RegExp(`^/(en|mr)(/(${slugs}|destinations/[a-z0-9-]+))?/?$`).test(pathname)
 }

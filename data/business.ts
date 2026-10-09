@@ -1,7 +1,7 @@
 import type { LocalizedText } from "@/lib/i18n/locales"
 
 export const business = {
-  name: "Kalika Tours & Travels",
+  name: "Kalika Tours and Travels",
   owner: "Umesh Panpat",
   phone: "8329042510",
   phoneE164: "+918329042510",

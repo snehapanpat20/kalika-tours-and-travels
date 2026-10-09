@@ -64,26 +64,28 @@ export function Hero({
         </div>
 
         <HeroZoomContent className={cn(shell, "flex flex-col items-center pt-32 pb-24 text-center sm:pt-36 lg:pt-40")}>
-          <p
-            className="hero-in inline-flex items-center gap-2 rounded-pill bg-white/10 px-4 py-1.5 text-xs font-bold tracking-[0.14em] text-teal-light uppercase ring-1 ring-white/25 backdrop-blur-sm"
-            style={step(0)}
-          >
-            {copy.eyebrow}
-          </p>
-
-          <h1 id="hero-title" className="hero-in relative mt-6 text-balance" style={step(1)}>
-            <span className="block text-[clamp(2.75rem,8vw,6.25rem)] leading-[0.95] font-extrabold tracking-tight text-white drop-shadow-[0_4px_24px_rgb(7_42_36/0.45)]">
-              {copy.titleLead}
+          {/* The pill and the headline form one H1, so it names the business and the city as well */}
+          <h1 id="hero-title" className="relative flex flex-col items-center text-balance">
+            <span
+              className="hero-in inline-flex items-center gap-2 rounded-pill bg-white/10 px-4 py-1.5 text-xs font-bold tracking-[0.14em] text-teal-light uppercase ring-1 ring-white/25 backdrop-blur-sm"
+              style={step(0)}
+            >
+              {copy.eyebrow}
             </span>
-            <span className="mt-1 block bg-gradient-to-r from-teal-light via-[#b8e6dc] to-coral bg-clip-text pb-2 text-[clamp(2.75rem,8vw,6.25rem)] leading-[1] font-extrabold tracking-tight text-transparent">
-              {copy.titleFollow}
-            </span>
-            {/* A little plane flying past the headline, with its dotted trail */}
-            <span aria-hidden="true" className="pointer-events-none absolute -top-6 -right-10 hidden text-teal-light sm:block lg:-right-20">
-              <svg viewBox="0 0 120 40" className="h-8 w-24 overflow-visible lg:h-10 lg:w-28" fill="none">
-                <path d="M2 34 C 30 30, 60 6, 104 12" stroke="currentColor" strokeWidth="2" strokeDasharray="3 6" strokeLinecap="round" opacity="0.55" />
-              </svg>
-              <Plane className="absolute -top-3 -right-4 size-7 rotate-12 fill-teal-light/20 lg:size-8" strokeWidth={1.8} />
+            <span className="hero-in relative mt-6 block" style={step(1)}>
+              <span className="block text-[clamp(2.75rem,8vw,6.25rem)] leading-[0.95] font-extrabold tracking-tight text-white drop-shadow-[0_4px_24px_rgb(7_42_36/0.45)]">
+                {copy.titleLead}
+              </span>
+              <span className="mt-1 block bg-gradient-to-r from-teal-light via-[#b8e6dc] to-coral bg-clip-text pb-2 text-[clamp(2.75rem,8vw,6.25rem)] leading-[1] font-extrabold tracking-tight text-transparent">
+                {copy.titleFollow}
+              </span>
+              {/* A little plane flying past the headline, with its dotted trail */}
+              <span aria-hidden="true" className="pointer-events-none absolute -top-6 -right-10 hidden text-teal-light sm:block lg:-right-20">
+                <svg viewBox="0 0 120 40" className="h-8 w-24 overflow-visible lg:h-10 lg:w-28" fill="none">
+                  <path d="M2 34 C 30 30, 60 6, 104 12" stroke="currentColor" strokeWidth="2" strokeDasharray="3 6" strokeLinecap="round" opacity="0.55" />
+                </svg>
+                <Plane className="absolute -top-3 -right-4 size-7 rotate-12 fill-teal-light/20 lg:size-8" strokeWidth={1.8} />
+              </span>
             </span>
           </h1>
 

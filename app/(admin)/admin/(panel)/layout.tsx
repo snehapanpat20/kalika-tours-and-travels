@@ -23,7 +23,7 @@ export default async function AdminPanelLayout({ children }: { children: ReactNo
       admin={{ name: admin.name, email: admin.email, role: admin.role, mustChangePassword: admin.mustChangePassword }}
       newEnquiries={newEnquiries}
       pendingReviews={pendingReviews}
-      logo={<BrandLogo size="nav" plate alt="Kalika Tours & Travels" />}
+      logo={<BrandLogo size="nav" plate alt="Kalika Tours and Travels" />}
     >
       {children}
     </AdminShell>

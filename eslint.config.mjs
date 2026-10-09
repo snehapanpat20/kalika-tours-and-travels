@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Generated output: Prisma client and the API test server's build
     "generated/**",
     ".next-test/**",
+    // Other build folders (NEXT_DIST_DIR, e.g. .next-build, .next-preview)
+    ".next-*/**",
   ]),
 ]);
 

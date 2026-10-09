@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { MessageSquareHeart } from "lucide-react"
+import { CtaSection } from "@/components/home/cta-section"
 import { PageHero } from "@/components/layout/page-hero"
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
@@ -8,6 +9,7 @@ import { ReviewForm } from "@/components/reviews/review-form"
 import { Button } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { shell } from "@/components/ui/styles"
+import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
 import { createPageMetadata } from "@/lib/seo/metadata"
@@ -28,6 +30,7 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 
 export default async function ReviewsPage(props: LocaleParams) {
   const { locale, dictionary } = await resolvePageLocale(props)
+  const crumbs = pageCrumbs(locale, dictionary, "reviews")
   const copy = dictionary.pages.reviews
   const tripTypes = dictionary.pages.gallery.tripTypes
   const reviews = await listApprovedReviews()
@@ -39,7 +42,9 @@ export default async function ReviewsPage(props: LocaleParams) {
 
   return (
     <>
+      <PageStructuredData locale={locale} page="reviews" crumbs={crumbs} />
       <PageHero
+        breadcrumbs={{ crumbs, label: dictionary.seo.breadcrumbLabel }}
         id="reviews-title"
         eyebrow={copy.eyebrow}
         titleLead={copy.title}
@@ -95,6 +100,8 @@ export default async function ReviewsPage(props: LocaleParams) {
           </div>
         </div>
       </section>
+
+      <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>
   )
 }

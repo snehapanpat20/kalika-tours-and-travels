@@ -9,6 +9,7 @@ import { pageImages } from "@/components/pages/page-images"
 import { Button } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { shell } from "@/components/ui/styles"
+import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { formatLocation } from "@/data/business"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
@@ -25,11 +26,14 @@ const valueIcons = { people: Users, comfort: Armchair, planning: Route, care: He
 
 export default async function AboutPage(props: LocaleParams) {
   const { locale, dictionary } = await resolvePageLocale(props)
+  const crumbs = pageCrumbs(locale, dictionary, "about")
   const copy = dictionary.pages.about
 
   return (
     <>
+      <PageStructuredData locale={locale} page="about" crumbs={crumbs} />
       <PageHero
+        breadcrumbs={{ crumbs, label: dictionary.seo.breadcrumbLabel }}
         id="about-title"
         eyebrow={copy.eyebrow}
         titleLead={copy.titleLead}

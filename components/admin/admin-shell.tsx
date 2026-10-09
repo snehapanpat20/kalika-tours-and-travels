@@ -18,6 +18,7 @@ import {
   LogOut,
   MapPinned,
   Megaphone,
+  Search,
   Menu,
   MessageSquareQuote,
   Settings,
@@ -78,6 +79,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     label: "System",
     items: [
       { href: "/admin/users", label: "Admin Users", icon: UsersRound, permission: "users.read" },
+      { href: "/admin/seo", label: "SEO", icon: Search, permission: "settings.read" },
       { href: "/admin/audit-logs", label: "Activity Log", icon: History, permission: "audit.read" },
       { href: "/admin/settings", label: "Settings", icon: Settings, permission: "settings.read" },
     ],
@@ -204,7 +206,7 @@ export function AdminShell({ admin, newEnquiries, pendingReviews, logo, children
             </button>
             <div className="min-w-0">
               <p className="truncate text-base font-extrabold tracking-tight text-forest">{title}</p>
-              <p className="truncate text-xs font-medium text-muted">Kalika Tours &amp; Travels · Business Manager</p>
+              <p className="truncate text-xs font-medium text-muted">Kalika Tours and Travels · Business Manager</p>
             </div>
             <div className="ml-auto flex items-center gap-1 sm:gap-2">
               {can(admin.role, "enquiries.read") ? (
@@ -326,7 +328,7 @@ function SidebarContent({
   return (
     <>
       <div className="px-5 pt-5 pb-5">
-        <Link href="/admin" onClick={onNavigate} aria-label="Kalika Tours & Travels admin home" className={cn("inline-flex rounded-[0.875rem]", focusRing)}>
+        <Link href="/admin" onClick={onNavigate} aria-label="Kalika Tours and Travels admin home" className={cn("inline-flex rounded-[0.875rem]", focusRing)}>
           {logo}
         </Link>
         <p className="mt-4 text-[0.6875rem] font-bold tracking-[0.18em] text-teal-light uppercase">Business Manager</p>

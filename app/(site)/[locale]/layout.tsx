@@ -3,10 +3,12 @@ import { notFound } from "next/navigation"
 import "../../globals.css"
 import { Document } from "@/components/layout/document"
 import { SiteFrame } from "@/components/layout/site-frame"
+import { JsonLd } from "@/components/seo/json-ld"
 import { services } from "@/data/services"
 import { getDictionary } from "@/lib/i18n/get-dictionary"
 import { isLocale, locales } from "@/lib/i18n/locales"
 import { createLocaleMetadata } from "@/lib/seo/metadata"
+import { businessSchema, graph, websiteSchema } from "@/lib/seo/structured-data"
 import { getLiveAnnouncement } from "@/server/cms/announcements"
 import { isPreviewing } from "@/server/cms/preview"
 import { listLiveServices } from "@/server/cms/services"
@@ -56,6 +58,8 @@ export default async function LocaleLayout({
 
   return (
     <Document locale={locale}>
+      {/* Who runs the site: the business and the website, referenced by every page's WebPage node */}
+      <JsonLd data={graph([businessSchema(locale), websiteSchema(locale)])} />
       <SiteFrame locale={locale} dictionary={dictionary} services={footerServices} announcement={announcement} preview={preview}>
         {children}
       </SiteFrame>

@@ -13,11 +13,15 @@ export const devanagari = Noto_Sans_Devanagari({
   variable: "--font-noto-devanagari",
 })
 
-/** Handwritten accent for the hero tagline; covers English and Marathi. */
+/**
+ * Handwritten accent for the hero tagline; covers English and Marathi.
+ * Not preloaded: only the homepage uses it, so other pages don't download it early.
+ */
 export const script = Kalam({
   subsets: ["latin", "devanagari"],
   weight: ["400", "700"],
   display: "swap",
+  preload: false,
   variable: "--font-kalam",
 })
 

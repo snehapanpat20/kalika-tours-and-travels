@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { EditorDrawer } from "@/components/admin/kit/editor-drawer"
 import { BilingualField, LinkField, TextField } from "@/components/admin/kit/form-controls"
 import { ImageInput, appendImage, type ImageValue, type UploadsStatus } from "@/components/admin/kit/image-input"
+import { PhotoPlacement, type Placement } from "@/components/admin/kit/photo-placement"
 import { StatusPill } from "@/components/admin/kit/status-pill"
 import { useSave } from "@/components/admin/kit/use-save"
 import { focusRing } from "@/components/ui/styles"
@@ -24,6 +25,7 @@ type Form = {
   ctaText: { en: string; mr: string }
   ctaLink: string
   imageAlt: string
+  placement: Placement
   startsAt: string
   endsAt: string
   sortOrder: string
@@ -37,6 +39,7 @@ const blank: Form = {
   ctaText: { en: "", mr: "" },
   ctaLink: "page:plan",
   imageAlt: "",
+  placement: { fit: "WHOLE", x: 50, y: 50 },
   startsAt: "",
   endsAt: "",
   sortOrder: "0",
@@ -50,6 +53,7 @@ const fromOffer = (offer: AdminOffer): Form => ({
   ctaText: { en: offer.ctaText ?? "", mr: offer.ctaTextMr ?? "" },
   ctaLink: offer.ctaLink ?? "",
   imageAlt: offer.imageAlt ?? "",
+  placement: { fit: offer.imageFit, x: offer.imageFocusX, y: offer.imageFocusY },
   startsAt: toIstInput(offer.startsAt),
   endsAt: toIstInput(offer.endsAt),
   sortOrder: String(offer.sortOrder),
@@ -71,6 +75,9 @@ function toFormData(form: Form, published: boolean, image: ImageValue) {
   }
   data.set("ctaLink", form.ctaLink)
   data.set("imageAlt", form.imageAlt)
+  data.set("imageFit", form.placement.fit)
+  data.set("imageFocusX", String(form.placement.x))
+  data.set("imageFocusY", String(form.placement.y))
   data.set("startsAt", form.startsAt)
   data.set("endsAt", form.endsAt)
   data.set("sortOrder", form.sortOrder || "0")
@@ -271,6 +278,7 @@ function OfferEditor({
       <BilingualField label="Full description" optional multiline rows={4} value={form.description} onChange={(value) => set("description", value)} errors={pair("description")} max={2000} />
 
       <ImageInput label="Photo (optional)" currentUrl={offer?.imageUrl ?? null} value={image} onChange={setImage} bundledImages={bundledImages} uploads={uploads} error={e.image} />
+      <PhotoPlacement image={image} currentUrl={offer?.imageUrl ?? null} value={form.placement} onChange={(value) => set("placement", value)} />
       <TextField label="Photo description" optional value={form.imageAlt} onChange={(value) => set("imageAlt", value)} error={e.imageAlt} max={200} hint="Describe the photo for people using screen readers." />
 
       <div className="grid gap-5 sm:grid-cols-2">

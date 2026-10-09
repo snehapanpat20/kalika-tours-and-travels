@@ -15,8 +15,8 @@ export const metadata: Metadata = { title: "Website Content" }
 export default async function AdminContentPage() {
   await requireAdminPage("/admin/content", "content.read")
   const states = await adminListSections()
-  // The Traveller has its own page in the sidebar
-  const sections = contentSections.filter((section) => section.key !== "traveller")
+  // The Traveller and SEO settings have their own pages in the sidebar
+  const sections = contentSections.filter((section) => section.key !== "traveller" && section.key !== "seo")
 
   return (
     <div className="grid gap-6">

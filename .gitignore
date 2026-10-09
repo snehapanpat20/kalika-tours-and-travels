@@ -47,6 +47,8 @@ next-env.d.ts
 
 # API test server build output
 /.next-test/
+# other build folders (NEXT_DIST_DIR); also keeps Tailwind from scanning them
+/.next-*/
 
 # uploaded images (local storage driver)
 /storage/

@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react"
 import { Photo, type PhotoSource } from "@/components/media/photo"
+import { Breadcrumbs } from "@/components/seo/breadcrumbs"
 import { shell } from "@/components/ui/styles"
+import type { Crumb } from "@/lib/seo/structured-data"
 import { cn } from "@/lib/utils/cn"
 
 const step = (i: number) => ({ "--i": i }) as CSSProperties
@@ -20,6 +22,7 @@ export function PageHero({
   imageClassName,
   actions,
   vivid = false,
+  breadcrumbs,
 }: {
   id: string
   eyebrow: string
@@ -33,6 +36,8 @@ export function PageHero({
   actions?: ReactNode
   /** Colourful collage backgrounds: lighter shading, just enough behind the words. */
   vivid?: boolean
+  /** Home › … › this page, shown above the eyebrow. */
+  breadcrumbs?: { crumbs: Crumb[]; label: string }
 }) {
   return (
     <section
@@ -62,6 +67,11 @@ export function PageHero({
 
       <div className={cn(shell, "pt-32 pb-12 sm:pb-14 lg:pb-16")}>
         <div className="max-w-[44rem]">
+          {breadcrumbs ? (
+            <div className="hero-in mb-5 text-white/90" style={step(0)}>
+              <Breadcrumbs crumbs={breadcrumbs.crumbs} label={breadcrumbs.label} />
+            </div>
+          ) : null}
           <p className="eyebrow hero-in text-white/85" style={step(0)}>
             {eyebrow}
           </p>

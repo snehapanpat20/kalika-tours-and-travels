@@ -5,6 +5,7 @@ import { ChevronDown, Languages } from "lucide-react"
 import { cmsIcon } from "@/components/cms/cms-icon"
 import { cmsIconNames, cmsIcons, type CmsIconName } from "@/lib/cms/icons"
 import { linkablePages } from "@/lib/cms/links"
+import { PasswordInput } from "@/components/ui/password-input"
 import { controlClass, focusRing } from "@/components/ui/styles"
 import { cn } from "@/lib/utils/cn"
 
@@ -63,6 +64,7 @@ export function TextField({
   rows = 3,
   placeholder,
   type = "text",
+  autoComplete,
   className,
 }: {
   label: string
@@ -76,6 +78,7 @@ export function TextField({
   rows?: number
   placeholder?: string
   type?: "text" | "email" | "password" | "number" | "datetime-local" | "date"
+  autoComplete?: string
   className?: string
 }) {
   return (
@@ -93,6 +96,18 @@ export function TextField({
             aria-invalid={invalid || undefined}
             className={cn(controlClass, "py-2.5 text-sm")}
           />
+        ) : type === "password" ? (
+          <PasswordInput
+            id={id}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            maxLength={max}
+            placeholder={placeholder}
+            aria-describedby={describedBy}
+            aria-invalid={invalid || undefined}
+            autoComplete={autoComplete ?? "new-password"}
+            className={inputClass}
+          />
         ) : (
           <input
             id={id}
@@ -103,7 +118,7 @@ export function TextField({
             placeholder={placeholder}
             aria-describedby={describedBy}
             aria-invalid={invalid || undefined}
-            autoComplete={type === "password" ? "new-password" : undefined}
+            autoComplete={autoComplete}
             className={inputClass}
           />
         )

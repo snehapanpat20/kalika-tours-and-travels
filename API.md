@@ -322,7 +322,7 @@ Every change is written to the audit log.
 | `GET /api/admin/announcements`, `POST` (JSON) | `announcements.read` / `.write` | `message`, `type` (INFO, OFFER, IMPORTANT, FESTIVE), `ctaText`, `ctaLink`, `startsAt`, `endsAt`, `published` |
 | `GET`, `PATCH`, `DELETE /api/admin/announcements/:id` | `announcements.*` | |
 | `GET /api/admin/destinations`, `POST` (multipart) | `destinations.read` / `.write` | `?category=&visibility=&search=` |
-| `GET`, `PATCH`, `DELETE /api/admin/destinations/:id` | `destinations.*` | |
+| `GET`, `PATCH`, `DELETE /api/admin/destinations/:id` | `destinations.*` | Optional `slug` (web address; made from the name when empty, unique: `409` with `errors[0].field = "slug"` if taken, `422` if malformed), `seoTitle` (≤70), `seoDescription` (≤170) |
 | `POST /api/admin/destinations/import` | `destinations.write` | Copies the built-in destinations; `409` if any exist |
 | `GET /api/admin/services`, `POST` (multipart) | `services.read` / `.write` | `enquiryType` is one of the five enquiry trip types |
 | `GET`, `PATCH`, `DELETE /api/admin/services/:id` | `services.*` | |
@@ -332,7 +332,8 @@ Every change is written to the audit log.
 | `POST /api/admin/content/:key/publish`, `/discard` | as above | Make the draft live, or throw it away |
 | `GET /api/admin/preview?path=/en/...`, `GET /api/admin/preview/exit` | `content.read`, none | Turn website preview of drafts on or off |
 
-Section keys: `hero`, `journeys`, `why`, `destinations`, `gallery`, `reviews`, `cta`, `traveller`.
+Section keys: `hero`, `journeys`, `why`, `destinations`, `gallery`, `reviews`, `cta`, `traveller`, `seo`
+(`seo` needs `settings.read` / `settings.write`, i.e. Super Admin; it is edited at `/admin/seo`).
 
 ## Admin: users, account and activity log
 

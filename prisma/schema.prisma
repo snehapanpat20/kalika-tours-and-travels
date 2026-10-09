@@ -209,6 +209,11 @@ model Review {
 // the Marathi site shows the English text.
 
 /// A promotion shown on the website between its start and end dates.
+enum OfferImageFit {
+  WHOLE
+  FILL
+}
+
 model Offer {
   id                 String    @id @default(uuid()) @db.Uuid
   title              String    @db.VarChar(120)
@@ -229,6 +234,11 @@ model Offer {
   imageWidth         Int?
   imageHeight        Int?
   imageAlt           String?   @db.VarChar(200)
+  /// WHOLE: the whole image is shown (posters with text); FILL: it fills the frame, cropped around the focus point
+  imageFit           OfferImageFit @default(WHOLE)
+  /// Focus point for FILL, in percent from the left / top (50/50 = centre)
+  imageFocusX        Int       @default(50) @db.SmallInt
+  imageFocusY        Int       @default(50) @db.SmallInt
   /// Shown from this moment (null = as soon as published)
   startsAt           DateTime?
   /// Hidden after this moment (null = until unpublished)
@@ -297,6 +307,11 @@ enum DestinationCategory {
 model Destination {
   id                 String              @id @default(uuid()) @db.Uuid
   name               String              @db.VarChar(80)
+  /// Web address of its own page, e.g. "mahabaleshwar" → /en/destinations/mahabaleshwar
+  slug               String              @unique @db.VarChar(80)
+  /// Optional search-result title and description; sensible defaults are used when empty
+  seoTitle           String?             @db.VarChar(70)
+  seoDescription     String?             @db.VarChar(170)
   nameMr             String?             @db.VarChar(80)
   state              String?             @db.VarChar(80)
   country            String              @default("India") @db.VarChar(80)

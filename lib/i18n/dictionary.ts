@@ -378,6 +378,27 @@ export type Dictionary = {
     photoCredits: string
     destinationCategories: Record<"FAMILY" | "GROUP" | "CORPORATE" | "OUTSTATION", { eyebrow: string; title: string; description: string }>
   }
+  /** Breadcrumbs, destination pages, FAQs and 404 links. */
+  seo: {
+    breadcrumbLabel: string
+    destination: {
+      eyebrow: string
+      aboutTitle: string
+      planTitle: string
+      planBody: string
+      planAction: string
+      servicesTitle: string
+      backToAll: string
+      moreTitle: string
+    }
+    faq: {
+      eyebrow: string
+      title: string
+      questions: Record<"capacity" | "ac" | "driver" | "tempo" | "night" | "oneWay" | "price" | "kinds" | "book" | "cancel" | "quote", string>
+      answers: Record<"capacity" | "ac" | "driver" | "tempo" | "kinds" | "book", string>
+    }
+    notFoundLinks: string
+  }
   errors: {
     notFoundTitle: string
     notFoundBody: string

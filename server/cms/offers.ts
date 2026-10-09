@@ -26,6 +26,13 @@ import { removeStoredImage } from "@/server/storage/images"
 
 // ─── Validation ───────────────────────────────────────────────
 
+/** Focus point in percent (0 = left/top, 100 = right/bottom). */
+const focusField = z.coerce
+  .number({ error: "Choose a focus point." })
+  .int({ error: "Choose a focus point." })
+  .min(0, { error: "Choose a focus point." })
+  .max(100, { error: "Choose a focus point." })
+
 const offerShape = z.object({
   title: requiredText(120, "Offer title"),
   titleMr: optionalText(120, "Marathi title"),
@@ -39,6 +46,9 @@ const offerShape = z.object({
   ctaTextMr: optionalText(40, "Marathi button text"),
   ctaLink: linkField,
   imageAlt: optionalText(200, "Photo description"),
+  imageFit: z.enum(["WHOLE", "FILL"], { error: "Choose how the photo fits." }),
+  imageFocusX: focusField,
+  imageFocusY: focusField,
   startsAt: istDateTime("Start"),
   endsAt: istDateTime("End"),
   published: formBoolean,
@@ -49,7 +59,14 @@ const offerShape = z.object({
 
 /** Defaults apply only when creating; an update changes just the fields sent. */
 export const offerCreateSchema = offerShape
-  .extend({ published: formBoolean.default(false), sortOrder: sortOrderField.default(0), removeImage: formBoolean.default(false) })
+  .extend({
+    published: formBoolean.default(false),
+    sortOrder: sortOrderField.default(0),
+    removeImage: formBoolean.default(false),
+    imageFit: z.enum(["WHOLE", "FILL"]).default("WHOLE"),
+    imageFocusX: focusField.default(50),
+    imageFocusY: focusField.default(50),
+  })
   .superRefine(checkDateOrder)
 export const offerUpdateSchema = offerShape.partial().superRefine(checkDateOrder)
 
@@ -81,6 +98,9 @@ export function serializeOffer(offer: Offer) {
     imageWidth: offer.imageWidth,
     imageHeight: offer.imageHeight,
     imageAlt: offer.imageAlt,
+    imageFit: offer.imageFit,
+    imageFocusX: offer.imageFocusX,
+    imageFocusY: offer.imageFocusY,
     uploaded: Boolean(offer.imageKey),
     startsAt: offer.startsAt?.toISOString() ?? null,
     endsAt: offer.endsAt?.toISOString() ?? null,
@@ -203,7 +223,7 @@ export type PublicOffer = {
   description: string | null
   label: string | null
   cta: { text: string; href: string; external: boolean } | null
-  image: { url: string; width: number; height: number; alt: string } | null
+  image: { url: string; width: number; height: number; alt: string; fit: "WHOLE" | "FILL"; focus: string } | null
   endsAt: string | null
   /** Only in preview: not live yet (draft or scheduled). */
   preview: boolean
@@ -229,7 +249,14 @@ export async function listLiveOffers(locale: Locale, preview: boolean, defaultCt
         cta: link ? { text: pick(locale, offer.ctaText, offer.ctaTextMr) || defaultCta, ...link } : null,
         image:
           offer.imageUrl && offer.imageWidth && offer.imageHeight
-            ? { url: offer.imageUrl, width: offer.imageWidth, height: offer.imageHeight, alt: offer.imageAlt ?? "" }
+            ? {
+                url: offer.imageUrl,
+                width: offer.imageWidth,
+                height: offer.imageHeight,
+                alt: offer.imageAlt ?? "",
+                fit: offer.imageFit,
+                focus: `${offer.imageFocusX}% ${offer.imageFocusY}%`,
+              }
             : null,
         endsAt: offer.endsAt?.toISOString() ?? null,
         preview: scheduleStatus(offer, now) !== "ACTIVE",

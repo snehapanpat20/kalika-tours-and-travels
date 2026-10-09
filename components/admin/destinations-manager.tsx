@@ -12,11 +12,13 @@ import { useSave } from "@/components/admin/kit/use-save"
 import { focusRing } from "@/components/ui/styles"
 import { deleteContentItem, importBuiltIn, previewHref, saveContentItem } from "@/lib/api/admin"
 import { destinationCategoryLabels } from "@/lib/cms/labels"
+import { DESTINATION_PAGE_MIN_DESCRIPTION, slugify } from "@/lib/cms/slug"
+import { SEO_DESCRIPTION_MAX, SEO_TITLE_MAX, defaultDestinationDescription, defaultDestinationTitle } from "@/lib/seo/destination-meta"
 import { cn } from "@/lib/utils/cn"
 import type { AdminDestination } from "@/server/cms/destinations"
 
 type Bi = { en: string; mr: string }
-type Form = { name: Bi; shortDescription: Bi; description: Bi; state: string; country: string; category: AdminDestination["category"]; imageAlt: string; sortOrder: string; published: boolean }
+type Form = { name: Bi; shortDescription: Bi; description: Bi; state: string; country: string; category: AdminDestination["category"]; imageAlt: string; sortOrder: string; published: boolean; slug: string; seoTitle: string; seoDescription: string }
 
 const blank: Form = {
   name: { en: "", mr: "" },
@@ -28,6 +30,9 @@ const blank: Form = {
   imageAlt: "",
   sortOrder: "0",
   published: true,
+  slug: "",
+  seoTitle: "",
+  seoDescription: "",
 }
 
 const fromItem = (item: AdminDestination): Form => ({
@@ -40,6 +45,9 @@ const fromItem = (item: AdminDestination): Form => ({
   imageAlt: item.imageAlt ?? "",
   sortOrder: String(item.sortOrder),
   published: item.published,
+  slug: item.slug,
+  seoTitle: item.seoTitle ?? "",
+  seoDescription: item.seoDescription ?? "",
 })
 
 function toFormData(form: Form, image: ImageValue) {
@@ -54,6 +62,9 @@ function toFormData(form: Form, image: ImageValue) {
   data.set("imageAlt", form.imageAlt)
   data.set("sortOrder", form.sortOrder || "0")
   data.set("published", form.published ? "true" : "false")
+  data.set("slug", form.slug.trim().toLowerCase())
+  data.set("seoTitle", form.seoTitle)
+  data.set("seoDescription", form.seoDescription)
   appendImage(data, image)
   return data
 }
@@ -215,6 +226,8 @@ function DestinationEditor({
   const [image, setImage] = useState<ImageValue>({ kind: "keep" })
   const set = <K extends keyof Form>(key: K, value: Form[K]) => setForm((current) => ({ ...current, [key]: value }))
   const e = save.errors
+  const hasPage = form.description.en.trim().length >= DESTINATION_PAGE_MIN_DESCRIPTION
+  const slugPreview = form.name.en ? slugify(form.name.en) : ""
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -261,7 +274,7 @@ function DestinationEditor({
         onChange={(value) => set("description", value)}
         errors={{ en: e.description, mr: e.descriptionMr }}
         max={2000}
-        hint="Visitors can open this under “More details”."
+        hint={`Visitors can open this under “More details”. With ${DESTINATION_PAGE_MIN_DESCRIPTION}+ characters in English, the destination also gets its own page on the website.`}
       />
       <ImageInput label="Photo (optional)" currentUrl={item?.imageUrl ?? null} value={image} onChange={setImage} bundledImages={bundledImages} uploads={uploads} error={e.image} />
       <TextField label="Photo description" optional value={form.imageAlt} onChange={(value) => set("imageAlt", value)} error={e.imageAlt} max={200} />
@@ -269,6 +282,51 @@ function DestinationEditor({
         <TextField label="Display order" type="number" value={form.sortOrder} onChange={(value) => set("sortOrder", value)} error={e.sortOrder} hint="Lower numbers show first." />
         <CheckField label="Published" description="Show this destination on the website." checked={form.published} onChange={(value) => set("published", value)} />
       </div>
+      <fieldset className="grid gap-5 rounded-card border border-line p-4 sm:p-5">
+        <legend className="px-1 text-sm font-bold text-forest">Search engines (optional)</legend>
+        <p className="-mt-2 text-sm text-muted">
+          {hasPage
+            ? "This destination has its own page. Leave these empty to use the defaults shown."
+            : `These are used once the destination has its own page (an English “More details” of ${DESTINATION_PAGE_MIN_DESCRIPTION}+ characters).`}
+        </p>
+        <TextField
+          label="Web address"
+          optional
+          value={form.slug}
+          onChange={(value) => set("slug", value)}
+          error={e.slug}
+          max={80}
+          placeholder={item?.slug ?? (slugPreview || "made from the name")}
+          hint={
+            <>
+              /en/destinations/<strong>{form.slug.trim().toLowerCase() || item?.slug || slugPreview || "…"}</strong> · lowercase letters, numbers and hyphens.
+              {item ? " Changing it breaks links people already shared." : " Leave empty to make it from the name."}
+            </>
+          }
+        />
+        <TextField
+          label="SEO title"
+          optional
+          value={form.seoTitle}
+          onChange={(value) => set("seoTitle", value)}
+          error={e.seoTitle}
+          max={SEO_TITLE_MAX}
+          placeholder={form.name.en ? defaultDestinationTitle("en", form.name.en.trim()) : undefined}
+          hint="Shown as the headline in Google results. Aim for 50–60 characters, describing this place honestly."
+        />
+        <TextField
+          label="Meta description"
+          optional
+          multiline
+          rows={2}
+          value={form.seoDescription}
+          onChange={(value) => set("seoDescription", value)}
+          error={e.seoDescription}
+          max={SEO_DESCRIPTION_MAX}
+          placeholder={form.name.en && form.shortDescription.en ? defaultDestinationDescription("en", form.name.en.trim(), form.shortDescription.en) : undefined}
+          hint="The summary under the title in results. Aim for 120–160 characters."
+        />
+      </fieldset>
     </EditorDrawer>
   )
 }

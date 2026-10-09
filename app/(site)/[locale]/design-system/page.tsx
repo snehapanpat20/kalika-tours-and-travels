@@ -22,7 +22,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
       <Container className="grid gap-10">
         <SectionHeading
           as="h1"
-          eyebrow="Kalika Tours & Travels"
+          eyebrow="Kalika Tours and Travels"
           title="Design system"
           description="Reusable type, color, and controls for later pages."
         />

@@ -10,11 +10,12 @@ import { builtInDestinationGroups, builtInPlaceImages } from "@/components/pages
 import { pageImages } from "@/components/pages/page-images"
 import { Button } from "@/components/ui/button"
 import { focusRing, shell } from "@/components/ui/styles"
+import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { photoCredits } from "@/data/photo-credits"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 import { isLocale, type Locale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
-import { planPath } from "@/lib/routes"
+import { destinationPath, planPath } from "@/lib/routes"
 import { createPageMetadata } from "@/lib/seo/metadata"
 import { cn } from "@/lib/utils/cn"
 import { listLiveDestinations, type PublicDestination } from "@/server/cms/destinations"
@@ -24,7 +25,16 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
   return isLocale(locale) ? createPageMetadata(locale, "destinations") : {}
 }
 
-type PlaceView = { key: string; name: string; description: string; details: string | null; image: PhotoSource | null; alt: string }
+type PlaceView = {
+  key: string
+  name: string
+  description: string
+  details: string | null
+  image: PhotoSource | null
+  alt: string
+  /** The destination's own page, when it has one. */
+  page: string | null
+}
 type GroupView = {
   id: string
   eyebrow: string
@@ -38,7 +48,7 @@ type GroupView = {
 const categoryOrder: PublicDestination["category"][] = ["MAHARASHTRA", "OTHER_STATES", "PILGRIMAGE", "FAMILY", "GROUP", "OUTSTATION", "CORPORATE"]
 
 /** Destinations managed in the admin panel, grouped by category. */
-function managedGroups(destinations: PublicDestination[], dictionary: Dictionary): GroupView[] {
+function managedGroups(locale: Locale, destinations: PublicDestination[], dictionary: Dictionary): GroupView[] {
   const copy = dictionary.pages.destinations
   return categoryOrder.flatMap((category): GroupView[] => {
     const places = destinations.filter((item) => item.category === category)
@@ -60,6 +70,7 @@ function managedGroups(destinations: PublicDestination[], dictionary: Dictionary
           details: item.description,
           image: item.image ? { src: item.image.url } : null,
           alt: item.image?.alt ?? "",
+          page: item.hasPage ? destinationPath(locale, item.slug) : null,
         })),
       },
     ]
@@ -82,20 +93,24 @@ function builtInGroups(dictionary: Dictionary): GroupView[] {
       details: null,
       image: builtInPlaceImages[id] ?? null,
       alt: "",
+      page: null,
     })),
   }))
 }
 
 export default async function DestinationsPage(props: LocaleParams) {
   const { locale, dictionary, preview } = await resolvePageLocale(props)
+  const crumbs = pageCrumbs(locale, dictionary, "destinations")
   const copy = dictionary.pages.destinations
   const planLabel = dictionary.pages.common.planATrip
   const managed = await listLiveDestinations(locale, preview)
-  const groups = managed ? managedGroups(managed, dictionary) : builtInGroups(dictionary)
+  const groups = managed ? managedGroups(locale, managed, dictionary) : builtInGroups(dictionary)
 
   return (
     <>
+      <PageStructuredData locale={locale} page="destinations" crumbs={crumbs} />
       <PageHero
+        breadcrumbs={{ crumbs, label: dictionary.seo.breadcrumbLabel }}
         id="destinations-title"
         eyebrow={copy.eyebrow}
         titleLead={copy.titleLead}
@@ -143,7 +158,7 @@ export default async function DestinationsPage(props: LocaleParams) {
                     <StaggerItem as="li" key={place.key}>
                       {place.image ? (
                         <Link
-                          href={planPath(locale, { destination: place.name })}
+                          href={place.page ?? planPath(locale, { destination: place.name })}
                           className={cn("group relative isolate flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-card bg-forest-deep p-5 text-white sm:aspect-[3/4]", focusRing)}
                         >
                           <span className="zoom-img absolute inset-0 -z-10">
@@ -153,7 +168,7 @@ export default async function DestinationsPage(props: LocaleParams) {
                           <span className="text-2xl font-extrabold tracking-tight">{place.name}</span>
                           <span className="mt-1.5 text-sm leading-relaxed text-white/80">{place.description}</span>
                           <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-teal-light">
-                            {planLabel}
+                            {place.page ? dictionary.cms.moreDetails : planLabel}
                             <ArrowUpRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                           </span>
                         </Link>
@@ -218,10 +233,21 @@ function PlaceTile({ locale, place, planLabel, moreLabel, tall = false }: { loca
     >
       <span className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-forest">
         <MapPin aria-hidden="true" strokeWidth={1.8} className="size-4 shrink-0 text-coral" />
-        {place.name}
+        {place.page ? (
+          <Link href={place.page} className={cn("underline-offset-4 hover:underline", focusRing)}>
+            {place.name}
+          </Link>
+        ) : (
+          place.name
+        )}
       </span>
       <span className="mt-1.5 text-sm leading-relaxed text-muted">{place.description}</span>
-      {place.details ? (
+      {place.page ? (
+        <Link href={place.page} className={cn("mt-2 text-sm font-semibold text-teal-deep underline-offset-4 hover:underline", focusRing)}>
+          {moreLabel}
+          <span className="sr-only">: {place.name}</span>
+        </Link>
+      ) : place.details ? (
         <details className="mt-2 text-sm text-muted">
           <summary className={cn("cursor-pointer font-semibold text-teal-deep", focusRing)}>{moreLabel}</summary>
           <p className="mt-2 leading-relaxed whitespace-pre-line">{place.details}</p>

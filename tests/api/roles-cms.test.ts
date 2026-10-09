@@ -285,6 +285,47 @@ describe("Roles, permissions and the CMS", () => {
     assert.equal((await apiForm("/api/admin/destinations", { name: "No category", shortDescription: "x", category: "MOON" }, { cookie: contentCookie })).status, 422)
   })
 
+  test("destinations: unique web addresses, SEO fields and own pages only with a full write-up", async () => {
+    const long =
+      "Malshej Ghat is a mountain pass in the Western Ghats, known for its waterfalls and misty views during the monsoon. It makes a scenic day trip or a relaxed overnight stay for families and groups travelling together from Pune."
+    const first = await apiForm("/api/admin/destinations", { name: "Malshej Ghat", shortDescription: "Monsoon waterfalls", category: "MAHARASHTRA", published: "true", description: long }, { cookie: contentCookie })
+    assert.equal(first.status, 201)
+    assert.equal(first.json.destination.slug, "malshej-ghat")
+    const second = await apiForm("/api/admin/destinations", { name: "Malshej Ghat", shortDescription: "Second entry", category: "MAHARASHTRA", published: "true" }, { cookie: contentCookie })
+    assert.equal(second.json.destination.slug, "malshej-ghat-2")
+
+    // Typed addresses: must be free and well formed; titles and descriptions have length limits
+    const clash = await apiForm(`/api/admin/destinations/${second.json.destination.id}`, { slug: "malshej-ghat" }, { method: "PATCH", cookie: contentCookie })
+    assert.equal(clash.status, 409)
+    assert.equal(clash.json.errors[0].field, "slug")
+    assert.equal((await apiForm(`/api/admin/destinations/${second.json.destination.id}`, { slug: "Bad Slug!" }, { method: "PATCH", cookie: contentCookie })).status, 422)
+    assert.equal((await apiForm(`/api/admin/destinations/${second.json.destination.id}`, { seoTitle: "x".repeat(71) }, { method: "PATCH", cookie: contentCookie })).status, 422)
+    assert.equal((await apiForm(`/api/admin/destinations/${second.json.destination.id}`, { seoDescription: "x".repeat(171) }, { method: "PATCH", cookie: contentCookie })).status, 422)
+
+    // A full write-up gets its own page with its own title, canonical URL and breadcrumb; a short entry does not
+    const own = await page("/en/destinations/malshej-ghat")
+    assert.equal(own.status, 200)
+    assert.match(own.html, /<title>Malshej Ghat Trip from Pune \| Kalika Tours and Travels<\/title>/)
+    assert.ok(own.html.includes('/en/destinations/malshej-ghat"'))
+    assert.ok(own.html.includes('"BreadcrumbList"'))
+    assert.ok(own.html.includes("/en/plan-your-trip?destination=Malshej+Ghat"))
+    assert.equal((await page("/en/destinations/malshej-ghat-2")).status, 404)
+    assert.ok((await page("/sitemap.xml")).html.includes("/en/destinations/malshej-ghat<"))
+    assert.ok(!(await page("/sitemap.xml")).html.includes("/en/destinations/malshej-ghat-2<"))
+    assert.ok((await page("/en/destinations")).html.includes('href="/en/destinations/malshej-ghat"'))
+
+    // Admin-written SEO title is used; unpublishing removes the page and its sitemap entry
+    await apiForm(`/api/admin/destinations/${first.json.destination.id}`, { seoTitle: "Malshej Ghat Monsoon Trip from Pune" }, { method: "PATCH", cookie: contentCookie })
+    assert.ok((await page("/en/destinations/malshej-ghat")).html.includes("<title>Malshej Ghat Monsoon Trip from Pune</title>"))
+    await apiForm(`/api/admin/destinations/${first.json.destination.id}`, { published: "false" }, { method: "PATCH", cookie: contentCookie })
+    assert.equal((await page("/en/destinations/malshej-ghat")).status, 404)
+    assert.ok(!(await page("/sitemap.xml")).html.includes("/en/destinations/malshej-ghat<"))
+
+    for (const item of [first, second]) {
+      await api(`/api/admin/destinations/${item.json.destination.id}`, { cookie: contentCookie, method: "DELETE" })
+    }
+  })
+
   test("services: CRUD, and Plan This Trip keeps a valid enquiry type", async () => {
     const created = await apiForm(
       "/api/admin/services",

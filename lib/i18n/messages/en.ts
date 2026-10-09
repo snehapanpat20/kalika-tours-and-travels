@@ -6,9 +6,9 @@ const drivers = businessRules.driverSeats
 
 export const en = {
   meta: {
-    siteName: "Kalika Tours & Travels",
+    siteName: "Kalika Tours and Travels",
     description:
-      "Kalika Tours & Travels in Hadapsar, Pune. Outstation trips, family tours, group tours, pilgrimage tours, and corporate trips.",
+      "Kalika Tours and Travels in Hadapsar, Pune: tours and a 20+1 seater Traveller for family, group, pilgrimage, corporate and outstation trips.",
   },
   tagline: "Travel Together. Travel Comfortably.",
   foundation: {
@@ -97,7 +97,7 @@ export const en = {
       pending: "Photograph to be added",
     },
     hero: {
-      eyebrow: "Kalika Tours & Travels · Pune",
+      eyebrow: "Kalika Tours and Travels · Pune",
       titleLead: "Explore India",
       titleFollow: "Together.",
       description: "Hills, beaches, temples and heritage, in one comfortable ride.",
@@ -192,7 +192,7 @@ export const en = {
       },
       view: "View Our Traveller",
       plan: "Plan Your Trip",
-      imageAlt: "The Kalika Tours & Travels 20+1 seater Force Traveller, seen from the front right",
+      imageAlt: "The Kalika Tours and Travels 20+1 seater Force Traveller, seen from the front right",
       gallery: {
         title: "Our 20+1 Seater Traveller",
         description: "Photographs of our own 20+1 seater Traveller, inside and out.",
@@ -201,7 +201,7 @@ export const en = {
         next: "Next photograph",
         counter: "Photograph {current} of {total}",
         items: {
-          exterior: { alt: "The Kalika Tours & Travels 20+1 seater Force Traveller, seen from the front right", caption: "Our Traveller: room for 20 passengers and a driver" },
+          exterior: { alt: "The Kalika Tours and Travels 20+1 seater Force Traveller, seen from the front right", caption: "Our Traveller: room for 20 passengers and a driver" },
           monsoonFront: { alt: "The Kalika Traveller driving on a wet ghat road, with a waterfall on the hillside behind", caption: "On a monsoon ghat road" },
           interior: { alt: "Inside the Kalika Traveller: rows of orange seats, curtains and overhead luggage racks", caption: "Cushioned seats, curtains and overhead racks" },
           front: { alt: "Front view of the Kalika Traveller, a white Force Traveller", caption: "Front view" },
@@ -336,7 +336,7 @@ export const en = {
       successBody: "Our team will contact you shortly. Nothing is booked until we confirm it with you.",
       whatsappFollowUp: "Also message us on WhatsApp",
       whatsappMessage:
-        "Hello Kalika Tours & Travels, I would like to enquire about a trip to {destination} ({service}) for {passengers} passengers from {from} to {to}. (Enquiry ref: {reference})",
+        "Hello Kalika Tours and Travels, I would like to enquire about a trip to {destination} ({service}) for {passengers} passengers from {from} to {to}. (Enquiry ref: {reference})",
       sendAnother: "Send another enquiry",
       errorGeneric: "We couldn't send your enquiry just now. Please try again, or call or WhatsApp us.",
       errorRateLimit: "Too many enquiries were sent from this connection. Please wait a few minutes, or call or WhatsApp us.",
@@ -371,41 +371,46 @@ export const en = {
   pages: {
     meta: {
       home: {
-        title: "Kalika Tours & Travels | Comfortable Group Travel from Pune",
+        title: "Kalika Tours and Travels | Tours & Traveller Rental in Pune",
         description:
-          "Comfortable group travel from Hadapsar, Pune in a 20+1 seater Traveller. Family tours, group tours, pilgrimages, corporate trips and outstation journeys.",
+          "Tours and travels from Hadapsar, Pune: a 20+1 seater AC Traveller for family, group, pilgrimage, corporate and outstation trips. Plan your trip online.",
       },
       about: {
-        title: "About Kalika Tours & Travels",
-        description: "Kalika Tours & Travels is a travel service from Hadapsar, Pune, planning comfortable journeys for families, groups and teams.",
+        title: "About Kalika Tours and Travels | Hadapsar, Pune",
+        description:
+          "A local tours and travels service in Hadapsar, Pune, run by Umesh Panpat. We plan comfortable journeys for families, groups and teams in our 20+1 Traveller.",
       },
       services: {
-        title: "Tours and Travel Services | Kalika Tours & Travels",
-        description: "Family tours, group tours, pilgrimage tours, corporate trips and outstation journeys in a 20+1 seater Traveller from Pune.",
+        title: "Tour & Travel Services in Pune | Kalika Tours and Travels",
+        description:
+          "Family tours, group tours, pilgrimage tours, corporate trips and outstation journeys from Pune in a comfortable 20+1 seater Traveller. Find your trip.",
       },
       destinations: {
-        title: "Travel Destinations | Kalika Tours & Travels",
-        description: "Places groups travel to with Kalika: across Maharashtra, beyond it, and to pilgrimage destinations around India.",
+        title: "Travel Destinations from Pune | Kalika Tours and Travels",
+        description:
+          "Hill stations, coast and temple towns in Maharashtra, trips to Goa, Rajasthan, Kerala and beyond, and pilgrimages across India. Plan a group trip from Pune.",
       },
       traveller: {
-        title: "20+1 Seater Traveller | Kalika Tours & Travels",
-        description: "Our 20+1 seater Traveller: air conditioning, spacious seating, legroom, luggage space and an experienced driver.",
+        title: "20+1 Seater Traveller Rental in Pune | Kalika Tours and Travels",
+        description:
+          "Hire our 20+1 seater AC Traveller in Pune for family trips, group tours, pilgrimages and outstation travel: spacious seats, luggage space, experienced driver.",
       },
       gallery: {
-        title: "Travel Moments | Kalika Tours & Travels",
-        description: "Photographs from Kalika journeys. Real journeys, real people, real memories.",
+        title: "Travel Photos | Kalika Tours and Travels, Pune",
+        description: "Photos from journeys with Kalika Tours and Travels: family trips, group tours and pilgrimages from Pune in our 20+1 Traveller.",
       },
       reviews: {
-        title: "Customer Reviews | Kalika Tours & Travels",
-        description: "What travellers say about their journeys with Kalika Tours & Travels.",
+        title: "Customer Reviews | Kalika Tours and Travels, Pune",
+        description: "Read what travellers say about their trips with Kalika Tours and Travels in Pune, or share your own experience of travelling with us.",
       },
       contact: {
-        title: "Contact Kalika Tours & Travels",
-        description: "Call, WhatsApp or email Kalika Tours & Travels in Hadapsar, Pune.",
+        title: "Contact Kalika Tours and Travels | Hadapsar, Pune",
+        description: "Call, WhatsApp or email Kalika Tours and Travels in Hadapsar, Pune to plan a family, group, pilgrimage, corporate or outstation trip.",
       },
       plan: {
-        title: "Plan Your Trip | Kalika Tours & Travels",
-        description: "Tell us where you're going and who's coming along. We'll help you plan the journey.",
+        title: "Plan a Trip from Pune | Kalika Tours and Travels",
+        description:
+          "Request a family, group, pilgrimage, corporate or outstation trip from Pune. Share your destination, dates and group size, and we'll get back to you.",
       },
     },
     common: {
@@ -427,7 +432,7 @@ export const en = {
       storyEyebrow: "Our story",
       storyTitle: "We plan journeys around people.",
       story: [
-        "Kalika Tours & Travels is a travel service based in Hadapsar, Pune, run by Umesh Panpat. We take families, friends, pilgrims and teams on their journeys in our 20+1 seater Traveller.",
+        "Kalika Tours and Travels is a travel service based in Hadapsar, Pune, run by Umesh Panpat. We take families, friends, pilgrims and teams on their journeys in our 20+1 seater Traveller.",
         "We believe the road is part of the trip. A comfortable seat, room for everyone's luggage and an experienced driver make long hours feel shorter, and keep the whole group together from the first mile to the last.",
         "Every trip is planned around the people travelling: where you want to go, who is coming along, and what the journey needs. You talk to us directly, and we plan it with you.",
       ],
@@ -642,6 +647,45 @@ export const en = {
       CORPORATE: { eyebrow: "Corporate travel", title: "Destinations for teams.", description: "Outings, offsites and staff travel." },
       OUTSTATION: { eyebrow: "Outstation", title: "Longer drives from Pune.", description: "Journeys beyond the city, at your pace." },
     },
+  },
+  seo: {
+    breadcrumbLabel: "Breadcrumb",
+    destination: {
+      eyebrow: "Destination",
+      aboutTitle: "About {place}",
+      planTitle: "Plan your {place} trip",
+      planBody: "Tell us your travel dates, where to pick you up and how many people are going. We'll get back to you with a plan for the journey.",
+      planAction: "Plan a {place} trip",
+      servicesTitle: "Trips we can plan to {place}",
+      backToAll: "All destinations",
+      moreTitle: "More destinations",
+    },
+    faq: {
+      eyebrow: "Questions",
+      title: "Frequently asked questions",
+      questions: {
+        capacity: "How many people can travel in the Traveller?",
+        ac: "Is the Traveller air-conditioned?",
+        driver: "Does the Traveller come with a driver?",
+        tempo: "Is it the same as a Tempo Traveller?",
+        night: "Can we travel at night?",
+        oneWay: "Do you offer one-way trips?",
+        price: "How is the price worked out?",
+        kinds: "What kinds of trips do you plan?",
+        book: "How do I book a trip?",
+        cancel: "Can a confirmed booking be cancelled?",
+        quote: "Does “Get a Quote” give an instant price?",
+      },
+      answers: {
+        capacity: `It seats ${passengers} passengers, plus the driver.`,
+        ac: "Yes. The Traveller is air-conditioned, with spacious seating, good legroom and large luggage space.",
+        driver: "Yes. Every trip is driven by an experienced driver.",
+        tempo: `Yes. Ours is a ${passengers}+${drivers} seater Force Traveller, the kind of vehicle many people call a Tempo Traveller.`,
+        kinds: "Outstation, family, group, pilgrimage and corporate trips from Pune, in our 20+1 seater Traveller.",
+        book: "Send an enquiry from the Plan Your Trip page, or call or WhatsApp us.",
+      },
+    },
+    notFoundLinks: "These pages may help",
   },
   errors: {
     notFoundTitle: "This page is not available",

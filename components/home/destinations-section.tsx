@@ -7,7 +7,7 @@ import { SectionHeading } from "@/components/ui/section-heading"
 import { shell } from "@/components/ui/styles"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 import type { Locale } from "@/lib/i18n/locales"
-import { pagePath, planPath } from "@/lib/routes"
+import { destinationPath, pagePath, planPath } from "@/lib/routes"
 import { cn } from "@/lib/utils/cn"
 import type { PublicDestination } from "@/server/cms/destinations"
 import type { DestinationId } from "@/types/home"
@@ -37,12 +37,14 @@ export function DestinationsSection({
   const cards = managed
     ? managed.slice(0, 10).map((item) => ({
         key: item.id,
+        href: item.hasPage ? destinationPath(locale, item.slug) : planPath(locale, { destination: item.name }),
+        ownPage: item.hasPage,
         name: item.name,
         places: item.shortDescription,
         alt: item.image?.alt ?? "",
         image: item.image ? { src: item.image.url } : noPhoto,
       }))
-    : order.map((id) => ({ key: id, name: copy.items[id].name, places: copy.items[id].places, alt: copy.items[id].alt, image: destinationImages[id] }))
+    : order.map((id) => ({ key: id, href: planPath(locale, { destination: copy.items[id].name }), ownPage: false, name: copy.items[id].name, places: copy.items[id].places, alt: copy.items[id].alt, image: destinationImages[id] }))
 
   return (
     <section aria-labelledby="destinations-title" className="overflow-hidden bg-stone py-(--spacing-section)">
@@ -57,12 +59,12 @@ export function DestinationsSection({
           {cards.map((item, index) => (
             <li key={item.key} className={cardSize}>
               <DestinationCard
-                href={planPath(locale, { destination: item.name })}
+                href={item.href}
                 name={item.name}
                 places={item.places}
                 alt={item.alt}
                 image={item.image}
-                actionLabel={`${copy.plan.replace("{place}", item.name)}: ${item.places}`}
+                actionLabel={item.ownPage ? `${item.name}: ${item.places}` : `${copy.plan.replace("{place}", item.name)}: ${item.places}`}
                 index={index}
               />
             </li>

@@ -5,6 +5,7 @@ import { Reveal } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
 import { Button } from "@/components/ui/button"
 import { shell } from "@/components/ui/styles"
+import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
 import { planPath } from "@/lib/routes"
@@ -18,12 +19,15 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 
 export default async function ContactPage(props: LocaleParams) {
   const { locale, dictionary } = await resolvePageLocale(props)
+  const crumbs = pageCrumbs(locale, dictionary, "contact")
   const copy = dictionary.pages.contact
   const contact = dictionary.home.contact
 
   return (
     <>
+      <PageStructuredData locale={locale} page="contact" crumbs={crumbs} />
       <PageHero
+        breadcrumbs={{ crumbs, label: dictionary.seo.breadcrumbLabel }}
         id="contact-title"
         eyebrow={copy.eyebrow}
         titleLead={copy.titleLead}

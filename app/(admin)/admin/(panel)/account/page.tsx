@@ -8,6 +8,8 @@ import { requireAdminPage } from "@/server/auth/admin-page"
 
 export const metadata: Metadata = { title: "My account" }
 
+const contentAdminSections = "Dashboard, Enquiries, Gallery, Reviews, Website content, Offers, Announcements, Destinations, Services and Our Traveller"
+
 export default async function AdminAccountPage() {
   const admin = await requireAdminPage("/admin/account", "self")
   const setup = admin.mustChangePassword
@@ -20,7 +22,9 @@ export default async function AdminAccountPage() {
         <div role="status" className="flex gap-3 rounded-card bg-coral-soft p-4 text-ink ring-1 ring-coral/30">
           <KeyRound aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-coral" />
           <p>
-            <strong>Welcome, {admin.name}.</strong> You signed in with a temporary password. Please choose your own password below to start using the admin panel.
+            <strong>Welcome, {admin.name}.</strong> You signed in with a temporary password. For security, the rest of the admin panel stays
+            hidden until you choose your own password below. As soon as you save it, your menu appears:{" "}
+            <strong>{admin.role === "SUPER_ADMIN" ? "every section of the admin panel" : contentAdminSections}</strong>.
           </p>
         </div>
       ) : null}
