@@ -4,6 +4,7 @@ import { heroImage } from "@/components/home/home-content"
 import { LoginForm } from "@/components/admin/login-form"
 import { Photo } from "@/components/media/photo"
 import { BrandLogo } from "@/components/ui/logo"
+import { business } from "@/data/business"
 import { getAdminForPage, safeAdminPath } from "@/server/auth/admin-page"
 
 export const metadata: Metadata = { title: "Sign in" }
@@ -21,9 +22,9 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
       </div>
       <div className="w-full max-w-sm">
         <div className="rounded-panel bg-ivory p-6 shadow-overlay sm:p-8">
-          <BrandLogo size="nav" plate alt="Kalika Tours and Travels" />
+          <BrandLogo size="header" plate />
           <h1 className="mt-6 text-2xl font-extrabold tracking-tight text-forest">Admin sign in</h1>
-          <p className="mt-1 text-sm text-muted">Manage enquiries and website content for Kalika Tours and Travels.</p>
+          <p className="mt-1 text-sm text-muted">Manage enquiries and website content for {business.name}.</p>
           <div className="mt-6">
             <LoginForm next={next} />
           </div>

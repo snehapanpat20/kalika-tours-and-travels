@@ -1,7 +1,15 @@
 import type { LocalizedText } from "@/lib/i18n/locales"
 
+/**
+ * The brand and the verified business facts. The brand name is defined here
+ * only: page copy, metadata, structured data, emails and the admin panel all
+ * read it from this file.
+ */
 export const business = {
-  name: "Kalika Tours and Travels",
+  name: "Kalika Yatra",
+  /** The brand name as written in each language. */
+  localName: { en: "Kalika Yatra", mr: "कालिका यात्रा" },
+  tagline: { en: "Travel Together. Travel Comfortably.", mr: "एकत्र प्रवास करा. आरामात प्रवास करा." },
   owner: "Umesh Panpat",
   phone: "8329042510",
   phoneE164: "+918329042510",
@@ -20,6 +28,8 @@ export const business = {
   },
 } as const satisfies {
   name: string
+  localName: LocalizedText
+  tagline: LocalizedText
   owner: string
   phone: string
   phoneE164: string

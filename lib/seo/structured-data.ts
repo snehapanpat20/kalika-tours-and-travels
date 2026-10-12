@@ -11,7 +11,8 @@ import type { Locale } from "@/lib/i18n/locales"
 
 type Json = Record<string, unknown>
 
-export const DEFAULT_SHARE_IMAGE = "/og/kalika-tours-and-travels.jpg"
+export const DEFAULT_SHARE_IMAGE = "/og/kalika-yatra.jpg"
+const BRAND_LOGO = "/images/brand/kalika-yatra-logo.png"
 
 const absolute = (path: string) => (path.startsWith("http") ? path : `${getSiteUrl()}${path}`)
 
@@ -29,9 +30,9 @@ export function businessSchema(locale: Locale): Json {
     "@type": "TravelAgency",
     "@id": businessId(),
     name: business.name,
-    alternateName: "कालिका टूर्स अँड ट्रॅव्हल्स",
+    alternateName: business.localName.mr,
     url: absolute(`/${locale}`),
-    logo: absolute("/images/brand/logo.png"),
+    logo: absolute(BRAND_LOGO),
     image: absolute(DEFAULT_SHARE_IMAGE),
     description:
       "Tours and travels from Hadapsar, Pune, with a 20+1 seater Traveller for family, group, pilgrimage, corporate and outstation trips.",
@@ -64,7 +65,7 @@ export function websiteSchema(locale: Locale): Json {
     name: business.name,
     inLanguage: ["en-IN", "mr-IN"],
     publisher: { "@id": businessId() },
-    ...(locale === "mr" ? { alternateName: "कालिका टूर्स अँड ट्रॅव्हल्स" } : {}),
+    ...(locale === "mr" ? { alternateName: business.localName.mr } : {}),
   }
 }
 

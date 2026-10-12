@@ -4,6 +4,7 @@ import { DesignSystemShowcase } from "@/components/design-system/showcase"
 import { Container } from "@/components/ui/container"
 import { Section } from "@/components/ui/section"
 import { SectionHeading } from "@/components/ui/section-heading"
+import { business } from "@/data/business"
 import { isLocale } from "@/lib/i18n/locales"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,7 +23,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
       <Container className="grid gap-10">
         <SectionHeading
           as="h1"
-          eyebrow="Kalika Tours and Travels"
+          eyebrow={business.name}
           title="Design system"
           description="Reusable type, color, and controls for later pages."
         />

@@ -1,16 +1,18 @@
+import { business } from "@/data/business"
 import { businessRules } from "@/lib/config/business-rules"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 
+const brand = business.localName.en
 const passengers = businessRules.passengerCapacity
 const drivers = businessRules.driverSeats
 
 export const en = {
   meta: {
-    siteName: "Kalika Tours and Travels",
+    siteName: brand,
     description:
-      "Kalika Tours and Travels in Hadapsar, Pune: tours and a 20+1 seater Traveller for family, group, pilgrimage, corporate and outstation trips.",
+      `${brand} in Hadapsar, Pune: tours and a 20+1 seater Traveller for family, group, pilgrimage, corporate and outstation trips.`,
   },
-  tagline: "Travel Together. Travel Comfortably.",
+  tagline: business.tagline.en,
   foundation: {
     eyebrow: "Foundation",
     body: "The application structure is in place. The public website is the next module.",
@@ -90,14 +92,14 @@ export const en = {
     customPricing:
       "Pricing is quoted for each trip. It depends on the destination, dates, passengers, duration, and requirements.",
     quoteIsEnquiry: "Get a Quote is an enquiry. It is not an automatic fare calculator.",
-    bookingIsRequest: "A booking stays a request until Kalika Tours and Travels confirms it.",
+    bookingIsRequest: `A booking stays a request until ${brand} confirms it.`,
   },
   home: {
     media: {
       pending: "Photograph to be added",
     },
     hero: {
-      eyebrow: "Kalika Tours and Travels · Pune",
+      eyebrow: `${brand} · Pune`,
       titleLead: "Explore India",
       titleFollow: "Together.",
       description: "Hills, beaches, temples and heritage, in one comfortable ride.",
@@ -192,7 +194,7 @@ export const en = {
       },
       view: "View Our Traveller",
       plan: "Plan Your Trip",
-      imageAlt: "The Kalika Tours and Travels 20+1 seater Force Traveller, seen from the front right",
+      imageAlt: `The ${brand} 20+1 seater Force Traveller, seen from the front right`,
       gallery: {
         title: "Our 20+1 Seater Traveller",
         description: "Photographs of our own 20+1 seater Traveller, inside and out.",
@@ -201,7 +203,7 @@ export const en = {
         next: "Next photograph",
         counter: "Photograph {current} of {total}",
         items: {
-          exterior: { alt: "The Kalika Tours and Travels 20+1 seater Force Traveller, seen from the front right", caption: "Our Traveller: room for 20 passengers and a driver" },
+          exterior: { alt: `The ${brand} 20+1 seater Force Traveller, seen from the front right`, caption: "Our Traveller: room for 20 passengers and a driver" },
           monsoonFront: { alt: "The Kalika Traveller driving on a wet ghat road, with a waterfall on the hillside behind", caption: "On a monsoon ghat road" },
           interior: { alt: "Inside the Kalika Traveller: rows of orange seats, curtains and overhead luggage racks", caption: "Cushioned seats, curtains and overhead racks" },
           front: { alt: "Front view of the Kalika Traveller, a white Force Traveller", caption: "Front view" },
@@ -336,7 +338,7 @@ export const en = {
       successBody: "Our team will contact you shortly. Nothing is booked until we confirm it with you.",
       whatsappFollowUp: "Also message us on WhatsApp",
       whatsappMessage:
-        "Hello Kalika Tours and Travels, I would like to enquire about a trip to {destination} ({service}) for {passengers} passengers from {from} to {to}. (Enquiry ref: {reference})",
+        `Hello ${brand}, I would like to enquire about a trip to {destination} ({service}) for {passengers} passengers from {from} to {to}. (Enquiry ref: {reference})`,
       sendAnother: "Send another enquiry",
       errorGeneric: "We couldn't send your enquiry just now. Please try again, or call or WhatsApp us.",
       errorRateLimit: "Too many enquiries were sent from this connection. Please wait a few minutes, or call or WhatsApp us.",
@@ -371,44 +373,44 @@ export const en = {
   pages: {
     meta: {
       home: {
-        title: "Kalika Tours and Travels | Tours & Traveller Rental in Pune",
+        title: `${brand} | Tours & Traveller Rental in Pune`,
         description:
           "Tours and travels from Hadapsar, Pune: a 20+1 seater AC Traveller for family, group, pilgrimage, corporate and outstation trips. Plan your trip online.",
       },
       about: {
-        title: "About Kalika Tours and Travels | Hadapsar, Pune",
+        title: `About ${brand} | Hadapsar, Pune`,
         description:
           "A local tours and travels service in Hadapsar, Pune, run by Umesh Panpat. We plan comfortable journeys for families, groups and teams in our 20+1 Traveller.",
       },
       services: {
-        title: "Tour & Travel Services in Pune | Kalika Tours and Travels",
+        title: `Tour & Travel Services in Pune | ${brand}`,
         description:
           "Family tours, group tours, pilgrimage tours, corporate trips and outstation journeys from Pune in a comfortable 20+1 seater Traveller. Find your trip.",
       },
       destinations: {
-        title: "Travel Destinations from Pune | Kalika Tours and Travels",
+        title: `Travel Destinations from Pune | ${brand}`,
         description:
           "Hill stations, coast and temple towns in Maharashtra, trips to Goa, Rajasthan, Kerala and beyond, and pilgrimages across India. Plan a group trip from Pune.",
       },
       traveller: {
-        title: "20+1 Seater Traveller Rental in Pune | Kalika Tours and Travels",
+        title: `20+1 Seater Traveller Rental in Pune | ${brand}`,
         description:
           "Hire our 20+1 seater AC Traveller in Pune for family trips, group tours, pilgrimages and outstation travel: spacious seats, luggage space, experienced driver.",
       },
       gallery: {
-        title: "Travel Photos | Kalika Tours and Travels, Pune",
-        description: "Photos from journeys with Kalika Tours and Travels: family trips, group tours and pilgrimages from Pune in our 20+1 Traveller.",
+        title: `Travel Photos | ${brand}, Pune`,
+        description: `Photos from journeys with ${brand}: family trips, group tours and pilgrimages from Pune in our 20+1 Traveller.`,
       },
       reviews: {
-        title: "Customer Reviews | Kalika Tours and Travels, Pune",
-        description: "Read what travellers say about their trips with Kalika Tours and Travels in Pune, or share your own experience of travelling with us.",
+        title: `Customer Reviews | ${brand}, Pune`,
+        description: `Read what travellers say about their trips with ${brand} in Pune, or share your own experience of travelling with us.`,
       },
       contact: {
-        title: "Contact Kalika Tours and Travels | Hadapsar, Pune",
-        description: "Call, WhatsApp or email Kalika Tours and Travels in Hadapsar, Pune to plan a family, group, pilgrimage, corporate or outstation trip.",
+        title: `Contact ${brand} | Hadapsar, Pune`,
+        description: `Call, WhatsApp or email ${brand} in Hadapsar, Pune to plan a family, group, pilgrimage, corporate or outstation trip.`,
       },
       plan: {
-        title: "Plan a Trip from Pune | Kalika Tours and Travels",
+        title: `Plan a Trip from Pune | ${brand}`,
         description:
           "Request a family, group, pilgrimage, corporate or outstation trip from Pune. Share your destination, dates and group size, and we'll get back to you.",
       },
@@ -432,7 +434,7 @@ export const en = {
       storyEyebrow: "Our story",
       storyTitle: "We plan journeys around people.",
       story: [
-        "Kalika Tours and Travels is a travel service based in Hadapsar, Pune, run by Umesh Panpat. We take families, friends, pilgrims and teams on their journeys in our 20+1 seater Traveller.",
+        `${brand} is a travel service based in Hadapsar, Pune, run by Umesh Panpat. We take families, friends, pilgrims and teams on their journeys in our 20+1 seater Traveller.`,
         "We believe the road is part of the trip. A comfortable seat, room for everyone's luggage and an experienced driver make long hours feel shorter, and keep the whole group together from the first mile to the last.",
         "Every trip is planned around the people travelling: where you want to go, who is coming along, and what the journey needs. You talk to us directly, and we plan it with you.",
       ],

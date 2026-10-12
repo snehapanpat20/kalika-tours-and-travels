@@ -42,7 +42,7 @@ export function SiteFooter({
       <div aria-hidden="true" className="road-line absolute inset-x-0 top-0 text-teal-light" />
       <div className={cn(shell, "grid gap-12 pt-16 pb-12 md:grid-cols-2 md:pt-20 lg:grid-cols-12 lg:gap-8")}>
         <div className="lg:col-span-4 lg:pr-8">
-          <BrandLogo size="footer" plate alt={business.name} />
+          <BrandLogo size="footer" plate alt={business.localName[locale]} />
           <p className="mt-7 max-w-xs text-2xl leading-snug font-bold tracking-tight text-white">{copy.description}</p>
           <p className="mt-5 flex items-start gap-2.5 text-[0.9375rem] leading-6 text-white/65">
             <MapPin aria-hidden="true" strokeWidth={1.8} className="mt-0.5 size-[1.125rem] shrink-0 text-coral" />
@@ -134,7 +134,7 @@ export function SiteFooter({
       <div className="border-t border-white/10">
         <div className={cn(shell, "flex flex-col gap-3 py-6 text-[0.8125rem] text-white/55 sm:flex-row sm:items-center sm:justify-between")}>
           <p>
-            © {new Date().getFullYear()} {business.name}. {copy.rights}
+            © {new Date().getFullYear()} {business.localName[locale]}. {copy.rights}
           </p>
           <a href="#top" className={cn("inline-flex min-h-11 items-center gap-2 font-semibold text-white/70 hover:text-white sm:min-h-0", focusRing)}>
             {copy.backToTop}

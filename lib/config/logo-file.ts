@@ -3,12 +3,30 @@ import fs from "node:fs"
 import path from "node:path"
 import { imageDirectories } from "@/lib/config/assets"
 
-const logoFileNames = ["logo.svg", "logo.png", "logo.webp", "logo.jpg", "logo.jpeg"] as const
+/**
+ * The three cuts of the official logo, written to `public/images/brand` by
+ * `scripts/build-brand-images.mjs`. Sizes are the files' own pixel dimensions.
+ * The brand is part of each file name on purpose: browsers and the image
+ * optimizer cache by address, so a new logo under an old name keeps showing the old one.
+ */
+export const logoVariants = {
+  /** Emblem, name and tagline. */
+  full: { baseName: "kalika-yatra-logo", width: 1212, height: 820 },
+  /** Emblem and name, without the tagline: for the header and other short spaces. */
+  compact: { baseName: "kalika-yatra-logo-compact", width: 1212, height: 725 },
+  /** Emblem only. */
+  mark: { baseName: "kalika-yatra-logo-mark", width: 1009, height: 557 },
+} as const
 
-export function getBrandLogoPath(): string | null {
+export type LogoVariant = keyof typeof logoVariants
+
+const logoExtensions = ["svg", "png", "webp", "jpg", "jpeg"] as const
+
+export function getBrandLogoPath(variant: LogoVariant = "full"): string | null {
   const brandDir = path.join(process.cwd(), "public", "images", "brand")
 
-  for (const fileName of logoFileNames) {
+  for (const extension of logoExtensions) {
+    const fileName = `${logoVariants[variant].baseName}.${extension}`
     if (fs.existsSync(path.join(brandDir, fileName))) {
       return `${imageDirectories.brand}/${fileName}`
     }

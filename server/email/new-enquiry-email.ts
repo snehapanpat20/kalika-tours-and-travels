@@ -1,4 +1,5 @@
 import "server-only"
+import { business } from "@/data/business"
 import type { SerializedEnquiry } from "@/server/enquiries/service"
 
 const travelTypeLabels: Record<SerializedEnquiry["travelType"], string> = {
@@ -53,7 +54,7 @@ export function buildNewEnquiryEmail(enquiry: SerializedEnquiry) {
 <html><body style="margin:0;padding:24px;background:#f7f8f4;font-family:Arial,Helvetica,sans-serif;color:#17201e">
   <table role="presentation" width="100%" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #dbe0d5" cellpadding="0" cellspacing="0">
     <tr><td style="padding:24px 24px 8px">
-      <p style="margin:0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#0e7469;font-weight:bold">Kalika Tours and Travels</p>
+      <p style="margin:0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#0e7469;font-weight:bold">${escapeHtml(business.name)}</p>
       <h1 style="margin:8px 0 0;font-size:22px;color:#0b3d35">New travel enquiry</h1>
     </td></tr>
     <tr><td style="padding:16px 24px">

@@ -1,9 +1,9 @@
 import Image from "next/image"
 import { business } from "@/data/business"
-import { getBrandLogoPath } from "@/lib/config/logo-file"
+import { getBrandLogoPath, logoVariants, type LogoVariant } from "@/lib/config/logo-file"
 import { cn } from "@/lib/utils/cn"
 
-/** Heights only. Width follows the logo's own 913×721 proportions. */
+/** Heights only. Width follows each logo file's own proportions. */
 const sizeClass = {
   mark: "h-10 w-auto sm:h-12",
   badge: "h-11 w-auto",
@@ -15,21 +15,26 @@ const sizeClass = {
 /**
  * The official logo from `public/images/brand`. It has a white background of
  * its own, so `plate` sets it on a matching white tile instead of editing it.
+ * `variant` picks the cut: the full logo, or the one without the tagline for
+ * spaces too short to keep the tagline readable.
  */
 export function BrandLogo({
   className,
+  variant = "full",
   size = "header",
   priority = false,
   plate = false,
   alt = business.name,
 }: {
   className?: string
+  variant?: LogoVariant
   size?: keyof typeof sizeClass
   priority?: boolean
   plate?: boolean
   alt?: string
 }) {
-  const src = getBrandLogoPath()
+  const src = getBrandLogoPath(variant)
+  const { width, height } = logoVariants[variant]
 
   if (!src) {
     return (
@@ -44,11 +49,11 @@ export function BrandLogo({
     <Image
       src={src}
       alt={alt}
-      width={913}
-      height={721}
+      width={width}
+      height={height}
       preload={priority}
       unoptimized={src.endsWith(".svg")}
-      sizes={size === "header" || size === "footer" ? "140px" : "90px"}
+      sizes={size === "header" || size === "footer" ? "150px" : "100px"}
       className={cn(sizeClass[size], !plate && className)}
     />
   )

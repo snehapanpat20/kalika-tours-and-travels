@@ -1,6 +1,6 @@
-Kalika Tours & Travels
+Kalika Yatra
 
-Website and enquiry backend for Kalika Tours & Travels (Next.js 16, PostgreSQL, Prisma).
+Website and enquiry backend for Kalika Yatra (Next.js 16, PostgreSQL, Prisma).
 Visitors send trip enquiries from the website; the business is emailed and manages them through the admin API.
 
 - **Setting up, testing and deploying the backend:** [BACKEND_SETUP.md](BACKEND_SETUP.md)
@@ -38,7 +38,12 @@ Copy `.env.example` to `.env.local` and fill it in. `DATABASE_URL` and `JWT_SECR
 - `tests/api`: automated API tests
 - `public/images`: brand logo, and separate folders for hero, traveller, service, destination and gallery photographs
 
-The official logo belongs only at `public/images/brand/logo.png`. It is the brand mark, not a content photograph.
+The official logo is kept exactly as supplied at `assets/brand/kalika-yatra-logo.webp`. `node scripts/build-brand-images.mjs`
+cuts the files the website uses from it: `public/images/brand/kalika-yatra-logo.png` (full logo), `kalika-yatra-logo-compact.png`
+(without the tagline, for the header) and `kalika-yatra-logo-mark.png` (emblem only), plus the site icons (`app/icon.png`, `app/apple-icon.png`)
+and the default sharing image (`public/og/kalika-yatra.jpg`). To change the logo, replace the source file and run the
+script again. The brand name and tagline are defined once, in `data/business.ts`. The logo is the brand mark, not a
+content photograph.
 
 ## Pages
 

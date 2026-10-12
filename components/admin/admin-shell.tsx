@@ -33,6 +33,7 @@ import { easeOut } from "@/components/motion/reveal"
 import { Spinner } from "@/components/ui/spinner"
 import { focusRing } from "@/components/ui/styles"
 import { useToast } from "@/components/ui/toast"
+import { business } from "@/data/business"
 import { signOut } from "@/lib/api/admin"
 import { can, roleLabels, type Permission } from "@/lib/auth/permissions"
 import { cn } from "@/lib/utils/cn"
@@ -206,7 +207,7 @@ export function AdminShell({ admin, newEnquiries, pendingReviews, logo, children
             </button>
             <div className="min-w-0">
               <p className="truncate text-base font-extrabold tracking-tight text-forest">{title}</p>
-              <p className="truncate text-xs font-medium text-muted">Kalika Tours and Travels · Business Manager</p>
+              <p className="truncate text-xs font-medium text-muted">{business.name} · Business Manager</p>
             </div>
             <div className="ml-auto flex items-center gap-1 sm:gap-2">
               {can(admin.role, "enquiries.read") ? (
@@ -328,7 +329,7 @@ function SidebarContent({
   return (
     <>
       <div className="px-5 pt-5 pb-5">
-        <Link href="/admin" onClick={onNavigate} aria-label="Kalika Tours and Travels admin home" className={cn("inline-flex rounded-[0.875rem]", focusRing)}>
+        <Link href="/admin" onClick={onNavigate} aria-label={`${business.name} admin home`} className={cn("inline-flex rounded-[0.875rem]", focusRing)}>
           {logo}
         </Link>
         <p className="mt-4 text-[0.6875rem] font-bold tracking-[0.18em] text-teal-light uppercase">Business Manager</p>

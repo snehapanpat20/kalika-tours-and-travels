@@ -1,4 +1,4 @@
-// Kalika Tours & Travels database schema.
+// Kalika Yatra database schema.
 //
 // An Enquiry is a request from a visitor. It is NOT a booking.
 // The business contacts the customer and confirms availability first;
