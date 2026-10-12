@@ -1,4 +1,4 @@
-# SEO guide: Kalika Tours and Travels
+# SEO guide: Kalika Yatra
 
 How the website is set up for search engines, what the owner can edit, and the manual steps that only the
 business can do. Nothing here guarantees rankings. Google decides that from the quality of the content,
@@ -20,16 +20,16 @@ Each page targets one main intent, so pages don't compete with each other. Title
 
 | Page | Main intent (search phrases it should answer) | Title |
 |---|---|---|
-| `/en` | Brand + "tours and travels in Pune", "Traveller on rent Pune" | Kalika Tours and Travels \| Tours & Traveller Rental in Pune |
-| `/en/about` | "Kalika Tours and Travels Hadapsar", who runs it | About Kalika Tours and Travels \| Hadapsar, Pune |
-| `/en/services` | "family / group / pilgrimage / corporate / outstation trips from Pune" | Tour & Travel Services in Pune \| Kalika Tours and Travels |
-| `/en/destinations` | "trips from Pune", "places to visit from Pune" | Travel Destinations from Pune \| Kalika Tours and Travels |
-| `/en/destinations/[slug]` | "[place] trip from Pune" (only places with a full write-up) | [Place] Trip from Pune \| Kalika Tours and Travels (or the admin's SEO title) |
-| `/en/traveller` | "20+1 seater Traveller rental Pune", "Tempo Traveller hire Pune" | 20+1 Seater Traveller Rental in Pune \| Kalika Tours and Travels |
-| `/en/gallery` | Trip photos | Travel Photos \| Kalika Tours and Travels, Pune |
-| `/en/reviews` | "Kalika Tours and Travels reviews" | Customer Reviews \| Kalika Tours and Travels, Pune |
-| `/en/contact` | Phone, email, location | Contact Kalika Tours and Travels \| Hadapsar, Pune |
-| `/en/plan-your-trip` | "book a trip from Pune", enquiry | Plan a Trip from Pune \| Kalika Tours and Travels |
+| `/en` | Brand + "tours and travels in Pune", "Traveller on rent Pune" | Kalika Yatra \| Tours & Traveller Rental in Pune |
+| `/en/about` | "Kalika Yatra Hadapsar", who runs it | About Kalika Yatra \| Hadapsar, Pune |
+| `/en/services` | "family / group / pilgrimage / corporate / outstation trips from Pune" | Tour & Travel Services in Pune \| Kalika Yatra |
+| `/en/destinations` | "trips from Pune", "places to visit from Pune" | Travel Destinations from Pune \| Kalika Yatra |
+| `/en/destinations/[slug]` | "[place] trip from Pune" (only places with a full write-up) | [Place] Trip from Pune \| Kalika Yatra (or the admin's SEO title) |
+| `/en/traveller` | "20+1 seater Traveller rental Pune", "Tempo Traveller hire Pune" | 20+1 Seater Traveller Rental in Pune \| Kalika Yatra |
+| `/en/gallery` | Trip photos | Travel Photos \| Kalika Yatra, Pune |
+| `/en/reviews` | "Kalika Yatra reviews" | Customer Reviews \| Kalika Yatra, Pune |
+| `/en/contact` | Phone, email, location | Contact Kalika Yatra \| Hadapsar, Pune |
+| `/en/plan-your-trip` | "book a trip from Pune", enquiry | Plan a Trip from Pune \| Kalika Yatra |
 
 The Marathi pages (`/mr/...`) have their own Marathi titles and descriptions and are linked to the English ones
 with `hreflang` (`en-IN`, `mr-IN`, `x-default` → English).
@@ -41,7 +41,7 @@ aren't true.
 ## 3. What is built in
 
 - **Metadata** (`lib/seo/metadata.ts`): a unique title, description and canonical URL per page, language
-  alternates, Open Graph and X (Twitter) cards, and the sharing image `public/og/kalika-tours-and-travels.jpg`
+  alternates, Open Graph and X (Twitter) cards, and the sharing image `public/og/kalika-yatra.jpg`
   (1200×630; rebuild it with `node scripts/build-brand-images.mjs`).
 - **Structured data** (`lib/seo/structured-data.ts`, JSON-LD on every page):
   - `TravelAgency`, a kind of LocalBusiness, with name, logo, email, both phone numbers, Hadapsar/Pune address,
@@ -54,7 +54,7 @@ aren't true.
     `FAQPage` (Google shows FAQ results only for government and health sites now). The FAQs are still visible on
     the page.
 - **Breadcrumbs**: visible on every inner page (`components/seo/breadcrumbs.tsx`), matching the `BreadcrumbList`.
-- **Homepage H1**: "Kalika Tours and Travels · Pune — Explore India Together." (the pill is part of the heading).
+- **Homepage H1**: "Kalika Yatra · Pune — Explore India Together." (the pill is part of the heading).
 - **FAQs**: on the Traveller and Services pages (`components/seo/faq-section.tsx`). Answers use only confirmed facts:
   seats, AC, driver, the trip rules in `rules`, and the services.
 - **Internal links**: every page leads to Plan Your Trip, including Gallery and Reviews; destination cards link to
@@ -94,7 +94,7 @@ Indexing takes days to weeks. Whether a page is indexed can only be confirmed in
 
 ## 6. Google Business Profile checklist (most important for local searches)
 
-- [ ] Create or claim the profile at <https://business.google.com> as **Kalika Tours and Travels**, exactly as on
+- [ ] Create or claim the profile at <https://business.google.com> as **Kalika Yatra**, exactly as on
       the website.
 - [ ] Category: *Travel agency* (optionally add *Tour operator*, or *Bus charter* / *Van rental service* if those
       match what you offer).

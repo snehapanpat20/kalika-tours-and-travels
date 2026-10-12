@@ -1,4 +1,4 @@
-# Backend setup: Kalika Tours & Travels
+# Backend setup: Kalika Yatra
 
 This guide takes you from a fresh copy of the project to a running, deployed backend.
 Every command is run from the project folder in a terminal.

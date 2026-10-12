@@ -305,7 +305,7 @@ describe("Roles, permissions and the CMS", () => {
     // A full write-up gets its own page with its own title, canonical URL and breadcrumb; a short entry does not
     const own = await page("/en/destinations/malshej-ghat")
     assert.equal(own.status, 200)
-    assert.match(own.html, /<title>Malshej Ghat Trip from Pune \| Kalika Tours and Travels<\/title>/)
+    assert.match(own.html, /<title>Malshej Ghat Trip from Pune \| Kalika Yatra<\/title>/)
     assert.ok(own.html.includes('/en/destinations/malshej-ghat"'))
     assert.ok(own.html.includes('"BreadcrumbList"'))
     assert.ok(own.html.includes("/en/plan-your-trip?destination=Malshej+Ghat"))

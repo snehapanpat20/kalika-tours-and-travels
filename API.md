@@ -1,4 +1,4 @@
-# Kalika Tours & Travels: API
+# Kalika Yatra: API
 
 All endpoints live under the same domain as the website, at `/api`.
 Requests and responses are JSON (`Content-Type: application/json`).

@@ -24,6 +24,7 @@ import { Photo } from "@/components/media/photo"
 import { EnquiryTable } from "@/components/admin/enquiry-table"
 import { StatusPill } from "@/components/admin/kit/status-pill"
 import { RefreshButton } from "@/components/admin/refresh-button"
+import { business } from "@/data/business"
 import { StatCard } from "@/components/admin/stat-card"
 import { StatusBadge } from "@/components/admin/status-badge"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -98,7 +99,7 @@ export default async function AdminDashboardPage() {
             <h1 id="dashboard-title" className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
               {greeting()}, {firstName}
             </h1>
-            <p className="mt-1 text-white/80">Here&apos;s what&apos;s happening with Kalika Tours and Travels.</p>
+            <p className="mt-1 text-white/80">Here&apos;s what&apos;s happening with {business.name}.</p>
           </div>
           <RefreshButton onDark />
         </div>
