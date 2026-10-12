@@ -91,16 +91,13 @@ export async function requireAdmin(request: Request, access: AdminAccess): Promi
   return profile
 }
 
+/** The attributes the session cookie is set with. Clearing it must send the same ones. */
+const sessionCookieOptions = () => ({ httpOnly: true, secure: isProduction(), sameSite: "strict", path: "/" }) as const
+
 /** Sets the session cookie for a freshly signed token. */
 async function setSessionCookie(admin: Pick<Admin, "id" | "tokenVersion">) {
   const { token, expiresAt } = await signAdminToken({ sub: admin.id, ver: admin.tokenVersion })
-  ;(await cookies()).set(adminCookieName(), token, {
-    httpOnly: true,
-    secure: isProduction(),
-    sameSite: "strict",
-    path: "/",
-    maxAge: ADMIN_TOKEN_TTL_SECONDS,
-  })
+  ;(await cookies()).set(adminCookieName(), token, { ...sessionCookieOptions(), maxAge: ADMIN_TOKEN_TTL_SECONDS })
   return expiresAt
 }
 
@@ -138,7 +135,9 @@ export async function refreshSession(admin: Pick<Admin, "id" | "tokenVersion">) 
 
 export async function signOutAdmin(request: Request) {
   assertTrustedOrigin(request)
-  ;(await cookies()).delete({ name: adminCookieName(), path: "/" })
+  // Not cookies().delete(): it omits Secure, and browsers ignore any Set-Cookie for a
+  // __Host- cookie without it, which would leave the admin signed in on production.
+  ;(await cookies()).set(adminCookieName(), "", { ...sessionCookieOptions(), maxAge: 0 })
   // Leaving the admin also leaves website preview
   ;(await draftMode()).disable()
 }
