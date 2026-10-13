@@ -107,12 +107,15 @@ describe("Admin gallery", () => {
     assert.ok(!html.includes("Draft Photo Title"))
   })
 
-  test("only featured, published photos appear on the homepage", async () => {
+  test("photos appear on the gallery page, featured or not; the homepage does not preview them", async () => {
     await apiForm("/api/admin/gallery", { ...fields({ title: "Featured Home Photo", featured: "true" }), imagePath: "/images/gallery/road.jpg" }, { cookie })
     await apiForm("/api/admin/gallery", { ...fields({ title: "Plain Gallery Photo" }), imagePath: "/images/gallery/place.jpg" }, { cookie })
-    const html = (await page("/en")).html
-    assert.ok(html.includes("Featured Home Photo"))
-    assert.ok(!html.includes("Plain Gallery Photo"))
+    const gallery = (await page("/en/gallery")).html
+    assert.ok(gallery.includes("Featured Home Photo"))
+    assert.ok(gallery.includes("Plain Gallery Photo"))
+    const home = (await page("/en")).html
+    assert.ok(!home.includes("Featured Home Photo"))
+    assert.ok(!home.includes("Plain Gallery Photo"))
   })
 
   test("a partial update changes only the fields sent", async () => {

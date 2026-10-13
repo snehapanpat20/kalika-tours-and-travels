@@ -8,7 +8,7 @@ import type { Locale } from "@/lib/i18n/locales"
 import { pagePath } from "@/lib/routes"
 import { cn } from "@/lib/utils/cn"
 
-const linkClass = cn("inline-flex min-h-9 items-center text-[0.9375rem] text-white/70 transition-colors hover:text-white", focusRing)
+const linkClass = cn("inline-flex min-h-9 items-center text-[0.9375rem] text-white/70 transition-colors hover:text-teal-light", focusRing)
 const headingClass = "text-xs font-bold tracking-[0.16em] text-teal-light uppercase"
 
 export function SiteFooter({
@@ -39,11 +39,10 @@ export function SiteFooter({
 
   return (
     <footer className="relative mt-auto overflow-hidden bg-forest-deep text-white">
-      <div aria-hidden="true" className="road-line absolute inset-x-0 top-0 text-teal-light" />
       <div className={cn(shell, "grid gap-12 pt-16 pb-12 md:grid-cols-2 md:pt-20 lg:grid-cols-12 lg:gap-8")}>
         <div className="lg:col-span-4 lg:pr-8">
           <BrandLogo size="footer" plate alt={business.localName[locale]} />
-          <p className="mt-7 max-w-xs text-2xl leading-snug font-bold tracking-tight text-white">{copy.description}</p>
+          <p className="mt-6 max-w-xs text-[0.9375rem] leading-relaxed text-white/75">{copy.description}</p>
           <p className="mt-5 flex items-start gap-2.5 text-[0.9375rem] leading-6 text-white/65">
             <MapPin aria-hidden="true" strokeWidth={1.8} className="mt-0.5 size-[1.125rem] shrink-0 text-coral" />
             {formatLocation(locale)}
@@ -105,7 +104,7 @@ export function SiteFooter({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  "inline-flex min-h-11 items-center gap-2.5 rounded-pill px-4 text-sm font-semibold text-white/85 ring-1 ring-white/20 transition hover:bg-white hover:text-forest",
+                  "inline-flex min-h-11 items-center gap-2.5 rounded-button px-4 text-sm font-medium text-white/85 ring-1 ring-white/25 transition hover:bg-white hover:text-forest",
                   focusRing,
                 )}
               >
@@ -119,7 +118,7 @@ export function SiteFooter({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  "inline-flex min-h-11 items-center gap-2.5 rounded-pill px-4 text-sm font-semibold text-white/85 ring-1 ring-white/20 transition hover:bg-white hover:text-forest",
+                  "inline-flex min-h-11 items-center gap-2.5 rounded-button px-4 text-sm font-medium text-white/85 ring-1 ring-white/25 transition hover:bg-white hover:text-forest",
                   focusRing,
                 )}
               >

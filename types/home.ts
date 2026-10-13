@@ -28,6 +28,16 @@ export type WhyPointId = "comfort" | "together" | "service" | "flexible"
 /** Trip type keys, matching the database TravelType enum. */
 export type TravelTypeKey = "OUTSTATION" | "FAMILY" | "GROUP" | "PILGRIMAGE" | "CORPORATE"
 
+/** Tour packages under "Upcoming tours" on the Destinations page. */
+export type UpcomingTourId =
+  | "goa"
+  | "kerala"
+  | "rajasthan"
+  | "ujjainOmkareshwar"
+  | "tirupati"
+  | "ayodhyaVaranasi"
+  | "haridwarRishikesh"
+
 /** Places listed on the Destinations page. */
 export type DestinationPlaceId =
   | "mahabaleshwar"

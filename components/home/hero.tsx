@@ -1,154 +1,99 @@
 import Link from "next/link"
 import type { CSSProperties } from "react"
-import { Plane, Search } from "lucide-react"
-import { heroImage, serviceIcons, serviceOrder } from "@/components/home/home-content"
-import { HeroParallax } from "@/components/home/hero-parallax"
-import { HeroZoomBackground, HeroZoomContent, HeroZoomTrack } from "@/components/home/hero-zoom"
+import { ArrowRight } from "lucide-react"
+import type { ImageRef } from "@/components/home/home-content"
 import { Photo, type PhotoSource } from "@/components/media/photo"
+import { Button } from "@/components/ui/button"
 import { focusRing, shell } from "@/components/ui/styles"
+import { business, formatLocation } from "@/data/business"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 import type { Locale } from "@/lib/i18n/locales"
-import { pagePath, planPath } from "@/lib/routes"
+import { pagePath } from "@/lib/routes"
 import { cn } from "@/lib/utils/cn"
 
-/** Stagger index for the CSS load sequence in globals.css (`.hero-in`). */
-const step = (i: number) => ({ "--i": i }) as CSSProperties
+/** When an element joins the CSS load sequence in globals.css, in ms after the page appears. */
+const at = (ms: number) => ({ "--d": ms }) as CSSProperties
+
+/** Our own Traveller on a monsoon ghat road: shown unless the admin has chosen another photo. */
+const homePhoto: ImageRef = { category: "traveller", name: "monsoon-front", position: "50% 55%" }
 
 export type HeroOverrides = {
-  /** Admin-chosen background photo; the India collage is used without one. */
+  /** Admin-chosen background photo; the Traveller photograph is used without one. */
   image?: PhotoSource | null
 }
 
 /**
- * Postcard-style hero in the brand palette: real places across India under a
- * forest-to-teal sky, the headline centred in the sky, a "where to?" search that
- * opens the trip planner with the destination filled in, and journey shortcuts.
+ * The homepage opening, centred over one photograph: where we are, the brand
+ * name set large (its second word in gold italics), the headline beneath it,
+ * and two ways forward: the trip planner and the Services page.
+ *
+ * It arrives in sequence (pure CSS, so it runs once and doesn't wait for
+ * scripts): the photo starts a slow push-in, the name rises word by word from
+ * behind a mask, a small rule draws under it, then the headline and the
+ * buttons fade up. Visitors who prefer reduced motion get it all in place.
  */
 export function Hero({
   locale,
   copy,
-  services,
+  servicesLabel,
   overrides = {},
 }: {
   locale: Locale
   copy: Dictionary["home"]["hero"]
-  /** Service names for the journey chips. */
-  services: Dictionary["services"]
+  /** Label of the secondary link, which opens the Services page. */
+  servicesLabel: string
   overrides?: HeroOverrides
 }) {
+  // "Kalika" stays upright; the rest of the name ("Yatra") is the gold italic word
+  const [first, ...rest] = business.localName[locale].split(" ")
+
   return (
-    <HeroZoomTrack>
-      <section aria-labelledby="hero-title" className="relative isolate flex min-h-[max(40rem,100svh)] overflow-hidden bg-forest-deep text-white lg:min-h-[max(46rem,100svh)]">
-        {/* Background: fade in, scroll parallax, zoom through on scroll, slow Ken Burns */}
-        <div className="hero-bg absolute inset-0 -z-20">
-          <HeroZoomBackground>
-            <HeroParallax>
-              <div className="hero-kenburns absolute inset-0 origin-[50%_70%]">
-                <Photo
-                  image={overrides.image ?? heroImage}
-                  alt={copy.imageAlt}
-                  sizes="100vw"
-                  preload
-                  // Keep the landmarks and the mist in view; the sky above holds the words
-                  className="object-[50%_100%]"
-                />
-              </div>
-            </HeroParallax>
-          </HeroZoomBackground>
+    <section aria-labelledby="hero-title" className="relative isolate overflow-hidden bg-forest-deep text-white">
+      <div className="hero-bg absolute inset-0 -z-20">
+        <div className="hero-zoom absolute inset-0">
+          <Photo image={overrides.image ?? homePhoto} alt={copy.imageAlt} sizes="100vw" preload />
         </div>
+      </div>
+      <div aria-hidden="true" className="hero-veil absolute inset-0 -z-10" />
 
-        {/* Deeper shade behind the words, and the mist that settles into the page */}
-        <div aria-hidden="true" className="absolute inset-0 -z-10">
-          <div className="absolute inset-x-0 top-0 h-[70%] bg-[radial-gradient(ellipse_60%_55%_at_50%_38%,rgb(7_42_36/0.45),transparent_75%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ivory via-ivory/70 to-transparent" />
-        </div>
-
-        <HeroZoomContent className={cn(shell, "flex flex-col items-center pt-32 pb-24 text-center sm:pt-36 lg:pt-40")}>
-          {/* The pill and the headline form one H1, so it names the business and the city as well */}
-          <h1 id="hero-title" className="relative flex flex-col items-center text-balance">
-            <span
-              className="hero-in inline-flex items-center gap-2 rounded-pill bg-white/10 px-4 py-1.5 text-xs font-bold tracking-[0.14em] text-teal-light uppercase ring-1 ring-white/25 backdrop-blur-sm"
-              style={step(0)}
-            >
-              {copy.eyebrow}
+      <div className={cn(shell, "flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center py-20 text-center lg:min-h-[calc(100svh-5rem)]")}>
+        <p className="hero-up eyebrow text-teal-light" style={at(100)}>
+          {formatLocation(locale)}
+        </p>
+        <h1 id="hero-title" className="mt-5 text-[clamp(3.5rem,1.4rem+9.5vw,8.5rem)] leading-[0.95] text-white">
+          <span className="hero-mask">
+            <span className="hero-line" style={at(200)}>
+              {first}
             </span>
-            <span className="hero-in relative mt-6 block" style={step(1)}>
-              <span className="block text-[clamp(2.75rem,8vw,6.25rem)] leading-[0.95] font-extrabold tracking-tight text-white drop-shadow-[0_4px_24px_rgb(7_42_36/0.45)]">
-                {copy.titleLead}
+          </span>
+          {rest.length ? (
+            <>
+              {" "}
+              <span className="hero-mask">
+                <span className="hero-line text-teal-light italic" style={at(320)}>
+                  {rest.join(" ")}
+                </span>
               </span>
-              <span className="mt-1 block bg-gradient-to-r from-teal-light via-[#b8e6dc] to-coral bg-clip-text pb-2 text-[clamp(2.75rem,8vw,6.25rem)] leading-[1] font-extrabold tracking-tight text-transparent">
-                {copy.titleFollow}
-              </span>
-              {/* A little plane flying past the headline, with its dotted trail */}
-              <span aria-hidden="true" className="pointer-events-none absolute -top-6 -right-10 hidden text-teal-light sm:block lg:-right-20">
-                <svg viewBox="0 0 120 40" className="h-8 w-24 overflow-visible lg:h-10 lg:w-28" fill="none">
-                  <path d="M2 34 C 30 30, 60 6, 104 12" stroke="currentColor" strokeWidth="2" strokeDasharray="3 6" strokeLinecap="round" opacity="0.55" />
-                </svg>
-                <Plane className="absolute -top-3 -right-4 size-7 rotate-12 fill-teal-light/20 lg:size-8" strokeWidth={1.8} />
-              </span>
-            </span>
-          </h1>
-
-          <p
-            className="hero-in mt-3 max-w-2xl font-[family-name:var(--font-script)] text-[clamp(1.35rem,3.2vw,2.1rem)] leading-snug font-bold text-[#f9b89a] drop-shadow-[0_2px_12px_rgb(7_42_36/0.5)]"
-            style={step(2)}
+            </>
+          ) : null}
+        </h1>
+        <span aria-hidden="true" className="hero-rule mt-5 block h-0.5 w-16 rounded-full bg-teal-light" style={at(700)} />
+        <p className="hero-up type-lead mt-5 max-w-2xl text-balance text-white/90 sm:text-[1.375rem]" style={at(800)}>
+          {copy.titleLead} {copy.titleFollow}
+        </p>
+        <div className="hero-up mt-9 flex flex-col items-center gap-x-7 gap-y-4 sm:flex-row" style={at(900)}>
+          <Button href={pagePath(locale, "plan")} size="lg">
+            {copy.plan}
+          </Button>
+          <Link
+            href={pagePath(locale, "services")}
+            className={cn("group inline-flex min-h-11 items-center gap-2 font-medium text-white underline-offset-4 hover:underline", focusRing)}
           >
-            {copy.description}
-          </p>
-
-          {/* Works without JavaScript: opens the trip planner with ?destination=… */}
-          <form action={pagePath(locale, "plan")} method="get" role="search" className="hero-in mt-9 w-full max-w-2xl" style={step(3)}>
-            <div className="flex items-center gap-2 rounded-pill bg-white p-2 pl-5 shadow-overlay ring-1 ring-forest/5 focus-within:ring-2 focus-within:ring-teal">
-              <Search aria-hidden="true" className="size-5 shrink-0 text-muted" />
-              <label htmlFor="hero-destination" className="sr-only">
-                {copy.searchLabel}
-              </label>
-              <input
-                id="hero-destination"
-                name="destination"
-                type="search"
-                maxLength={120}
-                autoComplete="off"
-                placeholder={copy.searchPlaceholder}
-                className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-ink placeholder:text-muted/80 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className={cn(
-                  "inline-flex min-h-12 shrink-0 items-center gap-2 rounded-pill bg-coral px-4 text-sm font-bold text-forest-deep transition-colors hover:bg-coral/90 sm:px-6",
-                  focusRing,
-                )}
-              >
-                <Search aria-hidden="true" className="size-4 sm:hidden" />
-                <span className="sr-only sm:not-sr-only">{copy.plan}</span>
-              </button>
-            </div>
-          </form>
-
-          <nav aria-label={copy.journeysLabel} className="hero-in mt-6 w-full max-w-3xl" style={step(4)}>
-            <ul className="flex flex-wrap justify-center gap-2">
-              {serviceOrder.map((id) => {
-                const Icon = serviceIcons[id]
-                return (
-                  <li key={id}>
-                    <Link
-                      href={planPath(locale, { service: id })}
-                      scroll={false}
-                      className={cn(
-                        "inline-flex min-h-10 items-center gap-2 rounded-pill bg-forest-deep/45 px-4 text-sm font-semibold text-white ring-1 ring-white/25 backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-forest-deep/65",
-                        focusRing,
-                      )}
-                    >
-                      <Icon aria-hidden="true" strokeWidth={1.9} className="size-4 text-teal-light" />
-                      {services[id].name}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </nav>
-        </HeroZoomContent>
-      </section>
-    </HeroZoomTrack>
+            {servicesLabel}
+            <ArrowRight aria-hidden="true" strokeWidth={2} className="nudge size-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
   )
 }

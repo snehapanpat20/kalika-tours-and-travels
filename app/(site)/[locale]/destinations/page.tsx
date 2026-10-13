@@ -1,18 +1,21 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowUpRight, MapPin } from "lucide-react"
-import { CtaSection } from "@/components/home/cta-section"
 import { destinationImages } from "@/components/home/home-content"
 import { PageHero } from "@/components/layout/page-hero"
-import { Photo, type PhotoSource } from "@/components/media/photo"
-import { ImageReveal, Reveal, Stagger, StaggerItem } from "@/components/motion/reveal"
+import { resolvePhoto, type PhotoSource } from "@/components/media/photo"
+import { Reveal } from "@/components/motion/reveal"
 import { builtInDestinationGroups, builtInPlaceImages } from "@/components/pages/destination-groups"
 import { pageImages } from "@/components/pages/page-images"
+import { upcomingTours } from "@/components/pages/upcoming-tours"
 import { Button } from "@/components/ui/button"
+import { CoverflowCarousel, type CoverflowItem } from "@/components/ui/coverflow-carousel"
+import { PolaroidLineCarousel, type PolaroidSlide } from "@/components/ui/polaroid-line-carousel"
 import { focusRing, shell } from "@/components/ui/styles"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { photoCredits } from "@/data/photo-credits"
+import { slugify } from "@/lib/cms/slug"
 import type { Dictionary } from "@/lib/i18n/dictionary"
+import { getDictionary } from "@/lib/i18n/get-dictionary"
 import { isLocale, type Locale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
 import { destinationPath, planPath } from "@/lib/routes"
@@ -27,6 +30,8 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 
 type PlaceView = {
   key: string
+  /** Stable id: the destination's web address, or the built-in place's id. */
+  slug: string
   name: string
   description: string
   details: string | null
@@ -65,6 +70,7 @@ function managedGroups(locale: Locale, destinations: PublicDestination[], dictio
         feature: featureImage && builtIn ? { image: featureImage, alt: builtIn.imageAlt } : null,
         places: places.map((item) => ({
           key: item.id,
+          slug: item.slug,
           name: item.name,
           description: item.shortDescription,
           details: item.description,
@@ -88,6 +94,7 @@ function builtInGroups(dictionary: Dictionary): GroupView[] {
     feature: group.image ? { image: group.image, alt: copy.groups[group.id].imageAlt } : null,
     places: group.places.map((id) => ({
       key: id,
+      slug: id,
       name: copy.places[id].name,
       description: copy.places[id].description,
       details: null,
@@ -105,6 +112,22 @@ export default async function DestinationsPage(props: LocaleParams) {
   const planLabel = dictionary.pages.common.planATrip
   const managed = await listLiveDestinations(locale, preview)
   const groups = managed ? managedGroups(locale, managed, dictionary) : builtInGroups(dictionary)
+  const famous = famousSlides(locale, groups, planLabel, dictionary.cms.moreDetails)
+  // Places the admin added beyond the built-in ones: listed by name, so each stays reachable
+  const added = managed ? addedPlaces(groups) : []
+  const tours = upcomingTours.map(({ id, image }): CoverflowItem => {
+    const photo = image ? resolvePhoto(image) : null
+    return {
+      id,
+      image: photo?.src,
+      position: photo?.position,
+      title: copy.tours.items[id].name,
+      meta: copy.tours.items[id].duration,
+      description: copy.tours.items[id].description,
+      href: planPath(locale, { destination: copy.tours.items[id].name }),
+      linkLabel: copy.tours.enquire,
+    }
+  })
 
   return (
     <>
@@ -121,70 +144,40 @@ export default async function DestinationsPage(props: LocaleParams) {
         imageAlt={copy.imageAlt}
       />
 
-      {groups.map((group, index) => {
-        const withPhotos = group.places.some((place) => place.image)
-        return (
-          <section
-            key={group.id}
-            id={group.id}
-            aria-labelledby={`${group.id}-title`}
-            className={cn("py-(--spacing-section)", index % 2 === 1 ? "bg-stone" : "bg-ivory")}
-          >
-            <div className={shell}>
-              <Reveal className="max-w-2xl">
-                <p className="eyebrow text-teal-deep">{group.eyebrow}</p>
-                <h2 id={`${group.id}-title`} className="type-h2 mt-4 text-forest">
-                  {group.title}
-                </h2>
-                <p className="mt-4 text-[1.0625rem] leading-relaxed text-muted">{group.description}</p>
-              </Reveal>
+      {/* Tour packages, as a coverflow to swipe, click or step through */}
+      <section aria-labelledby="tours-title" className="bg-ivory py-(--spacing-section)">
+        <Reveal className={cn(shell, "text-center")}>
+          <p className="eyebrow text-teal-deep">{copy.tours.eyebrow}</p>
+          <h2 id="tours-title" className="type-h2 mt-4 text-forest">
+            {copy.tours.title}
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-[1.0625rem] leading-relaxed text-muted">{copy.tours.description}</p>
+        </Reveal>
+        <CoverflowCarousel
+          className="mt-6"
+          items={tours}
+          ariaLabel={copy.tours.eyebrow}
+          previous={copy.tours.previous}
+          next={copy.tours.next}
+          counter={copy.tours.counter}
+          loop
+        />
+      </section>
 
-              {group.feature && !withPhotos ? (
-                <div className="mt-10 grid gap-6 lg:grid-cols-12 lg:gap-8">
-                  <ImageReveal className="relative aspect-[4/3] overflow-hidden rounded-panel bg-stone-deep lg:col-span-5 lg:aspect-auto lg:min-h-full">
-                    <Photo image={group.feature.image} alt={group.feature.alt} sizes="(min-width: 1024px) 38vw, 100vw" />
-                  </ImageReveal>
-                  <Stagger as="ul" className="grid gap-3 sm:grid-cols-2 lg:col-span-7">
-                    {group.places.map((place) => (
-                      <StaggerItem as="li" key={place.key}>
-                        <PlaceTile locale={locale} place={place} planLabel={planLabel} moreLabel={dictionary.cms.moreDetails} />
-                      </StaggerItem>
-                    ))}
-                  </Stagger>
-                </div>
-              ) : (
-                <Stagger as="ul" className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {group.places.map((place) => (
-                    <StaggerItem as="li" key={place.key}>
-                      {place.image ? (
-                        <Link
-                          href={place.page ?? planPath(locale, { destination: place.name })}
-                          className={cn("group relative isolate flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-card bg-forest-deep p-5 text-white sm:aspect-[3/4]", focusRing)}
-                        >
-                          <span className="zoom-img absolute inset-0 -z-10">
-                            <Photo image={place.image} alt={place.alt} sizes="(min-width: 1024px) 30vw, (min-width: 640px) 48vw, 100vw" />
-                          </span>
-                          <span aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-forest-deep/90 via-forest-deep/30 to-transparent" />
-                          <span className="text-2xl font-extrabold tracking-tight">{place.name}</span>
-                          <span className="mt-1.5 text-sm leading-relaxed text-white/80">{place.description}</span>
-                          <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-teal-light">
-                            {place.page ? dictionary.cms.moreDetails : planLabel}
-                            <ArrowUpRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                          </span>
-                        </Link>
-                      ) : (
-                        <PlaceTile locale={locale} place={place} planLabel={planLabel} moreLabel={dictionary.cms.moreDetails} tall />
-                      )}
-                    </StaggerItem>
-                  ))}
-                </Stagger>
-              )}
-            </div>
-          </section>
-        )
-      })}
+      {/* The well-known places, as one line of photographs to drag, click or step through */}
+      {famous.length ? (
+        <section aria-label={dictionary.home.destinations.eyebrow} className="bg-stone">
+          <PolaroidLineCarousel
+            slides={famous}
+            ariaLabel={dictionary.home.destinations.title}
+            previous={dictionary.home.destinations.previous}
+            next={dictionary.home.destinations.next}
+            counter={dictionary.pages.gallery.lightbox.counter}
+          />
+        </section>
+      ) : null}
 
-      <section aria-labelledby="more-title" className="bg-ivory pb-(--spacing-section)">
+      <section aria-labelledby="more-title" className="bg-ivory py-(--spacing-section)">
         <div className={shell}>
           <Reveal className="flex flex-col items-start gap-5 rounded-panel border border-dashed border-line bg-stone px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10">
             <div>
@@ -192,6 +185,20 @@ export default async function DestinationsPage(props: LocaleParams) {
                 {copy.moreTitle}
               </h2>
               <p className="mt-2 max-w-xl text-muted">{copy.moreBody}</p>
+              {added.length ? (
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {added.map((place) => (
+                    <li key={place.key}>
+                      <Link
+                        href={place.page ?? planPath(locale, { destination: place.name })}
+                        className={cn("inline-flex min-h-11 items-center rounded-button bg-white px-4 text-sm font-medium text-forest ring-1 ring-forest/15 hover:ring-teal/50", focusRing)}
+                      >
+                        {place.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
             <Button href={planPath(locale)} arrow>
               {dictionary.pages.common.planJourney}
@@ -199,8 +206,6 @@ export default async function DestinationsPage(props: LocaleParams) {
           </Reveal>
         </div>
       </section>
-
-      <CtaSection locale={locale} copy={dictionary.home.cta} />
 
       {/* Credits for photographs used under their licences */}
       <aside id="photo-credits" aria-label={dictionary.cms.photoCredits} className="bg-ivory py-6">
@@ -223,45 +228,39 @@ export default async function DestinationsPage(props: LocaleParams) {
   )
 }
 
-function PlaceTile({ locale, place, planLabel, moreLabel, tall = false }: { locale: Locale; place: PlaceView; planLabel: string; moreLabel: string; tall?: boolean }) {
-  return (
-    <div
-      className={cn(
-        "group relative flex h-full flex-col rounded-card bg-white p-5 shadow-soft ring-1 ring-forest/6 transition hover:-translate-y-0.5 hover:ring-teal/40",
-        tall && "justify-end sm:aspect-[3/4]",
-      )}
-    >
-      <span className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-forest">
-        <MapPin aria-hidden="true" strokeWidth={1.8} className="size-4 shrink-0 text-coral" />
-        {place.page ? (
-          <Link href={place.page} className={cn("underline-offset-4 hover:underline", focusRing)}>
-            {place.name}
-          </Link>
-        ) : (
-          place.name
-        )}
-      </span>
-      <span className="mt-1.5 text-sm leading-relaxed text-muted">{place.description}</span>
-      {place.page ? (
-        <Link href={place.page} className={cn("mt-2 text-sm font-semibold text-teal-deep underline-offset-4 hover:underline", focusRing)}>
-          {moreLabel}
-          <span className="sr-only">: {place.name}</span>
-        </Link>
-      ) : place.details ? (
-        <details className="mt-2 text-sm text-muted">
-          <summary className={cn("cursor-pointer font-semibold text-teal-deep", focusRing)}>{moreLabel}</summary>
-          <p className="mt-2 leading-relaxed whitespace-pre-line">{place.details}</p>
-        </details>
-      ) : null}
-      {/* A separate link (not the whole tile), so "More details" can open on its own */}
-      <Link
-        href={planPath(locale, { destination: place.name })}
-        className={cn("mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-bold text-teal-deep", focusRing)}
-      >
-        {planLabel}
-        <span className="sr-only">: {place.name}</span>
-        <ArrowUpRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-      </Link>
-    </div>
-  )
+/**
+ * The well-known places shown in the photo carousel, in this order. A place is
+ * matched by its web address (or built-in id), so it keeps its spot whatever
+ * language the page is in.
+ */
+const famousPlaces = ["mahabaleshwar", "lonavala", "konkan", "ashtavinayak", "goa", "mumbai", "shirdi", "ujjain", "gujarat", "varanasi", "vrindavan", "rajasthan", "kerala"]
+
+/** Managed places that are not one of the website's built-in ones (matched by web address). */
+function addedPlaces(groups: GroupView[]): PlaceView[] {
+  const names = getDictionary("en").pages.destinations.places
+  const builtIn = new Set(builtInDestinationGroups.flatMap((group) => group.places.map((id) => slugify(names[id].name))))
+  return groups.flatMap((group) => group.places).filter((place) => !builtIn.has(place.slug))
+}
+
+/** Slides for the photo carousel: the well-known places that have a photograph. */
+function famousSlides(locale: Locale, groups: GroupView[], planLabel: string, moreLabel: string): PolaroidSlide[] {
+  const places = groups.flatMap((group) => group.places)
+  return famousPlaces.flatMap((slug): PolaroidSlide[] => {
+    const place = places.find((item) => item.slug === slug)
+    if (!place?.image) return []
+    const photo = "src" in place.image ? place.image : resolvePhoto(place.image)
+    if (!photo.src) return []
+    return [
+      {
+        key: place.key,
+        image: photo.src,
+        position: photo.position,
+        alt: place.alt,
+        title: place.name,
+        caption: place.description,
+        href: place.page ?? planPath(locale, { destination: place.name }),
+        linkLabel: place.page ? moreLabel : planLabel,
+      },
+    ]
+  })
 }

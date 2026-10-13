@@ -14,5 +14,9 @@ export const metadata: Metadata = {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <Document locale="en">{children}</Document>
+  return (
+    <Document locale="en" theme="site">
+      {children}
+    </Document>
+  )
 }

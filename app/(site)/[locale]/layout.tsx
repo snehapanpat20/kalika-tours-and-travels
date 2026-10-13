@@ -57,7 +57,7 @@ export default async function LocaleLayout({
     : services.map((service) => ({ anchor: service.id, name: service.name[locale] }))
 
   return (
-    <Document locale={locale}>
+    <Document locale={locale} theme="site">
       {/* Who runs the site: the business and the website, referenced by every page's WebPage node */}
       <JsonLd data={graph([businessSchema(locale), websiteSchema(locale)])} />
       <SiteFrame locale={locale} dictionary={dictionary} services={footerServices} announcement={announcement} preview={preview}>

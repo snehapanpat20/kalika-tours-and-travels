@@ -265,7 +265,6 @@ describe("Roles, permissions and the CMS", () => {
     assert.equal((await api("/api/admin/content/traveller/publish", { cookie: contentCookie, body: {} })).status, 200)
     const traveller = (await page("/en/traveller")).html
     assert.ok(traveller.includes("Unique test caption"))
-    assert.ok((await page("/en")).html.includes("Our comfortable Traveller"))
   })
 
   // ─── Destinations and services ───────────────────────────

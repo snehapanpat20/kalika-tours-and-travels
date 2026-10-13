@@ -42,7 +42,7 @@ export function DestinationCard({
         </div>
         <span
           aria-hidden="true"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30 backdrop-blur-sm transition-colors duration-300 group-hover:bg-coral group-hover:text-forest-deep group-hover:ring-coral"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30 backdrop-blur-sm transition-colors duration-300 group-hover:bg-coral group-hover:text-on-coral group-hover:ring-coral"
         >
           <ArrowUpRight strokeWidth={2} className="size-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </span>

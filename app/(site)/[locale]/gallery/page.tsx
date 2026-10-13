@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { GalleryWall } from "@/components/gallery/gallery-wall"
-import { CtaSection } from "@/components/home/cta-section"
 import { PageHero } from "@/components/layout/page-hero"
 import { Reveal } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
@@ -69,8 +68,6 @@ export default async function GalleryPage(props: LocaleParams) {
           />
         </div>
       </section>
-
-      <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>
   )
 }

@@ -54,7 +54,7 @@ aren't true.
     `FAQPage` (Google shows FAQ results only for government and health sites now). The FAQs are still visible on
     the page.
 - **Breadcrumbs**: visible on every inner page (`components/seo/breadcrumbs.tsx`), matching the `BreadcrumbList`.
-- **Homepage H1**: "Kalika Yatra · Pune — Explore India Together." (the pill is part of the heading).
+- **Homepage H1**: "Kalika Yatra" (the brand name, set large). The line "Every road has a story. Let us be part of yours." follows as a paragraph.
 - **FAQs**: on the Traveller and Services pages (`components/seo/faq-section.tsx`). Answers use only confirmed facts:
   seats, AC, driver, the trip rules in `rules`, and the services.
 - **Internal links**: every page leads to Plan Your Trip, including Gallery and Reviews; destination cards link to

@@ -34,8 +34,10 @@ export function destinationPath(locale: Locale, slug: string): string {
   return `${pagePath(locale, "destinations")}/${slug}`
 }
 
-/** True when `pathname` is one of the public pages that opens with a dark hero image. */
+/** Pages that open with a dark photograph behind the header. None at present: the homepage photo is washed light. */
+const darkHeroPaths: string[] = []
+
+/** True when `pathname` opens with a dark photograph, so the header shows light text over it. */
 export function hasDarkHero(pathname: string): boolean {
-  const slugs = Object.values(pageSlugs).filter(Boolean).join("|")
-  return new RegExp(`^/(en|mr)(/(${slugs}|destinations/[a-z0-9-]+))?/?$`).test(pathname)
+  return darkHeroPaths.includes(pathname.replace(/\/$/, ""))
 }
