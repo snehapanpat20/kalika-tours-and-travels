@@ -1,19 +1,15 @@
 import type { Metadata } from "next"
 import { Armchair, HeartHandshake, MapPin, Route, Users } from "lucide-react"
-import { CtaSection } from "@/components/home/cta-section"
-import { JourneyStory } from "@/components/home/journey-story"
 import { PageHero } from "@/components/layout/page-hero"
 import { Photo } from "@/components/media/photo"
 import { ImageReveal, Reveal, Stagger, StaggerItem } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
-import { Button } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { shell } from "@/components/ui/styles"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { formatLocation } from "@/data/business"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
-import { pagePath } from "@/lib/routes"
 import { createPageMetadata } from "@/lib/seo/metadata"
 import { cn } from "@/lib/utils/cn"
 
@@ -41,12 +37,7 @@ export default async function AboutPage(props: LocaleParams) {
         description={copy.description}
         image={pageImages.aboutHero}
         vivid
-        imageAlt={copy.imageAlt}
-        actions={
-          <Button href={pagePath(locale, "plan")} size="lg" arrow className="w-full sm:w-auto">
-            {dictionary.pages.common.planJourney}
-          </Button>
-        }
+        imageAlt={dictionary.pages.destinations.groups.maharashtra.imageAlt}
       />
 
       <section aria-labelledby="story-heading" className="bg-ivory py-(--spacing-section)">
@@ -68,7 +59,7 @@ export default async function AboutPage(props: LocaleParams) {
           </Reveal>
           <div className="lg:col-span-6 xl:col-span-5">
             <ImageReveal className="relative aspect-[4/5] overflow-hidden rounded-panel bg-stone-deep">
-              <Photo image={pageImages.aboutStory} alt={copy.storyImageAlt} sizes="(min-width: 1024px) 40vw, 100vw" />
+              <Photo image={pageImages.aboutStory} alt={dictionary.pages.traveller.imageAlt} sizes="(min-width: 1024px) 40vw, 100vw" />
             </ImageReveal>
           </div>
         </div>
@@ -97,9 +88,6 @@ export default async function AboutPage(props: LocaleParams) {
           </Stagger>
         </div>
       </section>
-
-      <JourneyStory locale={locale} copy={dictionary.home.story} />
-      <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>
   )
 }

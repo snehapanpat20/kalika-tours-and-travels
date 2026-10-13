@@ -106,7 +106,7 @@ export function SiteNav({
         "fixed inset-x-0 top-0 z-40 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-500",
         overlay
           ? "border-b border-transparent bg-transparent"
-          : "border-b border-forest/8 bg-ivory/85 shadow-[0_10px_30px_-24px_rgb(11_61_53/0.5)] backdrop-blur-xl supports-[backdrop-filter]:bg-ivory/75",
+          : "border-b border-forest/8 bg-ivory/85 shadow-soft backdrop-blur-xl supports-[backdrop-filter]:bg-ivory/75",
         open && "bg-ivory supports-[backdrop-filter]:bg-ivory",
       )}
     >
@@ -152,8 +152,8 @@ export function SiteNav({
                           ? "text-white"
                           : "text-white/80 hover:text-white"
                         : current
-                          ? "text-forest"
-                          : "text-ink/70 hover:text-forest",
+                          ? "text-teal-deep"
+                          : "text-ink/80 hover:text-teal-deep",
                       focusRing,
                     )}
                   >
@@ -169,7 +169,7 @@ export function SiteNav({
           <div className="hidden sm:block">
             <LanguageSwitcher locale={locale} labels={dictionary.languages} label={dictionary.languageLabel} tone={overlay ? "light" : "dark"} />
           </div>
-          <Button href={planHref} size="sm" arrow className="hidden md:inline-flex">
+          <Button href={planHref} size="sm" arrow variant={overlay ? "light" : "primary"} className="hidden md:inline-flex">
             {copy.plan}
           </Button>
           <a

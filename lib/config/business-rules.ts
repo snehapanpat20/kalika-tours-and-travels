@@ -8,7 +8,7 @@ export const businessRules = {
   passengerCapacity: 20,
   driverSeats: 1,
   nightTravelAllowed: true,
-  oneWayTripsOffered: false,
+  oneWayTripsOffered: true,
   cancellationAllowedAfterConfirmation: false,
   refundAfterConfirmedBooking: false,
   tollsParkingAndDriverAllowance: "separate-where-applicable",

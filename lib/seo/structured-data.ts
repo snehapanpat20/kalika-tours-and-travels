@@ -12,7 +12,7 @@ import type { Locale } from "@/lib/i18n/locales"
 type Json = Record<string, unknown>
 
 export const DEFAULT_SHARE_IMAGE = "/og/kalika-yatra.jpg"
-const BRAND_LOGO = "/images/brand/kalika-yatra-logo.png"
+const BRAND_LOGO = "/images/brand/kalika-yatra-maroon-logo.png"
 
 const absolute = (path: string) => (path.startsWith("http") ? path : `${getSiteUrl()}${path}`)
 

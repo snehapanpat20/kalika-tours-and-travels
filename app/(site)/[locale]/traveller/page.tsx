@@ -3,7 +3,6 @@ import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 import { cmsIcon } from "@/components/cms/cms-icon"
 import { ComfortSection } from "@/components/home/comfort-section"
-import { CtaSection } from "@/components/home/cta-section"
 import { journeyOrder, serviceIcons, travellerGallery, travellerImage, vehicleFeatureIcons } from "@/components/home/home-content"
 import { VehicleFeature } from "@/components/home/vehicle-feature"
 import { PageHero } from "@/components/layout/page-hero"
@@ -154,8 +153,6 @@ export default async function TravellerPage(props: LocaleParams) {
       </section>
 
       <FaqSection id="traveller-faq-title" faqs={travellerFaqs(dictionary)} copy={dictionary.seo.faq} className="bg-stone" />
-
-      <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>
   )
 }

@@ -183,7 +183,7 @@ export function ReviewForm({
                   className="sr-only"
                 />
                 <span className="sr-only">{copy.ratingOption.replace("{rating}", String(value))}</span>
-                <Star aria-hidden="true" strokeWidth={1.6} className={cn("size-8 transition-colors", value <= rating ? "fill-coral text-coral" : "fill-transparent text-line hover:text-coral/60")} />
+                <Star aria-hidden="true" strokeWidth={1.6} className={cn("size-8 transition-colors", value <= rating ? "fill-highlight text-highlight" : "fill-transparent text-line hover:text-coral/60")} />
               </label>
             ))}
           </div>

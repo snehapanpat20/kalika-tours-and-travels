@@ -15,7 +15,7 @@ export type AnnouncementView = {
 
 const tones = {
   INFO: { className: "bg-forest-deep text-white", icon: Info, iconClass: "text-teal-light", link: "text-teal-light" },
-  OFFER: { className: "bg-coral text-forest-deep", icon: Tag, iconClass: "text-forest-deep", link: "text-forest-deep underline" },
+  OFFER: { className: "bg-coral text-on-coral", icon: Tag, iconClass: "text-on-coral", link: "text-on-coral underline" },
   IMPORTANT: { className: "bg-ink text-white", icon: Megaphone, iconClass: "text-coral", link: "text-coral" },
   FESTIVE: { className: "bg-teal-deep text-white", icon: Sparkles, iconClass: "text-coral-soft", link: "text-white underline" },
 } as const

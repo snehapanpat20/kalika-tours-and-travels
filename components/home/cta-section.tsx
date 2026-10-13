@@ -18,7 +18,7 @@ export function CtaSection({ locale, copy }: { locale: Locale; copy: Dictionary[
             <Photo image={ctaImage} alt="" sizes="(min-width: 1440px) 86rem, 100vw" />
           </div>
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-forest-deep/90 via-forest-deep/65 to-forest-deep/20" />
-          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-1 bg-[repeating-linear-gradient(90deg,var(--color-coral)_0_18px,transparent_18px_30px)]" />
+          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-1 bg-[repeating-linear-gradient(90deg,var(--kalika-coral)_0_18px,transparent_18px_30px)]" />
 
           <div className="max-w-2xl">
             <p className="eyebrow text-white/80">{copy.eyebrow}</p>

@@ -15,6 +15,7 @@ import type { Dictionary } from "@/lib/i18n/dictionary"
 import type { Locale } from "@/lib/i18n/locales"
 import { ApiError } from "@/lib/api/client"
 import { submitEnquiry } from "@/lib/api/enquiries"
+import { cn } from "@/lib/utils/cn"
 import { enquiryInputSchema, enquiryMessages, toFieldIssues, travelTypeByService, type EnquiryInput } from "@/lib/validation/enquiry"
 import type { FieldIssue } from "@/lib/errors/app-error"
 import type { ServiceId } from "@/types/catalog"
@@ -100,6 +101,9 @@ export function PlanFormFromUrl(props: FormProps) {
   return <PlanForm {...props} requestedService={params.get("service") ?? ""} requestedDestination={(params.get("destination") ?? "").slice(0, 80)} />
 }
 
+/** Added to the message of a one-way enquiry. In English, because the business reads it. */
+const oneWayMarker = "[One-way trip]"
+
 export function PlanForm({
   locale,
   copy,
@@ -118,6 +122,7 @@ export function PlanForm({
   const [typedDestination, setTypedDestination] = useState<string | null>(null)
   const [departureDate, setDepartureDate] = useState("")
   const [returnDate, setReturnDate] = useState("")
+  const [oneWayTrip, setOneWayTrip] = useState(false)
   const [passengers, setPassengers] = useState("")
   const [notes, setNotes] = useState("")
   const [website, setWebsite] = useState("")
@@ -164,6 +169,7 @@ export function PlanForm({
     setTypedDestination("")
     setDepartureDate("")
     setReturnDate("")
+    setOneWayTrip(false)
     setPassengers("")
     setNotes("")
   }
@@ -179,9 +185,11 @@ export function PlanForm({
       travelType: (serviceId ? travelTypeByService[serviceId as ServiceId] : "") as EnquiryInput["travelType"],
       destination,
       travelDate: departureDate,
-      returnDate,
+      // The enquiry record always has a return date. A one-way trip sends the travel
+      // date for both and says so in the message, so the business sees it at once.
+      returnDate: oneWayTrip ? departureDate : returnDate,
       passengerCount: passengers,
-      message: notes,
+      message: oneWayTrip ? [oneWayMarker, notes.trim()].filter(Boolean).join(" ") : notes,
       locale,
       website,
     }
@@ -285,16 +293,38 @@ export function PlanForm({
             />
           )}
         </Field>
+        <fieldset className="sm:col-span-2">
+          <legend className="text-sm font-semibold text-forest">{copy.tripKind}</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {[
+              { value: false, label: copy.tripType },
+              { value: true, label: copy.oneWayTrip },
+            ].map((option) => (
+              <label
+                key={option.label}
+                className={cn(
+                  "inline-flex min-h-11 cursor-pointer items-center gap-2.5 rounded-button px-4 text-sm font-medium ring-1 transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-3 has-focus-visible:outline-teal",
+                  oneWayTrip === option.value ? "bg-forest text-white ring-forest" : "bg-white text-forest ring-line hover:bg-stone",
+                )}
+              >
+                <input type="radio" name="tripKind" className="sr-only" checked={oneWayTrip === option.value} onChange={() => setOneWayTrip(option.value)} />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <Field label={copy.departure} error={errors.departureDate}>
           {(field) => (
             <Input id={field.id} name="departure" type="date" min={today} value={departureDate} invalid={field.invalid} describedBy={field.describedBy} onChange={(event) => setDepartureDate(event.target.value)} />
           )}
         </Field>
-        <Field label={copy.return} error={errors.returnDate}>
-          {(field) => (
-            <Input id={field.id} name="return" type="date" min={departureDate || today} value={returnDate} invalid={field.invalid} describedBy={field.describedBy} onChange={(event) => setReturnDate(event.target.value)} />
-          )}
-        </Field>
+        {oneWayTrip ? null : (
+          <Field label={copy.return} error={errors.returnDate}>
+            {(field) => (
+              <Input id={field.id} name="return" type="date" min={departureDate || today} value={returnDate} invalid={field.invalid} describedBy={field.describedBy} onChange={(event) => setReturnDate(event.target.value)} />
+            )}
+          </Field>
+        )}
         <Field label={copy.passengers} hint={copy.passengersHint} error={errors.passengers}>
           {(field) => (
             <Input
@@ -335,10 +365,7 @@ export function PlanForm({
       </Field>
 
       <div className="flex flex-col gap-5 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="flex items-start gap-3 text-sm leading-6 text-muted sm:max-w-xs">
-          <span className="mt-0.5 inline-flex shrink-0 items-center rounded-pill bg-teal-soft px-2.5 py-0.5 text-xs font-bold text-teal-deep">{copy.tripType}</span>
-          <span>{oneWay}</span>
-        </p>
+        <p className="text-sm leading-6 text-muted sm:max-w-xs">{oneWay}</p>
         <Button type="submit" size="lg" className="w-full sm:w-auto" loading={submitting} icon={<Send aria-hidden="true" strokeWidth={2} className="-ml-1 size-[1.125rem]" />}>
           {submitting ? copy.submitting : copy.submit}
         </Button>

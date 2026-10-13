@@ -10,10 +10,10 @@ type Size = "sm" | "md" | "lg"
 
 const variantClass: Record<Variant, string> = {
   primary:
-    "bg-coral text-forest-deep shadow-[0_10px_24px_-12px_rgb(242_107_91/0.8)] hover:bg-coral-deep hover:shadow-[0_14px_28px_-12px_rgb(242_107_91/0.9)]",
+    "bg-coral text-on-coral shadow-[0_10px_24px_-12px_var(--kalika-coral-glow)] hover:bg-coral-deep hover:shadow-[0_14px_28px_-12px_var(--kalika-coral-glow)]",
   secondary: "bg-forest text-white hover:bg-forest-soft",
   outline: "bg-transparent text-forest ring-1 ring-forest/25 ring-inset hover:bg-forest/5 hover:ring-forest/45",
-  inverse: "bg-white/8 text-white ring-1 ring-white/45 ring-inset backdrop-blur-sm hover:bg-white/15 hover:ring-white/80",
+  inverse: "bg-transparent text-white ring-1 ring-white/40 ring-inset hover:bg-white/10 hover:ring-white/70",
   light: "bg-white text-forest hover:bg-ivory",
 }
 
@@ -53,7 +53,7 @@ export function Button({
   icon,
 }: ButtonProps) {
   const classes = cn(
-    "group inline-flex items-center justify-center gap-2.5 rounded-pill font-bold whitespace-nowrap transition duration-300 ease-out motion-safe:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60",
+    "group inline-flex items-center justify-center gap-2.5 rounded-button font-bold whitespace-nowrap transition duration-300 ease-out motion-safe:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60",
     focusRing,
     variantClass[variant],
     sizeClass[size],

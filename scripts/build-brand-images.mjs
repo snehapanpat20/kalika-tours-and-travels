@@ -5,12 +5,12 @@
  *   node scripts/build-brand-images.mjs
  *
  * Source:
- *   assets/brand/kalika-yatra-logo.webp     the logo exactly as supplied (square, white background)
+ *   assets/brand/kalika-yatra-logo.webp     the logo exactly as supplied (white background)
  *
  * Output:
- *   public/images/brand/kalika-yatra-logo.png           full logo: emblem, name and tagline (footer, sign-in, structured data)
- *   public/images/brand/kalika-yatra-logo-compact.png   emblem and name, without the tagline (header, admin sidebar)
- *   public/images/brand/kalika-yatra-logo-mark.png      emblem only (icons and other very small spaces)
+ *   public/images/brand/kalika-yatra-maroon-logo.png           full logo: emblem, name and tagline (footer, sign-in, structured data)
+ *   public/images/brand/kalika-yatra-maroon-logo-compact.png   emblem and name, without the tagline (header, admin sidebar)
+ *   public/images/brand/kalika-yatra-maroon-logo-mark.png      emblem only (icons and other very small spaces)
  *   public/og/kalika-yatra.jpg                          1200×630 default sharing image (Open Graph / X)
  *   app/icon.png                                        512×512 site icon (favicon)
  *   app/apple-icon.png                                  180×180 home-screen icon
@@ -25,14 +25,14 @@ const source = "assets/brand/kalika-yatra-logo.webp"
 const collage = "public/images/hero/hero-india-brand.jpg"
 const brandDir = "public/images/brand"
 const shareImage = "public/og/kalika-yatra.jpg"
-const files = { full: "kalika-yatra-logo.png", compact: "kalika-yatra-logo-compact.png", mark: "kalika-yatra-logo-mark.png" }
-const brand = { forestDeep: "#072a24", tealLight: "#8FD8CB", coral: "#F26B5B", ivory: "#F7F8F4" }
+const files = { full: "kalika-yatra-maroon-logo.png", compact: "kalika-yatra-maroon-logo-compact.png", mark: "kalika-yatra-maroon-logo-mark.png" }
+const brand = { forestDeep: "#22110e", tealLight: "#eab444", coral: "#b32707", ivory: "#fdfaf3" }
 
-/** Rows of the 1254×1254 source, measured from the artwork (left, top, right, bottom of the ink). */
-const SOURCE_SIZE = 1254
-const emblem = { left: 152, top: 224, right: 1120, bottom: 740 }
-const name = { left: 46, top: 789, right: 1217, bottom: 908 }
-const tagline = { left: 61, top: 949, right: 1193, bottom: 1003 }
+/** Rows of the 1376×768 source, measured from the artwork (left, top, right, bottom of the ink). */
+const SOURCE_SIZE = { width: 1376, height: 768 }
+const emblem = { left: 376, top: 123, right: 1011, bottom: 466 }
+const name = { left: 305, top: 497, right: 1075, bottom: 576 }
+const tagline = { left: 315, top: 604, right: 1060, bottom: 639 }
 const MARGIN = 20
 
 function box(...rows) {
@@ -43,15 +43,15 @@ function box(...rows) {
   return { left, top, width: right - left + 1, height: bottom - top + 1 }
 }
 
-/** A crop of the source. The supplied file's background is 254/255 white, so it is lifted to pure white to sit flush on white plates. */
+/** A crop of the source. The supplied file's background is 253/255 white, so it is lifted to pure white to sit flush on white plates. */
 function crop(region) {
   return sharp(source).removeAlpha().extract(region).linear(1.02, 0)
 }
 
 async function logos() {
   const { width, height } = await sharp(source).metadata()
-  if (width !== SOURCE_SIZE || height !== SOURCE_SIZE) {
-    throw new Error(`${source} is ${width}×${height}; the crop rows in this script were measured on a ${SOURCE_SIZE}×${SOURCE_SIZE} file and must be re-measured.`)
+  if (width !== SOURCE_SIZE.width || height !== SOURCE_SIZE.height) {
+    throw new Error(`${source} is ${width}×${height}; the crop rows in this script were measured on a ${SOURCE_SIZE.width}×${SOURCE_SIZE.height} file and must be re-measured.`)
   }
   mkdirSync(brandDir, { recursive: true })
   const variants = { [files.full]: box(emblem, name, tagline), [files.compact]: box(emblem, name), [files.mark]: box(emblem) }

@@ -7,7 +7,7 @@ import type {
   WhyPointId,
 } from "@/types/home"
 import type { PageKey } from "@/lib/routes"
-import type { DestinationPlaceId, TravelTypeKey } from "@/types/home"
+import type { DestinationPlaceId, TravelTypeKey, UpcomingTourId } from "@/types/home"
 import type { ServiceId, VehicleFeatureId } from "@/types/catalog"
 
 export type Dictionary = {
@@ -70,12 +70,12 @@ export type Dictionary = {
       eyebrow: string
       titleLead: string
       titleFollow: string
-      /** Handwritten tagline under the headline. */
+      /** One sentence under the headline saying what we offer. */
       description: string
       /** Label of the destination search box (for screen readers). */
       searchLabel: string
       searchPlaceholder: string
-      /** Search button text. */
+      /** The hero's button, which opens the trip planner. */
       plan: string
       /** Label for the row of journey chips. */
       journeysLabel: string
@@ -187,7 +187,12 @@ export type Dictionary = {
       passengersHint: string
       notes: string
       notesPlaceholder: string
+      /** The "round trip" choice. */
       tripType: string
+      /** The "one-way" choice. */
+      oneWayTrip: string
+      /** Label of the round trip / one-way choice. */
+      tripKind: string
       submit: string
       submitting: string
       successTitle: string
@@ -233,6 +238,7 @@ export type Dictionary = {
       planTrip: string
       planThisTrip: string
       planATrip: string
+      viewAllServices: string
       viewAllPhotos: string
       readAllReviews: string
       exploreDestinations: string
@@ -269,6 +275,17 @@ export type Dictionary = {
       imageAlt: string
       groups: Record<"maharashtra" | "beyond" | "pilgrimage", { eyebrow: string; title: string; description: string; imageAlt: string }>
       places: Record<DestinationPlaceId, { name: string; description: string }>
+      tours: {
+        eyebrow: string
+        title: string
+        description: string
+        previous: string
+        next: string
+        /** Announced when the tour changes, e.g. "Tour {current} of {total}". */
+        counter: string
+        enquire: string
+        items: Record<UpcomingTourId, { name: string; duration: string; description: string }>
+      }
       moreTitle: string
       moreBody: string
     }

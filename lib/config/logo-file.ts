@@ -11,11 +11,11 @@ import { imageDirectories } from "@/lib/config/assets"
  */
 export const logoVariants = {
   /** Emblem, name and tagline. */
-  full: { baseName: "kalika-yatra-logo", width: 1212, height: 820 },
+  full: { baseName: "kalika-yatra-maroon-logo", width: 811, height: 557 },
   /** Emblem and name, without the tagline: for the header and other short spaces. */
-  compact: { baseName: "kalika-yatra-logo-compact", width: 1212, height: 725 },
+  compact: { baseName: "kalika-yatra-maroon-logo-compact", width: 811, height: 494 },
   /** Emblem only. */
-  mark: { baseName: "kalika-yatra-logo-mark", width: 1009, height: 557 },
+  mark: { baseName: "kalika-yatra-maroon-logo-mark", width: 676, height: 384 },
 } as const
 
 export type LogoVariant = keyof typeof logoVariants

@@ -12,7 +12,7 @@ export function WhatsAppButton({ label }: { label: string }) {
       rel="noopener noreferrer"
       aria-label={label}
       className={cn(
-        "group fixed right-4 bottom-4 z-30 inline-flex items-center rounded-full bg-whatsapp text-white shadow-[0_14px_30px_-12px_rgb(7_42_36/0.6)] transition-[background-color,transform] duration-300 hover:bg-[#1a8a4a] motion-safe:hover:-translate-y-0.5 sm:right-6 sm:bottom-6",
+        "group fixed right-4 bottom-4 z-30 inline-flex items-center rounded-full bg-whatsapp text-white shadow-card transition-[background-color,transform] duration-300 hover:bg-whatsapp-deep motion-safe:hover:-translate-y-0.5 sm:right-6 sm:bottom-6",
         "motion-safe:animate-[pop-in_600ms_cubic-bezier(0.22,1,0.36,1)_1.4s_both]",
         focusRing,
       )}

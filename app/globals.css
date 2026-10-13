@@ -3,15 +3,19 @@
 /*
  * Kalika design system
  * ────────────────────
- * Palette: deep forest + fresh teal, with a warm coral used sparingly for
- * calls to action and small highlights. Ivory surfaces keep it warm.
- * Type: Manrope (Latin) with Noto Sans Devanagari for Marathi.
- * Signature motif: the dashed "road line" from the logo, used for eyebrows,
- * dividers and the feature list.
+ * Colours are theme variables (--kalika-*), so one set of utility classes
+ * (text-forest, bg-ivory, bg-coral …) serves two palettes:
+ *   - the admin panel (default): deep forest + teal with a coral accent;
+ *   - the customer website (`data-theme="site"` on <html>): dark brown ink on
+ *     warm cream, terracotta buttons and gold accents, after the reference
+ *     design at kalika-yatra.vercel.app.
+ * To change a colour, change its variable below; never hard-code one in a component.
+ * Type: Manrope in the admin. On the website, Cormorant Garamond headings and
+ * DM Sans text, with Noto Serif / Noto Sans Devanagari for Marathi.
  */
 @theme inline {
-  --font-sans: var(--font-manrope), var(--font-noto-devanagari), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-manrope), var(--font-noto-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--kalika-font-body);
+  --font-display: var(--kalika-font-display);
   --font-script: var(--font-kalam), cursive;
 
   --breakpoint-sm: 40rem;
@@ -20,42 +24,50 @@
   --breakpoint-xl: 75rem;
   --breakpoint-2xl: 90rem;
 
-  /* Brand palette */
-  --color-forest: #0b3d35;
-  --color-forest-soft: #145248;
-  --color-forest-deep: #072a24;
-  --color-teal: #159a8c;
-  --color-teal-deep: #0e7469;
-  --color-teal-soft: #e2f1ee;
-  --color-teal-light: #8fd8cb;
-  --color-coral: #f26b5b;
-  --color-coral-deep: #ef6352;
-  --color-coral-soft: #fde9e5;
+  /* Brand palette: values come from the theme variables further down */
+  --color-forest: var(--kalika-forest);
+  --color-forest-soft: var(--kalika-forest-soft);
+  --color-forest-deep: var(--kalika-forest-deep);
+  --color-teal: var(--kalika-teal);
+  --color-teal-deep: var(--kalika-teal-deep);
+  --color-teal-soft: var(--kalika-teal-soft);
+  --color-teal-light: var(--kalika-teal-light);
+  --color-coral: var(--kalika-coral);
+  --color-coral-deep: var(--kalika-coral-deep);
+  --color-coral-soft: var(--kalika-coral-soft);
+  /* Text and icons placed on a coral (accent) fill */
+  --color-on-coral: var(--kalika-on-coral);
+  /* Small non-text highlights: the eyebrow dash and rating stars */
+  --color-highlight: var(--kalika-highlight);
 
   /* Surfaces and text */
-  --color-ivory: #f7f8f4;
-  --color-stone: #eef0e8;
-  --color-stone-deep: #e1e5da;
-  --color-ink: #17201e;
-  --color-muted: #55615d;
-  --color-line: #dbe0d5;
+  --color-ivory: var(--kalika-ivory);
+  --color-stone: var(--kalika-stone);
+  --color-stone-deep: var(--kalika-stone-deep);
+  --color-ink: var(--kalika-ink);
+  --color-muted: var(--kalika-muted);
+  --color-line: var(--kalika-line);
 
+  /* States keep their conventional colours in both themes */
   --color-danger: #b42318;
   --color-danger-soft: #fdeceb;
   --color-success: #067647;
   --color-success-soft: #e7f6ee;
-  --color-whatsapp: #1f9d55;
+  --color-whatsapp: var(--kalika-whatsapp);
+  --color-whatsapp-deep: var(--kalika-whatsapp-deep);
 
   /* Shape */
   --radius-control: 0.75rem;
   --radius-card: 1rem;
   --radius-panel: 1.25rem;
   --radius-pill: 999px;
+  /* Buttons: pills in the admin, rounded rectangles on the website */
+  --radius-button: var(--kalika-radius-button);
 
-  /* Depth: soft, green-tinted, never heavy */
-  --shadow-soft: 0 1px 2px rgb(11 61 53 / 0.05), 0 8px 24px -16px rgb(11 61 53 / 0.25);
-  --shadow-card: 0 2px 4px rgb(11 61 53 / 0.04), 0 22px 44px -26px rgb(11 61 53 / 0.38);
-  --shadow-overlay: 0 30px 70px -28px rgb(7 42 36 / 0.55);
+  /* Depth: soft, tinted with the theme's dark colour, never heavy */
+  --shadow-soft: 0 1px 2px rgb(var(--kalika-shade) / 0.05), 0 8px 24px -16px rgb(var(--kalika-shade) / 0.25);
+  --shadow-card: 0 2px 4px rgb(var(--kalika-shade) / 0.04), 0 22px 44px -26px rgb(var(--kalika-shade) / 0.38);
+  --shadow-overlay: 0 30px 70px -28px rgb(var(--kalika-shade-deep) / 0.55);
 
   /* Rhythm */
   --spacing-section: clamp(4.5rem, 3rem + 6vw, 8.5rem);
@@ -63,6 +75,137 @@
 
   /* Motion */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── Theme: admin panel (default) ───────────────────────────── */
+:root {
+  --kalika-forest: #0b3d35;
+  --kalika-forest-soft: #145248;
+  --kalika-forest-deep: #072a24;
+  --kalika-teal: #159a8c;
+  --kalika-teal-deep: #0e7469;
+  --kalika-teal-soft: #e2f1ee;
+  --kalika-teal-light: #8fd8cb;
+  --kalika-coral: #f26b5b;
+  --kalika-coral-deep: #ef6352;
+  --kalika-coral-soft: #fde9e5;
+  --kalika-on-coral: #072a24;
+  --kalika-coral-glow: rgb(242 107 91 / 0.8);
+  --kalika-highlight: #f26b5b;
+  --kalika-radius-button: 999px;
+  --kalika-font-body: var(--font-manrope), var(--font-noto-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --kalika-font-display: var(--font-manrope), var(--font-noto-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --kalika-ivory: #f7f8f4;
+  --kalika-stone: #eef0e8;
+  --kalika-stone-deep: #e1e5da;
+  --kalika-ink: #17201e;
+  --kalika-muted: #55615d;
+  --kalika-line: #dbe0d5;
+  --kalika-whatsapp: #1f9d55;
+  --kalika-whatsapp-deep: #1a8a4a;
+  /* Shadow and scrim tints, as R G B */
+  --kalika-shade: 11 61 53;
+  --kalika-shade-deep: 7 42 36;
+  --kalika-wash: 247 248 244;
+}
+
+/*
+ * ─── Theme: customer website ──────────────────────────────────
+ * After the reference design. The hex values are that site's own tokens
+ * (declared in lab()) converted to sRGB by the browser; "derived" marks a
+ * hover or tint step that the reference does not define.
+ * Contrast (WCAG): ink on cream 15:1, muted text 7:1, cream on terracotta
+ * 6.4:1, terracotta on cream 6:1, gold on ink 9:1.
+ */
+[data-theme="site"] {
+  --kalika-forest: #271511; /* ref: foreground. Headings and dark buttons */
+  --kalika-forest-soft: #3a231c; /* derived: hover */
+  --kalika-forest-deep: #22110e; /* ref: ink. Page headers, footer, photo shade */
+  --kalika-teal: #b32707; /* ref: ring */
+  --kalika-teal-deep: #b32707; /* ref: primary. Small labels and links on cream */
+  --kalika-teal-soft: #f3ecde; /* ref: muted */
+  --kalika-teal-light: #eab444; /* ref: accent. Labels on ink */
+  --kalika-coral: #b32707; /* ref: primary. Buttons */
+  --kalika-coral-deep: #9a2106; /* derived: hover */
+  --kalika-coral-soft: #f6e2d6; /* derived */
+  --kalika-on-coral: #fdfaf3; /* ref: primary foreground */
+  --kalika-coral-glow: transparent;
+  --kalika-highlight: #eab444; /* ref: accent gold */
+  --kalika-radius-button: 999px; /* ref: pill buttons */
+  --kalika-font-body: var(--font-dm-sans), var(--font-noto-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --kalika-font-display: var(--font-cormorant), var(--font-noto-serif-devanagari), ui-serif, Georgia, serif;
+  --kalika-ivory: #fbf6ec; /* ref: background */
+  --kalika-stone: #f1e7d2; /* ref: secondary */
+  --kalika-stone-deep: #e8dcc4; /* derived */
+  --kalika-ink: #271511; /* ref: foreground */
+  --kalika-muted: #614e44; /* ref: muted foreground */
+  --kalika-line: #e0d6c6; /* ref: border */
+  --kalika-whatsapp: #b32707;
+  --kalika-whatsapp-deep: #9a2106;
+  --kalika-shade: 34 17 14; /* ref: ink, as R G B */
+  --kalika-shade-deep: 34 17 14;
+  --kalika-wash: 251 246 236;
+}
+
+[data-theme="site"] body {
+  background: var(--kalika-ivory);
+}
+
+/* On ink (page headers, footer, offer panels, photo cards) focus rings and small accents turn gold; buttons stay terracotta. */
+[data-theme="site"] :is(.bg-forest, .bg-forest-deep, .bg-forest-soft, .bg-teal-deep, .bg-ink) {
+  --kalika-teal: #eab444;
+  --kalika-teal-deep: #eab444;
+  --kalika-whatsapp: #ffffff;
+}
+
+/* …and back on a light card placed inside an ink surface */
+[data-theme="site"] :is(.bg-forest, .bg-forest-deep, .bg-forest-soft, .bg-teal-deep, .bg-ink) :is(.bg-white, .bg-ivory, .bg-stone) {
+  --kalika-teal: #b32707;
+  --kalika-teal-deep: #b32707;
+  --kalika-whatsapp: #b32707;
+}
+
+/*
+ * Website typography, after the reference: every heading is set in the serif
+ * display face at a lighter weight than the admin's sans headings. Small
+ * uppercase labels (footer column titles) stay in the text face.
+ */
+[data-theme="site"] :is(h1, h2, h3):not(.uppercase),
+[data-theme="site"] :is(.type-display, .type-h2, .type-h3) {
+  font-family: var(--kalika-font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+[data-theme="site"] .type-h2 {
+  line-height: 1.05;
+}
+
+[data-theme="site"] .type-h3 {
+  font-size: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);
+  line-height: 1.15;
+}
+
+[data-theme="site"]:lang(mr) :is(h1, h2, h3):not(.uppercase),
+[data-theme="site"]:lang(mr) :is(.type-display, .type-h2, .type-h3) {
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+/* Labels above headings: widely spaced capitals, no dash */
+[data-theme="site"] .eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+[data-theme="site"] .eyebrow::before {
+  display: none;
+}
+
+/* Buttons carry a medium weight, as in the reference */
+[data-theme="site"] .rounded-button {
+  font-weight: 500;
 }
 
 /* Page gutter, kept in step with the `shell` utility classes */
@@ -95,21 +238,21 @@ html {
 }
 
 body {
-  background: var(--color-ivory);
-  color: var(--color-ink);
+  background: var(--kalika-ivory);
+  color: var(--kalika-ink);
   font-weight: 500;
   overflow-x: clip;
   text-rendering: optimizeLegibility;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-teal);
+  outline: 2px solid var(--kalika-teal);
   outline-offset: 3px;
 }
 
 ::selection {
-  background: var(--color-teal-soft);
-  color: var(--color-forest);
+  background: var(--kalika-teal-soft);
+  color: var(--kalika-forest);
 }
 
 dialog {
@@ -121,7 +264,7 @@ dialog {
 }
 
 dialog::backdrop {
-  background: rgb(7 42 36 / 0.72);
+  background: rgb(var(--kalika-shade-deep) / 0.72);
   backdrop-filter: blur(4px);
 }
 
@@ -185,7 +328,7 @@ dialog::backdrop {
     width: 1.75rem;
     height: 2px;
     flex-shrink: 0;
-    background: repeating-linear-gradient(90deg, var(--color-coral) 0 6px, transparent 6px 10px);
+    background: repeating-linear-gradient(90deg, var(--kalika-highlight) 0 6px, transparent 6px 10px);
   }
 
   :lang(mr) .eyebrow {
@@ -221,27 +364,73 @@ dialog::backdrop {
     scroll-padding-inline: calc(max(0px, (100% - 90rem) / 2) + var(--shell-gutter));
   }
 
+  /* Homepage photo: an even ink veil, a little lighter in the middle, behind the centred name */
+  .hero-veil {
+    background: linear-gradient(180deg, rgb(var(--kalika-shade-deep) / 0.66) 0%, rgb(var(--kalika-shade-deep) / 0.56) 45%, rgb(var(--kalika-shade-deep) / 0.78) 100%);
+  }
+
+  /*
+   * Homepage name: each word sits in a mask and rises into it on load. The
+   * mask is padded (and pulled back by the same margin) so descenders, the
+   * italic overhang and Devanagari marks above and below the line aren't cut.
+   */
+  .hero-mask {
+    display: inline-block;
+    overflow: hidden;
+    padding: 0.22em 0.08em;
+    margin: -0.22em -0.08em;
+    vertical-align: bottom;
+  }
+  .hero-line {
+    display: inline-block;
+  }
+  /* Small accent rule under the homepage name; drawn from the left on load */
+  .hero-rule {
+    transform-origin: left;
+  }
+
+  /* Page header photos: ink from the left, fading out to the right, so light text reads on them */
+  .hero-ink {
+    background: linear-gradient(90deg, rgb(var(--kalika-shade-deep) / 0.86) 0%, rgb(var(--kalika-shade-deep) / 0.52) 50%, rgb(var(--kalika-shade-deep) / 0.12) 100%);
+  }
+
+  /*
+   * Homepage photo: washed with the page colour so dark text reads on it.
+   * Phones: an even veil over the whole photo. Wider screens: the photo sits on
+   * the right and fades into the page on its left edge.
+   */
+  .hero-wash {
+    background: linear-gradient(180deg, rgb(var(--kalika-wash) / 0.94) 0%, rgb(var(--kalika-wash) / 0.86) 60%, rgb(var(--kalika-wash) / 0.7) 100%);
+  }
+
+  @media (min-width: 64rem) {
+    .hero-wash {
+      background:
+        linear-gradient(0deg, rgb(var(--kalika-wash)) 0%, rgb(var(--kalika-wash) / 0) 22%),
+        linear-gradient(90deg, rgb(var(--kalika-wash)) 0%, rgb(var(--kalika-wash)) 36%, rgb(var(--kalika-wash) / 0.8) 48%, rgb(var(--kalika-wash) / 0.22) 64%, rgb(var(--kalika-wash) / 0) 80%);
+    }
+  }
+
   /* Hero shading: strongest behind the headline on the left, clear by the Traveller */
   .hero-scrim-left {
     background: linear-gradient(
       90deg,
-      rgb(7 42 36 / 0.84) 0%,
-      rgb(7 42 36 / 0.62) 28%,
-      rgb(7 42 36 / 0.24) 50%,
-      rgb(7 42 36 / 0) 68%
+      rgb(var(--kalika-shade-deep) / 0.84) 0%,
+      rgb(var(--kalika-shade-deep) / 0.62) 28%,
+      rgb(var(--kalika-shade-deep) / 0.24) 50%,
+      rgb(var(--kalika-shade-deep) / 0) 68%
     );
   }
 
   /* Barely-there cinematic vignette around the frame edges */
   .hero-vignette {
-    background: radial-gradient(ellipse 85% 80% at 62% 48%, transparent 58%, rgb(7 42 36 / 0.38) 100%);
+    background: radial-gradient(ellipse 85% 80% at 62% 48%, transparent 58%, rgb(var(--kalika-shade-deep) / 0.38) 100%);
   }
 
   /* Placeholder frame for a photograph that has not been supplied yet */
   .image-frame {
     background:
-      radial-gradient(120% 90% at 20% 10%, rgb(21 154 140 / 0.14), transparent 60%),
-      linear-gradient(160deg, var(--color-stone), var(--color-stone-deep));
+      linear-gradient(160deg, var(--kalika-stone), var(--kalika-stone-deep));
   }
 }
 
@@ -254,7 +443,7 @@ dialog::backdrop {
 
   /* Image zoom inside hoverable cards */
   .zoom-img img {
-    transition: transform 900ms var(--ease-out-soft);
+    transition: transform 700ms var(--ease-out-soft);
   }
 
   .group:hover .zoom-img img,
@@ -283,8 +472,30 @@ dialog::backdrop {
     will-change: transform;
   }
 
+  /*
+   * Homepage entrance, in order: the photo starts a slow push-in, the name
+   * rises word by word, the rule draws, then the headline and the buttons
+   * fade up. Each element sets its own start with --d (ms).
+   */
+  .hero-zoom {
+    animation: hero-zoom 18s linear both;
+    will-change: transform;
+  }
+  .hero-line {
+    animation: hero-line 800ms var(--ease-out-soft) both;
+    animation-delay: calc(var(--d, 0) * 1ms);
+  }
+  .hero-rule {
+    animation: hero-rule 600ms var(--ease-out-soft) both;
+    animation-delay: calc(var(--d, 0) * 1ms);
+  }
+  .hero-up {
+    animation: hero-up 700ms var(--ease-out-soft) both;
+    animation-delay: calc(var(--d, 0) * 1ms);
+  }
+
   .hero-in {
-    animation: hero-in 650ms var(--ease-out-soft) both;
+    animation: hero-in 800ms var(--ease-out-soft) both;
     animation-delay: calc(150ms + var(--i, 0) * 120ms);
   }
 }
@@ -307,10 +518,50 @@ dialog::backdrop {
   }
 }
 
-@keyframes hero-in {
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes hero-line {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes hero-up {
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
   to {
     opacity: 1;

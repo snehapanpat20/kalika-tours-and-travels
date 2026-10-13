@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { MessageSquareHeart } from "lucide-react"
-import { CtaSection } from "@/components/home/cta-section"
 import { PageHero } from "@/components/layout/page-hero"
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
@@ -100,8 +99,6 @@ export default async function ReviewsPage(props: LocaleParams) {
           </div>
         </div>
       </section>
-
-      <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>
   )
 }

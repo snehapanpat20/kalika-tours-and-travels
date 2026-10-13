@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { Check } from "lucide-react"
 import { cmsIcon } from "@/components/cms/cms-icon"
-import { CtaSection } from "@/components/home/cta-section"
 import { journeyVisuals, serviceIcons, serviceOrder, type Icon } from "@/components/home/home-content"
 import { PageHero } from "@/components/layout/page-hero"
 import { Photo, type PhotoSource } from "@/components/media/photo"
@@ -144,8 +143,6 @@ export default async function ServicesPage(props: LocaleParams) {
       </div>
 
       <FaqSection id="services-faq-title" faqs={serviceFaqs(dictionary)} copy={dictionary.seo.faq} className="bg-stone" />
-
-      <CtaSection locale={locale} copy={dictionary.home.cta} />
     </>
   )
 }

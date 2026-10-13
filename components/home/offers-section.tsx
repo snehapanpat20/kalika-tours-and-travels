@@ -1,10 +1,9 @@
 import type { CSSProperties } from "react"
 import Image from "next/image"
-import { BadgePercent, CalendarClock, Sparkles } from "lucide-react"
+import { BadgePercent, CalendarClock } from "lucide-react"
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal"
 import { Button } from "@/components/ui/button"
 import { WhatsAppIcon } from "@/components/ui/icons"
-import { SectionHeading } from "@/components/ui/section-heading"
 import { shell } from "@/components/ui/styles"
 import { business } from "@/data/business"
 import type { Dictionary } from "@/lib/i18n/dictionary"
@@ -70,12 +69,14 @@ export function OffersSection({ locale, copy, whatsappLabel, offers }: { locale:
   const single = offers.length === 1
 
   return (
-    <section aria-labelledby="offers-title" className="bg-ivory pt-16 sm:pt-20 lg:pt-24">
+    <section aria-labelledby="offers-title" className="bg-ivory pt-6 pb-4 sm:pt-8">
       <div className={shell}>
-        <Reveal>
-          <SectionHeading id="offers-title" eyebrow={copy.offers.eyebrow} title={copy.offers.title} description={copy.offers.description} />
+        <Reveal y={16}>
+          <h2 id="offers-title" className="type-h3 text-forest">
+            {copy.offers.title}
+          </h2>
         </Reveal>
-        <Stagger as="ul" className={cn("mt-10 grid gap-6", !single && "md:grid-cols-2 xl:grid-cols-3")}>
+        <Stagger as="ul" className={cn("mt-6 grid gap-6", !single && "md:grid-cols-2 xl:grid-cols-3")}>
           {offers.map((offer) => {
             const wide = single && Boolean(offer.image)
             // Portrait or square posters take the narrower column, wide photos the larger one
@@ -84,7 +85,7 @@ export function OffersSection({ locale, copy, whatsappLabel, offers }: { locale:
               <StaggerItem as="li" key={offer.id}>
                 <article
                   className={cn(
-                    "group relative flex h-full flex-col overflow-hidden rounded-panel bg-forest-deep text-white shadow-card ring-1 ring-forest/10",
+                    "group relative flex h-full flex-col overflow-hidden rounded-panel bg-forest text-white",
                     wide && "md:grid md:grid-cols-12 md:items-stretch",
                   )}
                 >
@@ -98,43 +99,32 @@ export function OffersSection({ locale, copy, whatsappLabel, offers }: { locale:
                     </div>
                   ) : null}
 
-                  <div className={cn("relative isolate flex flex-1 flex-col p-7 sm:p-9", wide && (tall ? "md:col-span-7" : "md:col-span-5"), wide && "md:justify-center lg:p-14")}>
-                    {/* Decoration: a soft teal glow, a faint offer mark and the brand's dashed route line */}
-                    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-                      <div className="absolute -top-24 -right-24 size-72 rounded-full bg-teal/25 blur-3xl" />
-                      <div className="absolute -bottom-28 -left-20 size-64 rounded-full bg-coral/10 blur-3xl" />
-                      <BadgePercent strokeWidth={1} className="absolute -right-8 -bottom-10 size-48 text-white/[0.04]" />
-                      <div className="absolute inset-x-0 bottom-0 h-1 bg-[repeating-linear-gradient(90deg,var(--color-coral)_0_18px,transparent_18px_30px)] opacity-80" />
-                    </div>
+                  <div className={cn("flex flex-1 flex-col p-6 sm:p-8", wide && (tall ? "md:col-span-7" : "md:col-span-5"), wide && "md:justify-center lg:p-10")}>
 
                     <div className="flex flex-wrap items-center gap-2">
                       {offer.label ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-pill bg-coral px-3 py-1 text-xs font-extrabold tracking-wide text-forest-deep">
+                        <span className="inline-flex items-center gap-1.5 rounded-pill bg-coral px-3 py-1 text-xs font-extrabold tracking-wide text-on-coral">
                           <BadgePercent aria-hidden="true" className="size-3.5" />
                           {offer.label}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[0.16em] text-teal-light uppercase">
-                          <Sparkles aria-hidden="true" className="size-3.5" />
-                          {copy.offers.eyebrow}
-                        </span>
+                        <span className="text-xs font-bold tracking-[0.16em] text-teal-light uppercase">{copy.offers.eyebrow}</span>
                       )}
                       {offer.preview ? <span className="rounded-pill bg-white/90 px-2.5 py-1 text-[0.6875rem] font-bold text-forest-deep">{copy.notLiveYet}</span> : null}
                     </div>
 
                     <h3
                       className={cn(
-                        "mt-5 leading-[1.05] font-extrabold tracking-tight text-balance",
-                        wide ? "text-[clamp(2rem,1.4rem+1.8vw,3rem)]" : "text-[1.75rem] sm:text-[2rem]",
+                        "mt-4 leading-[1.1] font-extrabold tracking-tight text-balance",
+                        wide ? "text-[clamp(1.625rem,1.3rem+1.1vw,2.25rem)]" : "text-2xl sm:text-[1.75rem]",
                       )}
                     >
                       {offer.title}
                     </h3>
-                    <span aria-hidden="true" className="mt-5 block h-1 w-14 rounded-full bg-gradient-to-r from-coral to-teal-light" />
-                    <p className="mt-5 text-[1.0625rem] leading-relaxed text-white/85 sm:text-lg">{offer.shortDescription}</p>
+                    <p className="mt-4 text-[1.0625rem] leading-relaxed text-white/85">{offer.shortDescription}</p>
                     {offer.description ? <p className="mt-3 leading-relaxed whitespace-pre-line text-white/70">{offer.description}</p> : null}
 
-                    <div className="mt-8 flex flex-col gap-5">
+                    <div className="mt-6 flex flex-col gap-5">
                       {offer.endsAt ? (
                         <p className="inline-flex w-fit items-center gap-2 rounded-pill bg-white/[0.07] px-3.5 py-2 text-sm font-semibold text-teal-light ring-1 ring-white/15">
                           <CalendarClock aria-hidden="true" className="size-4" />
@@ -152,7 +142,7 @@ export function OffersSection({ locale, copy, whatsappLabel, offers }: { locale:
                           variant="inverse"
                           size="lg"
                           className="w-full sm:w-auto"
-                          icon={<WhatsAppIcon className="-ml-1 size-[1.125rem] text-[#25D366]" />}
+                          icon={<WhatsAppIcon className="-ml-1 size-[1.125rem]" />}
                         >
                           {whatsappLabel}
                         </Button>
