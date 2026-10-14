@@ -62,13 +62,13 @@ export const contentSections: ContentSection[] = [
     previewPage: "home",
     permission: "content.write",
     fields: [
-      { name: "eyebrow", label: "Small label above the headline", help: "Not shown at the moment: the homepage shows the location there.", max: 60, path: "home.hero.eyebrow" },
-      { name: "titleLead", label: "Headline under the name, first part", max: 60, path: "home.hero.titleLead" },
-      { name: "titleFollow", label: "Headline under the name, second part", max: 40, path: "home.hero.titleFollow" },
-      { name: "description", label: "Short sentence", help: "Not shown at the moment: the homepage shows only the name and the headline.", multiline: true, max: 160, path: "home.hero.description" },
+      { name: "eyebrow", label: "Small label above the name", help: "Shown in capitals, e.g. TOURS AND TRAVELS · INDIA.", max: 60, path: "home.hero.eyebrow" },
+      { name: "titleLead", label: "Tagline under the name, first part", max: 60, path: "home.hero.titleLead" },
+      { name: "titleFollow", label: "Tagline under the name, second part", max: 60, path: "home.hero.titleFollow" },
+      { name: "description", label: "Short sentence", help: "Not shown at the moment: the homepage shows the name and the tagline.", multiline: true, max: 160, path: "home.hero.description" },
       { name: "searchPlaceholder", label: "Search box hint", help: "Not shown at the moment: the homepage has no search box.", max: 60, path: "home.hero.searchPlaceholder" },
       { name: "plan", label: "Button text", max: 30, path: "home.hero.plan" },
-      { name: "imageAlt", label: "Photo description (for screen readers)", help: "Describe what the photo shows.", max: 300, path: "home.hero.imageAlt" },
+      { name: "imageAlt", label: "Photo description (for screen readers)", help: "Describe what the photo shows. Used when a photo is chosen below; it then opens the slideshow.", max: 300, path: "home.hero.imageAlt" },
     ],
     image: {
       label: "Background photo",

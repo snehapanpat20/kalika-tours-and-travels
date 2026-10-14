@@ -6,6 +6,7 @@ import { ImageReveal, Reveal, Stagger, StaggerItem } from "@/components/motion/r
 import { pageImages } from "@/components/pages/page-images"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { shell } from "@/components/ui/styles"
+import { PageCTA } from "@/components/sections/page-cta"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { formatLocation } from "@/data/business"
 import { isLocale } from "@/lib/i18n/locales"
@@ -88,6 +89,7 @@ export default async function AboutPage(props: LocaleParams) {
           </Stagger>
         </div>
       </section>
+      <PageCTA pageKey="about" locale={locale} dictionary={dictionary} />
     </>
   )
 }

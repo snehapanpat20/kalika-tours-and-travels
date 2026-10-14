@@ -9,6 +9,7 @@ import { pageImages } from "@/components/pages/page-images"
 import { Button } from "@/components/ui/button"
 import { shell } from "@/components/ui/styles"
 import { FaqSection, serviceFaqs } from "@/components/seo/faq-section"
+import { PageCTA } from "@/components/sections/page-cta"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
@@ -143,6 +144,7 @@ export default async function ServicesPage(props: LocaleParams) {
       </div>
 
       <FaqSection id="services-faq-title" faqs={serviceFaqs(dictionary)} copy={dictionary.seo.faq} className="bg-stone" />
+      <PageCTA pageKey="services" locale={locale} dictionary={dictionary} />
     </>
   )
 }

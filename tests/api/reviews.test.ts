@@ -164,6 +164,7 @@ describe("Customer reviews", () => {
       assert.equal(approve.json.review.status, "APPROVED")
       assert.ok(approve.json.review.moderatedAt)
       assert.ok((await page("/en/reviews")).html.includes("Approved Person"))
+      assert.ok((await page("/en")).html.includes("Approved Person"))
 
       const reject = await api(`/api/admin/reviews/${id}`, { method: "PATCH", body: { status: "REJECTED" }, cookie })
       assert.equal(reject.status, 200)

@@ -8,6 +8,7 @@ import { ReviewForm } from "@/components/reviews/review-form"
 import { Button } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { shell } from "@/components/ui/styles"
+import { PageCTA } from "@/components/sections/page-cta"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
@@ -99,6 +100,7 @@ export default async function ReviewsPage(props: LocaleParams) {
           </div>
         </div>
       </section>
+      <PageCTA pageKey="reviews" locale={locale} dictionary={dictionary} />
     </>
   )
 }

@@ -7,7 +7,8 @@ import type {
   WhyPointId,
 } from "@/types/home"
 import type { PageKey } from "@/lib/routes"
-import type { DestinationPlaceId, TravelTypeKey, UpcomingTourId } from "@/types/home"
+import type { PageCtaKey } from "@/data/pageCtas"
+import type { DestinationPlaceId, HeroSlideId, TravelTypeKey, UpcomingTourId } from "@/types/home"
 import type { ServiceId, VehicleFeatureId } from "@/types/catalog"
 
 export type Dictionary = {
@@ -62,9 +63,45 @@ export type Dictionary = {
     quoteIsEnquiry: string
     bookingIsRequest: string
   }
+  /**
+   * The closing call-to-action band above the footer, per page
+   * (components/sections/page-cta.tsx; layout and links in data/pageCtas.ts).
+   * The headline is in three parts so exactly one phrase can be highlighted.
+   */
+  pageCtas: {
+    items: Record<PageCtaKey, { lead: string; accent: string; tail: string; subtext: string; primary: string; secondary?: string }>
+    /** The small quote form on the Services page's band. */
+    quote: { label: string; destination: string; destinationPlaceholder: string; people: string; date: string }
+  }
   home: {
     media: {
       pending: string
+    }
+    /** The homepage's sections (hero, tours, about, Traveller, services, destinations, gallery and reviews, closing call). */
+    landing: {
+      /** A section heading in three parts: the middle word is set in the handwritten face. */
+      hero: {
+        /** Prefix of the "Now showing" label, e.g. "Now showing". */
+        nowShowing: string
+        slides: Record<HeroSlideId, { place: string; alt: string }>
+        /** Label of the group of photo buttons. */
+        slidesLabel: string
+        /** One photo button, e.g. "Show photo {n}: {place}". */
+        showSlide: string
+        pause: string
+        play: string
+        /** Secondary link, to the first section below the hero. */
+        explore: string
+        /** The planning card (no departure dates are published, so it invites an enquiry). */
+        card: { eyebrow: string; title: string; body: string; action: string }
+        trust: { seats: string; base: string; direct: string; rating: string }
+        scroll: string
+      }
+      tours: { eyebrow: string; lead: string; accent: string; description: string; duration: string; enquire: string; viewAll: string; previous: string; next: string }
+      about: { eyebrow: string; title: string; link: string; stats: { seats: string; places: string; trips: string }; photoAlt: string; insetAlt: string }
+      traveller: { eyebrow: string; lead: string; accent: string; link: string; perfectFor: string }
+      services: { eyebrow: string; lead: string; accent: string; description: string; viewAll: string; rental: { title: string; body: string } }
+      reviews: { eyebrow: string; lead: string; accent: string; readAll: string; previous: string; next: string; pause: string; play: string }
     }
     hero: {
       eyebrow: string

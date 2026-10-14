@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { focusRing, shell } from "@/components/ui/styles"
 import { FaqSection, travellerFaqs } from "@/components/seo/faq-section"
+import { PageCTA } from "@/components/sections/page-cta"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
@@ -153,6 +154,7 @@ export default async function TravellerPage(props: LocaleParams) {
       </section>
 
       <FaqSection id="traveller-faq-title" faqs={travellerFaqs(dictionary)} copy={dictionary.seo.faq} className="bg-stone" />
+      <PageCTA pageKey="traveller" locale={locale} dictionary={dictionary} />
     </>
   )
 }

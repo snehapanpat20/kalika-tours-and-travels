@@ -6,6 +6,7 @@ import { pageImages } from "@/components/pages/page-images"
 import { Button } from "@/components/ui/button"
 import { InstagramIcon } from "@/components/ui/icons"
 import { shell } from "@/components/ui/styles"
+import { PageCTA } from "@/components/sections/page-cta"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { business } from "@/data/business"
 import { isLocale } from "@/lib/i18n/locales"
@@ -68,6 +69,7 @@ export default async function GalleryPage(props: LocaleParams) {
           />
         </div>
       </section>
+      <PageCTA pageKey="gallery" locale={locale} dictionary={dictionary} />
     </>
   )
 }
