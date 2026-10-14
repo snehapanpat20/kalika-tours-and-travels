@@ -82,7 +82,12 @@ function localDate() {
   return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10)
 }
 
-/** Reads `?service=` and `?destination=` set by the journey and destination cards. */
+/**
+ * Reads `?service=` and `?destination=` (set by the journey and destination
+ * cards), and `?people=` and `?date=` (set by the quick quote form). Values
+ * that aren't a whole number or a YYYY-MM-DD date are ignored; the form's own
+ * checks still apply on sending.
+ */
 export function PlanFormFromUrl(props: FormProps) {
   const params = useSearchParams()
   const key = params.toString()
@@ -98,7 +103,17 @@ export function PlanFormFromUrl(props: FormProps) {
     return () => window.clearTimeout(timer)
   }, [key])
 
-  return <PlanForm {...props} requestedService={params.get("service") ?? ""} requestedDestination={(params.get("destination") ?? "").slice(0, 80)} />
+  const people = params.get("people") ?? ""
+  const date = params.get("date") ?? ""
+  return (
+    <PlanForm
+      {...props}
+      requestedService={params.get("service") ?? ""}
+      requestedDestination={(params.get("destination") ?? "").slice(0, 80)}
+      requestedPassengers={/^\d{1,3}$/.test(people) ? people : ""}
+      requestedDate={/^\d{4}-\d{2}-\d{2}$/.test(date) ? date : ""}
+    />
+  )
 }
 
 /** Added to the message of a one-way enquiry. In English, because the business reads it. */
@@ -111,7 +126,9 @@ export function PlanForm({
   oneWay,
   requestedService = "",
   requestedDestination = "",
-}: FormProps & { requestedService?: string; requestedDestination?: string }) {
+  requestedPassengers = "",
+  requestedDate = "",
+}: FormProps & { requestedService?: string; requestedDestination?: string; requestedPassengers?: string; requestedDate?: string }) {
   const formRef = useRef<HTMLFormElement>(null)
   const serviceFromUrl = services.some((service) => service.id === requestedService) ? requestedService : ""
 
@@ -120,10 +137,10 @@ export function PlanForm({
   const [email, setEmail] = useState("")
   const [chosenService, setChosenService] = useState<string | null>(null)
   const [typedDestination, setTypedDestination] = useState<string | null>(null)
-  const [departureDate, setDepartureDate] = useState("")
+  const [departureDate, setDepartureDate] = useState(requestedDate)
   const [returnDate, setReturnDate] = useState("")
   const [oneWayTrip, setOneWayTrip] = useState(false)
-  const [passengers, setPassengers] = useState("")
+  const [passengers, setPassengers] = useState(requestedPassengers)
   const [notes, setNotes] = useState("")
   const [website, setWebsite] = useState("")
   const [errors, setErrors] = useState<Partial<Record<Slot, string>>>({})
@@ -132,11 +149,13 @@ export function PlanForm({
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" })
 
   // A newer card click in the page overrides an earlier choice
-  const [seen, setSeen] = useState({ service: serviceFromUrl, destination: requestedDestination })
-  if (seen.service !== serviceFromUrl || seen.destination !== requestedDestination) {
-    setSeen({ service: serviceFromUrl, destination: requestedDestination })
+  const [seen, setSeen] = useState({ service: serviceFromUrl, destination: requestedDestination, passengers: requestedPassengers, date: requestedDate })
+  if (seen.service !== serviceFromUrl || seen.destination !== requestedDestination || seen.passengers !== requestedPassengers || seen.date !== requestedDate) {
+    setSeen({ service: serviceFromUrl, destination: requestedDestination, passengers: requestedPassengers, date: requestedDate })
     if (seen.service !== serviceFromUrl) setChosenService(null)
     if (seen.destination !== requestedDestination) setTypedDestination(null)
+    if (seen.passengers !== requestedPassengers) setPassengers(requestedPassengers)
+    if (seen.date !== requestedDate) setDepartureDate(requestedDate)
   }
 
   const serviceId = chosenService ?? serviceFromUrl

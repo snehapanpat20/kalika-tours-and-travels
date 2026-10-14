@@ -18,7 +18,7 @@ export const business = {
   callOnlyPhoneE164: "+919561046539",
   email: "kalikatourstravels15@gmail.com",
   whatsappUrl: "https://wa.me/918329042510",
-  instagramUrl: "https://www.instagram.com/_kalika_tours_travels/",
+  instagramUrl: "https://www.instagram.com/_kalika_yatra_/",
   whatsappCommunityUrl: "https://chat.whatsapp.com/EkMI1s0lx067I2ZfN6kIIK",
   location: {
     area: { en: "Hadapsar", mr: "हडपसर" },

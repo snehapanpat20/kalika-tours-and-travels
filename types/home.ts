@@ -28,6 +28,9 @@ export type WhyPointId = "comfort" | "together" | "service" | "flexible"
 /** Trip type keys, matching the database TravelType enum. */
 export type TravelTypeKey = "OUTSTATION" | "FAMILY" | "GROUP" | "PILGRIMAGE" | "CORPORATE"
 
+/** Background photographs of the homepage hero, in order. */
+export type HeroSlideId = "traveller" | "rajasthan" | "kedarnath" | "konkan"
+
 /** Tour packages under "Upcoming tours" on the Destinations page. */
 export type UpcomingTourId =
   | "goa"

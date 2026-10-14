@@ -151,6 +151,53 @@
   background: var(--kalika-ivory);
 }
 
+/*
+ * Brand palette: sunset red-orange #B5290F, gold #E0A93B, warm cream #FBF5EA
+ * and deep brown #2A1A12. Used by the homepage (.home-landing), the footer and
+ * the closing call-to-action bands (.brand-palette). Close to the site palette,
+ * but its own; the header and page bodies keep the site palette.
+ * Contrast: red-orange on cream 6.2:1, gold on brown 8.1:1, cream on brown 15:1.
+ */
+[data-theme="site"] :is(.home-landing, .brand-palette) {
+  --kalika-forest: #2a1a12;
+  --kalika-forest-soft: #3d281d;
+  --kalika-forest-deep: #2a1a12;
+  --kalika-teal: #b5290f;
+  --kalika-teal-deep: #b5290f;
+  --kalika-teal-light: #e0a93b;
+  --kalika-coral: #b5290f;
+  --kalika-coral-deep: #98220c;
+  --kalika-highlight: #e0a93b;
+  --kalika-ivory: #fbf5ea;
+  --kalika-stone: #f3e8d4;
+  --kalika-stone-deep: #e9dbc1;
+  --kalika-ink: #2a1a12;
+  --kalika-muted: #5f4b40;
+  --kalika-line: #e2d5c1;
+  --kalika-shade: 42 26 18;
+  --kalika-shade-deep: 42 26 18;
+}
+
+[data-theme="site"] .home-landing {
+  background: var(--kalika-ivory);
+}
+
+/* Letter-spacing breaks up Devanagari conjuncts: Marathi labels keep normal spacing */
+[data-theme="site"]:lang(mr) .home-landing [class*="tracking-"] {
+  letter-spacing: normal;
+}
+
+[data-theme="site"] :is(.home-landing, .brand-palette) :is(.bg-forest, .bg-forest-deep, .bg-forest-soft, .bg-ink),
+[data-theme="site"] .brand-palette:is(.bg-forest, .bg-forest-deep, .bg-forest-soft, .bg-ink, .cta-gradient) {
+  --kalika-teal: #e0a93b;
+  --kalika-teal-deep: #e0a93b;
+}
+
+[data-theme="site"] :is(.home-landing, .brand-palette) :is(.bg-forest, .bg-forest-deep, .bg-forest-soft, .bg-ink) :is(.bg-white, .bg-ivory, .bg-stone) {
+  --kalika-teal: #b5290f;
+  --kalika-teal-deep: #b5290f;
+}
+
 /* On ink (page headers, footer, offer panels, photo cards) focus rings and small accents turn gold; buttons stay terracotta. */
 [data-theme="site"] :is(.bg-forest, .bg-forest-deep, .bg-forest-soft, .bg-teal-deep, .bg-ink) {
   --kalika-teal: #eab444;
@@ -389,6 +436,94 @@ dialog::backdrop {
     transform-origin: left;
   }
 
+  /* ── Homepage pieces (components/home/landing) ── */
+
+  /* The handwritten word in a section heading */
+  .landing-script {
+    font-family: var(--font-script);
+    font-size: 0.86em;
+    font-weight: 400;
+    font-style: normal;
+    color: var(--kalika-teal-deep);
+    white-space: nowrap;
+  }
+  :is(.bg-forest, .bg-forest-deep, .bg-ink) .landing-script {
+    color: var(--kalika-teal-light);
+  }
+
+  /* A Mughal-style arch: round at the top, softly squared below */
+  .arch-frame {
+    border-radius: 999px 999px 1.25rem 1.25rem;
+  }
+
+  /* Frosted glass over the hero photographs */
+  .glass-panel {
+    background: rgb(42 26 18 / 0.38);
+    border: 1px solid rgb(255 255 255 / 0.18);
+    box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.5);
+    backdrop-filter: blur(14px) saturate(1.2);
+  }
+  .glass-chip {
+    background: rgb(42 26 18 / 0.45);
+    border: 1px solid rgb(255 255 255 / 0.25);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Hero veil: darker at the left and bottom, where the text and controls sit */
+  .landing-hero-veil {
+    background:
+      linear-gradient(90deg, rgb(42 26 18 / 0.78) 0%, rgb(42 26 18 / 0.5) 45%, rgb(42 26 18 / 0.15) 100%),
+      linear-gradient(180deg, rgb(42 26 18 / 0.55) 0%, transparent 28%, transparent 60%, rgb(42 26 18 / 0.7) 100%);
+  }
+
+  /* Hero photographs cross-fade */
+  .hero-slide {
+    opacity: 0;
+    transition: opacity 1.4s ease;
+  }
+  .hero-slide.is-active {
+    opacity: 1;
+  }
+
+  /* Sideways rows without a visible scrollbar (they still scroll with touch, trackpad and the arrow buttons) */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Closing band: a sunset from red-orange to gold, under a faint jali lattice */
+  .landing-sunset {
+    background: linear-gradient(115deg, #98220c 0%, #b5290f 40%, #c8551d 75%, #e0a93b 130%);
+  }
+  .landing-jali {
+    opacity: 0.12;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23fbf5ea' stroke-width='1.2'%3E%3Cpath d='M24 2 46 24 24 46 2 24Z'/%3E%3Ccircle cx='24' cy='24' r='7'/%3E%3Cpath d='M24 17v-6M24 31v6M17 24h-6M31 24h6'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 48px 48px;
+    mask-image: linear-gradient(90deg, transparent 0%, black 45%, black 100%);
+  }
+
+  /* ── Closing call-to-action bands (components/sections/page-cta.tsx) ── */
+
+  /* Sunset: red-orange behind the text on the left, warming to gold at the far right */
+  .cta-gradient {
+    background: linear-gradient(110deg, #98220c 0%, #b5290f 45%, #c8551d 78%, #e0a93b 125%);
+  }
+
+  /* Cream: a warmer tone than the page sections, so the band stands apart from the one above it */
+  .cta-cream {
+    background: #f4e6cc;
+  }
+
+  /* The one highlighted phrase in a headline, in the handwritten face */
+  .cta-accent {
+    font-family: var(--font-script);
+    font-size: 0.9em;
+    font-weight: 400;
+    font-style: normal;
+  }
+
   /* Page header photos: ink from the left, fading out to the right, so light text reads on them */
   .hero-ink {
     background: linear-gradient(90deg, rgb(var(--kalika-shade-deep) / 0.86) 0%, rgb(var(--kalika-shade-deep) / 0.52) 50%, rgb(var(--kalika-shade-deep) / 0.12) 100%);
@@ -477,6 +612,25 @@ dialog::backdrop {
    * rises word by word, the rule draws, then the headline and the buttons
    * fade up. Each element sets its own start with --d (ms).
    */
+  /* Homepage: each photo slowly zooms in while it shows */
+  .hero-slide.is-active .hero-slide-img {
+    animation: hero-zoom 9s linear both;
+  }
+  .landing-scroll-cue {
+    animation: scroll-cue 2.2s var(--ease-out-soft) infinite;
+  }
+  /* Cards lift a little on hover */
+  .lift-card {
+    transition:
+      transform 350ms var(--ease-out-soft),
+      box-shadow 350ms var(--ease-out-soft),
+      border-color 350ms ease;
+  }
+  .lift-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+  }
+
   .hero-zoom {
     animation: hero-zoom 18s linear both;
     will-change: transform;

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { CoverflowCarousel, type CoverflowItem } from "@/components/ui/coverflow-carousel"
 import { PolaroidLineCarousel, type PolaroidSlide } from "@/components/ui/polaroid-line-carousel"
 import { focusRing, shell } from "@/components/ui/styles"
+import { PageCTA } from "@/components/sections/page-cta"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { photoCredits } from "@/data/photo-credits"
 import { slugify } from "@/lib/cms/slug"
@@ -224,6 +225,7 @@ export default async function DestinationsPage(props: LocaleParams) {
           {" "}(Wikimedia Commons)
         </div>
       </aside>
+      <PageCTA pageKey="destinations" locale={locale} dictionary={dictionary} />
     </>
   )
 }
