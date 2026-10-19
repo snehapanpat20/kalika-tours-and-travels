@@ -10,7 +10,8 @@ import { assertStorageKey } from "@/server/storage/keys"
  *   e.g. "fleet/<uuid>.webp", so database keys and /media URLs never change.
  * - Files are served through /media (see readStoredFile), so the bucket can
  *   stay private and the secret key never leaves the server.
- * - Error messages carry the HTTP status only: never the key, URL or response body.
+ * - Error messages carry the HTTP status and Supabase's short error text for the
+ *   server log: never the secret, the project address or the file's key.
  */
 
 export type SupabaseStorageConfig = {
@@ -35,24 +36,48 @@ export class StorageRequestError extends Error {
   }
 }
 
-/** Supabase answers some errors with HTTP 400 and the real status in the body. */
-async function bodyStatus(response: Response): Promise<{ status: number; error?: string }> {
+/** Supabase's short error text, kept only if it is plain and repeats none of `hidden`. */
+function safeText(value: unknown, maxLength: number, hidden: string[]): string | undefined {
+  if (typeof value !== "string") return undefined
+  const text = value.trim().slice(0, maxLength)
+  if (!text || !/^[\w .,:;'"()/-]+$/.test(text)) return undefined
+  return hidden.some((item) => item && text.toLowerCase().includes(item.toLowerCase())) ? undefined : text
+}
+
+/**
+ * Supabase answers some errors with HTTP 400 and the real status in the body.
+ * The error name and message (e.g. "Unauthorized: Invalid Compact JWS") are kept
+ * for the server log, unless they contain the key, the project address or the file name.
+ */
+async function bodyStatus(response: Response, hidden: string[]): Promise<{ status: number; error?: string }> {
   try {
-    const body = (await response.json()) as { statusCode?: string | number; error?: string }
+    const body = (await response.json()) as { statusCode?: string | number; error?: string; message?: string }
     const status = Number(body.statusCode)
-    // Only short, known-shaped error names are kept (e.g. "Duplicate", "not_found")
-    const error = typeof body.error === "string" && /^[\w -]{1,40}$/.test(body.error) ? body.error : undefined
-    return { status: Number.isInteger(status) && status > 0 ? status : response.status, error }
+    const detail = [safeText(body.error, 40, hidden), safeText(body.message, 160, hidden)].filter(Boolean).join(": ")
+    return { status: Number.isInteger(status) && status > 0 ? status : response.status, error: detail || undefined }
   } catch {
     return { status: response.status }
   }
 }
 
+/** Legacy service_role keys are JWTs; the newer sb_secret_ keys are not. */
+const isJwt = (key: string) => /^eyJ[\w-]+\.[\w-]+\.[\w-]+$/.test(key)
+
 export function createSupabaseStorage(config: SupabaseStorageConfig, fetchImpl: typeof fetch = fetch): ImageStorage {
   const base = `${config.url.replace(/\/+$/, "")}/storage/v1/object`
   const bucket = encodeURIComponent(config.bucket)
   const objectUrl = (key: string) => `${base}/${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`
-  const auth = { apikey: config.secretKey, Authorization: `Bearer ${config.secretKey}` }
+  // Supabase: send secret keys on the apikey header, not as a Bearer token, because they are
+  // not JWTs and Storage rejects them there. A legacy service_role key (a JWT) goes on both.
+  const auth: Record<string, string> = isJwt(config.secretKey) ? { apikey: config.secretKey, Authorization: `Bearer ${config.secretKey}` } : { apikey: config.secretKey }
+  const host = (() => {
+    try {
+      return new URL(config.url).hostname
+    } catch {
+      return config.url
+    }
+  })()
+  const hiddenFor = (key: string) => [config.secretKey, host, host.split(".")[0], key]
 
   async function call(operation: "upload" | "remove" | "read", url: string, init: RequestInit): Promise<Response> {
     try {
@@ -81,7 +106,7 @@ export function createSupabaseStorage(config: SupabaseStorageConfig, fetchImpl: 
         body: new Uint8Array(data),
       })
       if (!response.ok) {
-        const { status, error } = await bodyStatus(response)
+        const { status, error } = await bodyStatus(response, hiddenFor(key))
         throw new StorageRequestError("upload", status, status === 409 ? "the file already exists" : error)
       }
       return { url: `/media/${key}` }
@@ -96,7 +121,7 @@ export function createSupabaseStorage(config: SupabaseStorageConfig, fetchImpl: 
         body: JSON.stringify({ prefixes: [key] }),
       })
       if (!response.ok) {
-        const { status, error } = await bodyStatus(response)
+        const { status, error } = await bodyStatus(response, hiddenFor(key))
         throw new StorageRequestError("remove", status, error)
       }
     },
@@ -105,8 +130,8 @@ export function createSupabaseStorage(config: SupabaseStorageConfig, fetchImpl: 
       assertStorageKey(key)
       const response = await call("read", objectUrl(key), { method: "GET", headers: auth })
       if (!response.ok) {
-        const { status, error } = await bodyStatus(response)
-        if (status === 404 || error === "not_found") return null
+        const { status, error } = await bodyStatus(response, hiddenFor(key))
+        if (status === 404 || error?.startsWith("not_found")) return null
         throw new StorageRequestError("read", status, error)
       }
       const declared = Number(response.headers.get("content-length"))

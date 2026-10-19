@@ -95,10 +95,30 @@ describe("Storage › Supabase driver", () => {
     assert.equal(headers.get("content-type"), "image/webp")
     assert.equal(headers.get("x-upsert"), "false")
     assert.equal(headers.get("apikey"), SECRET)
-    assert.equal(headers.get("authorization"), `Bearer ${SECRET}`)
+    assert.equal(headers.get("authorization"), null, "a secret key is not a JWT, so it is never sent as a Bearer token")
     assert.deepEqual(Buffer.from(calls[0].init.body as Uint8Array), data)
     assert.equal(storage.driver, "supabase")
     assert.equal(storage.persistent, true)
+  })
+
+  test("a legacy service_role key (a JWT) is sent on both headers", async () => {
+    // A made-up JWT-shaped value ({"alg":"none"} / {"test":true}), not a real key
+    const legacy = "eyJhbGciOiJub25lIn0.eyJ0ZXN0Ijp0cnVlfQ.ZmFrZS1zaWduYXR1cmU"
+    const { calls, fetchImpl } = mockFetch(json({ Key: `fleet-photos/${key}` }))
+    await createSupabaseStorage({ ...config, secretKey: legacy }, fetchImpl).put(key, Buffer.from("x"))
+    assert.equal(headersOf(calls[0]).get("apikey"), legacy)
+    assert.equal(headersOf(calls[0]).get("authorization"), `Bearer ${legacy}`)
+  })
+
+  test("Supabase's own error text reaches the server log, unless it repeats the secret, address or key", async () => {
+    const jws = createSupabaseStorage(config, mockFetch(json({ statusCode: "403", error: "Unauthorized", message: "Invalid Compact JWS" }, 400)).fetchImpl)
+    await assert.rejects(jws.put(key, Buffer.from("x")), (error) => assertSanitized(error) && /HTTP 403, Unauthorized: Invalid Compact JWS/.test((error as Error).message))
+
+    const mime = createSupabaseStorage(config, mockFetch(json({ statusCode: "415", error: "invalid_mime_type", message: "mime type image/webp is not supported" }, 400)).fetchImpl)
+    await assert.rejects(mime.put(key, Buffer.from("x")), (error) => assertSanitized(error) && /HTTP 415, invalid_mime_type: mime type image\/webp is not supported/.test((error as Error).message))
+
+    const leaky = createSupabaseStorage(config, mockFetch(json({ statusCode: "404", error: "Bucket not found", message: `no bucket at example-project.supabase.co for ${key}` }, 400)).fetchImpl)
+    await assert.rejects(leaky.put(key, Buffer.from("x")), (error) => assertSanitized(error) && /HTTP 404, Bucket not found\)/.test((error as Error).message))
   })
 
   test("an existing object is never replaced (409, or 400 with a Duplicate body)", async () => {
