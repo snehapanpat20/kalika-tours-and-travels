@@ -3,6 +3,7 @@ import { readFile, readdir } from "node:fs/promises"
 import path from "node:path"
 import sharp from "sharp"
 import { AppError } from "@/lib/errors/app-error"
+import { describeError, logger } from "@/server/api/logger"
 import { getImageStorage } from "@/server/storage"
 
 export const acceptedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"] as const
@@ -63,7 +64,7 @@ export async function processImageUpload(file: File, options: ProcessOptions) {
 }
 
 /** Processes and stores an upload. Throws 503 when image storage is not configured. */
-/** Folders uploads may be stored in; keep in step with storageKeyPattern in ./index.ts. */
+/** Folders uploads may be stored in; keep in step with storageKeyPattern in ./keys.ts. */
 export type ImageFolder = "gallery" | "reviews" | "offers" | "destinations" | "services" | "content" | "fleet"
 
 export async function storeImageUpload(file: File, folder: ImageFolder, options: ProcessOptions) {
@@ -75,13 +76,31 @@ export async function storeImageUpload(file: File, folder: ImageFolder, options:
   }
   const image = await processImageUpload(file, options)
   const key = `${folder}/${crypto.randomUUID()}.webp`
-  const { url } = await storage.put(key, image.data)
+  let url: string
+  try {
+    ;({ url } = await storage.put(key, image.data))
+  } catch (error) {
+    // The cause (status only, never the key or secret) goes to the server log
+    logger.error("storage_upload_failed", { driver: storage.driver, error: describeError(error) })
+    throw new AppError("SERVICE_UNAVAILABLE", "The photo could not be saved. Please try again.", 503, [
+      { field: options.field, message: "The photo could not be saved. Please try again." },
+    ])
+  }
   return { url, key, width: image.width, height: image.height }
 }
 
+/**
+ * Deletes an uploaded file once nothing uses it. Best effort: the content change
+ * is already saved, so a failed delete (e.g. cloud storage briefly unreachable)
+ * is logged and leaves an unused file rather than failing the request.
+ */
 export async function removeStoredImage(key: string | null | undefined) {
   if (!key) return
-  await getImageStorage()?.remove(key)
+  try {
+    await getImageStorage()?.remove(key)
+  } catch (error) {
+    logger.warn("storage_remove_failed", { key, error: describeError(error) })
+  }
 }
 
 export type StoredImage = { url: string; key: string | null; width: number; height: number }

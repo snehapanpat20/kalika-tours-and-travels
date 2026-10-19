@@ -30,7 +30,9 @@ export default async function AdminSettingsPage() {
 
   const storageState: { ok: boolean; text: string } = !storage.enabled
     ? { ok: false, text: `${storage.reason} Gallery photos can still use images bundled with the website, and review photos are turned off.` }
-    : storage.persistent
+    : storage.driver === "supabase"
+      ? { ok: true, text: "Uploads are saved to Supabase Storage and served from this website at /media/…. The bucket can stay private." }
+      : storage.persistent
       ? { ok: true, text: "Uploads are saved to this server's disk. Back up the upload folder with your database." }
       : { ok: false, text: "Uploads are saved to this server's disk, but this host does not keep files between deployments. Photos may be lost." }
 
@@ -69,8 +71,9 @@ export default async function AdminSettingsPage() {
 
       <Panel icon={<HardDrive className="size-5" />} title="Photo uploads">
         <Status ok={storageState.ok} text={storageState.text} />
-        <Row label="Storage" value={storage.enabled ? "Local disk" : "Off"} />
-        {storage.enabled ? <Row label="Folder" value={uploadRoot()} mono /> : null}
+        <Row label="Storage" value={!storage.enabled ? "Off" : storage.driver === "supabase" ? "Supabase Storage" : "Local disk"} />
+        {storage.enabled && storage.driver === "supabase" ? <Row label="Bucket" value={storage.bucket} mono /> : null}
+        {storage.enabled && storage.driver === "local" ? <Row label="Folder" value={uploadRoot()} mono /> : null}
         <p className="text-sm text-muted">Uploads are resized and re-saved as WebP, which also removes location data from phone photos.</p>
       </Panel>
     </div>

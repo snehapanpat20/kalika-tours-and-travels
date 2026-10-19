@@ -16,6 +16,7 @@
     "db:studio": "prisma studio",
     "admin:create": "tsx scripts/create-admin.ts",
     "test:api": "tsx --test --test-concurrency=1 tests/api/*.test.ts",
+    "test:unit": "tsx --conditions=react-server --test tests/unit/*.test.ts",
     "test:server": "tsx scripts/test-server.ts"
   },
   "dependencies": {
