@@ -73,7 +73,7 @@ export async function deleteReview(id: string) {
 
 // ─── Website content items (offers, announcements, destinations, services) ───
 
-export type ContentKind = "offers" | "announcements" | "destinations" | "services"
+export type ContentKind = "offers" | "announcements" | "destinations" | "services" | "vehicles"
 
 /** Creates (id null) or updates an item. Multipart when it can carry an image, JSON otherwise. */
 export async function saveContentItem<T extends object>(kind: ContentKind, id: string | null, body: FormData | Record<string, unknown>) {
@@ -86,8 +86,36 @@ export async function deleteContentItem(kind: ContentKind, id: string) {
 }
 
 /** Copies what the website shows today into the admin panel (destinations or services). */
-export async function importBuiltIn(kind: "destinations" | "services") {
+export async function importBuiltIn(kind: "destinations" | "services" | "vehicles") {
   return apiRequest<{ count: number }>(`/api/admin/${kind}/import`, { method: "POST", body: {} })
+}
+
+// ─── Fleet: vehicle order and photos ──────────────────────────
+
+const vehiclePath = (id: string) => `/api/admin/vehicles/${encodeURIComponent(id)}`
+
+/** Saves the order of every vehicle, first to last. */
+export async function reorderVehicles(ids: string[]) {
+  return apiRequest<{ count: number }>("/api/admin/vehicles/order", { method: "PUT", body: { ids } })
+}
+
+/** Adds one photo: an `image` upload or the `imagePath` of a photo already on the website. */
+export async function addVehiclePhoto<T extends object>(vehicleId: string, form: FormData) {
+  return apiRequest<T>(`${vehiclePath(vehicleId)}/photos`, { method: "POST", body: form })
+}
+
+/** Replaces a photo and/or changes its descriptions. */
+export async function updateVehiclePhoto<T extends object>(vehicleId: string, photoId: string, form: FormData) {
+  return apiRequest<T>(`${vehiclePath(vehicleId)}/photos/${encodeURIComponent(photoId)}`, { method: "PATCH", body: form })
+}
+
+export async function deleteVehiclePhoto<T extends object>(vehicleId: string, photoId: string) {
+  return apiRequest<T>(`${vehiclePath(vehicleId)}/photos/${encodeURIComponent(photoId)}`, { method: "DELETE" })
+}
+
+/** Saves the photo order and the cover. */
+export async function arrangeVehiclePhotos<T extends object>(vehicleId: string, ids: string[], coverId: string) {
+  return apiRequest<T>(`${vehiclePath(vehicleId)}/photos`, { method: "PUT", body: { ids, coverId } })
 }
 
 // ─── Website sections (hero, why Kalika, Traveller, …) ─────────

@@ -22,6 +22,7 @@ import {
 import { contentRoutes } from "@/server/cms/entity-routes"
 import { adminListOffers, createOffer, deleteOffer, getOffer, offerCreateSchema, offerListSchema, offerUpdateSchema, updateOffer } from "@/server/cms/offers"
 import { adminListServices, createService, deleteService, getService, serviceCreateSchema, serviceListSchema, serviceUpdateSchema, updateService } from "@/server/cms/services"
+import { adminListVehicles, createVehicle, deleteVehicle, getVehicle, updateVehicle, vehicleCreateSchema, vehicleListSchema, vehicleUpdateSchema } from "@/server/cms/vehicles"
 
 /** API handlers for each kind of website content; app/api/admin/* re-exports these. */
 
@@ -103,4 +104,25 @@ export const serviceRoutes = contentRoutes({
   },
   remove: deleteService,
   get: getService,
+})
+
+/** Vehicle details only; photos have their own routes (app/api/admin/vehicles/[id]/photos). */
+export const vehicleRoutes = contentRoutes({
+  label: "Vehicle",
+  entityType: "Vehicle",
+  key: "vehicle",
+  body: "json",
+  permissions: { read: "fleet.read", write: "fleet.write", delete: "fleet.delete" },
+  summary: (item) => item.name,
+  list: { schema: vehicleListSchema, run: adminListVehicles },
+  create: { schema: vehicleCreateSchema, run: (input) => createVehicle(input) },
+  update: {
+    schema: vehicleUpdateSchema,
+    run: async (id, input) => {
+      const { before, vehicle } = await updateVehicle(id, input)
+      return { before, after: vehicle }
+    },
+  },
+  remove: deleteVehicle,
+  get: getVehicle,
 })
