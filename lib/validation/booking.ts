@@ -6,7 +6,7 @@ export const bookingRequestSchema = z
   .object({
     quoteId: z.string().trim().min(1).nullable(),
     enquiryId: z.string().trim().min(1).nullable(),
-    passengerCount: z.number().int().min(1).max(businessRules.passengerCapacity),
+    passengerCount: z.number().int().min(1).max(businessRules.maxGroupSize),
     departureDate: isoDateSchema,
     returnDate: isoDateSchema,
     tripType: z.literal("round-trip"),

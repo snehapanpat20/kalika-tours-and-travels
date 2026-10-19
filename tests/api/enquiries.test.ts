@@ -50,6 +50,15 @@ describe("POST /api/enquiries", () => {
     assert.equal(response.status, 201)
   })
 
+  test("the vehicle chosen on the website reaches the stored enquiry", async () => {
+    // The trip form puts the chosen vehicle at the start of the message (there is no vehicle column)
+    const message = "[Vehicle: 34-Seater AC Sleeper Bus] [One-way trip] Pickup from Hadapsar."
+    const response = await api("/api/enquiries", { body: validEnquiry({ message }) })
+    assert.equal(response.status, 201)
+    const stored = await prisma.enquiry.findUniqueOrThrow({ where: { id: response.json.enquiryId } })
+    assert.equal(stored.message, message)
+  })
+
   test("missing name", async () => {
     const response = await api("/api/enquiries", { body: validEnquiry({ fullName: undefined }) })
     assert.equal(response.status, 422)
@@ -115,8 +124,15 @@ describe("POST /api/enquiries", () => {
     assert.equal(response.status, 201)
   })
 
+  test("groups of up to 60 are accepted", async () => {
+    for (const passengerCount of [1, 21, 45, 60]) {
+      const response = await api("/api/enquiries", { body: validEnquiry({ passengerCount }) })
+      assert.equal(response.status, 201, String(passengerCount))
+    }
+  })
+
   test("invalid passenger count", async () => {
-    for (const passengerCount of [0, -3, 21, 2.5, "lots"]) {
+    for (const passengerCount of [0, -3, 61, 2.5, "lots"]) {
       const response = await api("/api/enquiries", { body: validEnquiry({ passengerCount }) })
       assert.equal(response.status, 422, String(passengerCount))
       assert.deepEqual(fieldsOf(response.json), ["passengerCount"], String(passengerCount))

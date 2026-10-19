@@ -20,7 +20,7 @@ export const travelTypeByService: Record<ServiceId, TravelType> = {
   corporate: "CORPORATE",
 }
 
-export const MAX_PASSENGERS = businessRules.passengerCapacity
+export const MAX_PASSENGERS = businessRules.maxGroupSize
 /** How far ahead an enquiry can be made. */
 export const BOOKING_HORIZON_DAYS = 730
 export const MESSAGE_MAX_LENGTH = 1000
