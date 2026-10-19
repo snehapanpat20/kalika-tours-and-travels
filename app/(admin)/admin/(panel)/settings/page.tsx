@@ -6,7 +6,7 @@ import { adminRoles, can, permissions, roleDescriptions, roleLabels } from "@/li
 import { cn } from "@/lib/utils/cn"
 import { requireAdminPage } from "@/server/auth/admin-page"
 import { getEmailStatus } from "@/server/email/mailer"
-import { getStorageStatus, uploadRoot } from "@/server/storage"
+import { checkStorageConnection, getStorageStatus, uploadRoot } from "@/server/storage"
 
 export const metadata: Metadata = { title: "Settings" }
 
@@ -18,6 +18,8 @@ export default async function AdminSettingsPage() {
   const admin = await requireAdminPage("/admin/settings", "settings.read")
   const email = getEmailStatus()
   const storage = getStorageStatus()
+  // Read-only: asks Supabase about the bucket (nothing is uploaded). Null unless Supabase is the driver.
+  const connection = await checkStorageConnection()
 
   const emailState: { ok: boolean; text: string } =
     email.mode === "none"
@@ -73,6 +75,27 @@ export default async function AdminSettingsPage() {
         <Status ok={storageState.ok} text={storageState.text} />
         <Row label="Storage" value={!storage.enabled ? "Off" : storage.driver === "supabase" ? "Supabase Storage" : "Local disk"} />
         {storage.enabled && storage.driver === "supabase" ? <Row label="Bucket" value={storage.bucket} mono /> : null}
+        {connection ? (
+          connection.ok ? (
+            <>
+              <Status
+                ok={connection.acceptsWebp}
+                text={
+                  connection.acceptsWebp
+                    ? "Connection checked: the address, key and bucket work."
+                    : `Connection works, but the bucket only accepts ${connection.allowedMimeTypes?.join(", ")}. Uploads are saved as WebP: add image/webp to the bucket's allowed file types in Supabase.`
+                }
+              />
+              <Row label="Bucket access" value={connection.public ? "Public (private is recommended; photos are served from /media)" : "Private"} />
+              <Row label="Size limit" value={connection.fileSizeLimit ? `${(connection.fileSizeLimit / 1024 / 1024).toFixed(1)} MB per file` : "Project default"} />
+            </>
+          ) : (
+            <>
+              <Status ok={false} text={`Connection check failed: ${connection.hint}`} />
+              <Row label="Supabase answer" value={`${connection.status ? `HTTP ${connection.status}` : "No answer"}${connection.detail ? ` (${connection.detail})` : ""}`} mono />
+            </>
+          )
+        ) : null}
         {storage.enabled && storage.driver === "local" ? <Row label="Folder" value={uploadRoot()} mono /> : null}
         <p className="text-sm text-muted">Uploads are resized and re-saved as WebP, which also removes location data from phone photos.</p>
       </Panel>

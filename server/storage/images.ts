@@ -5,6 +5,7 @@ import sharp from "sharp"
 import { AppError } from "@/lib/errors/app-error"
 import { describeError, logger } from "@/server/api/logger"
 import { getImageStorage } from "@/server/storage"
+import { StorageRequestError } from "@/server/storage/supabase"
 
 export const acceptedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"] as const
 
@@ -80,8 +81,14 @@ export async function storeImageUpload(file: File, folder: ImageFolder, options:
   try {
     ;({ url } = await storage.put(key, image.data))
   } catch (error) {
-    // The cause (status only, never the key or secret) goes to the server log
-    logger.error("storage_upload_failed", { driver: storage.driver, error: describeError(error) })
+    // For the server log only: the stage, Supabase's status and its redacted error text.
+    // Never the secret, headers, the file's key or the image itself.
+    logger.error("storage_upload_failed", {
+      stage: "storage_upload",
+      driver: storage.driver,
+      folder,
+      ...(error instanceof StorageRequestError ? { status: error.status, detail: error.detail } : { error: describeError(error).name }),
+    })
     throw new AppError("SERVICE_UNAVAILABLE", "The photo could not be saved. Please try again.", 503, [
       { field: options.field, message: "The photo could not be saved. Please try again." },
     ])
@@ -99,7 +106,10 @@ export async function removeStoredImage(key: string | null | undefined) {
   try {
     await getImageStorage()?.remove(key)
   } catch (error) {
-    logger.warn("storage_remove_failed", { key, error: describeError(error) })
+    logger.warn("storage_remove_failed", {
+      stage: "cleanup",
+      ...(error instanceof StorageRequestError ? { status: error.status, detail: error.detail } : { error: describeError(error).name }),
+    })
   }
 }
 

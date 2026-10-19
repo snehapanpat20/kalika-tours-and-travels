@@ -247,6 +247,8 @@ export async function addVehiclePhoto(vehicleId: string, input: z.infer<typeof p
       },
     })
   } catch (error) {
+    // The file was stored but its record was not: remove the file, log the stage
+    logger.error("vehicle_photo_save_failed", { stage: "metadata_persistence", error: describeError(error).name, code: (error as { code?: unknown }).code })
     await removeFiles([image.key])
     throw error
   }

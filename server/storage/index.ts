@@ -4,7 +4,7 @@ import path from "node:path"
 import { getServerEnv, type ServerEnv } from "@/lib/config/env"
 import { describeError, logger } from "@/server/api/logger"
 import { assertStorageKey, storageKeyPattern } from "@/server/storage/keys"
-import { createSupabaseStorage, type SupabaseStorageConfig } from "@/server/storage/supabase"
+import { checkSupabaseBucket, createSupabaseStorage, type BucketCheck, type SupabaseStorageConfig } from "@/server/storage/supabase"
 
 export { storageKeyPattern } from "@/server/storage/keys"
 
@@ -124,6 +124,15 @@ function storageFor(choice: StorageChoice): ImageStorage | null {
   const config = choice.supabase!
   if (supabaseStorage?.config !== config) supabaseStorage = { config, storage: createSupabaseStorage(config) }
   return supabaseStorage.storage
+}
+
+/**
+ * For admin Settings: a read-only check that the Supabase address, key and bucket
+ * work (no upload). Null when Supabase is not the active driver.
+ */
+export async function checkStorageConnection(): Promise<BucketCheck | null> {
+  const choice = currentChoice()
+  return choice.status.enabled && choice.supabase ? checkSupabaseBucket(choice.supabase) : null
 }
 
 /** The configured storage, or null when uploads are switched off. */

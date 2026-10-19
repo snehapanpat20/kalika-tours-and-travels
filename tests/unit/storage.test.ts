@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { describe, test } from "node:test"
 import { chooseStorage } from "@/server/storage"
-import { StorageRequestError, createSupabaseStorage } from "@/server/storage/supabase"
+import { StorageRequestError, checkSupabaseBucket, createSupabaseStorage, redact } from "@/server/storage/supabase"
 
 /**
  * Storage driver selection and the Supabase driver, with a mocked fetch:
@@ -118,7 +118,7 @@ describe("Storage › Supabase driver", () => {
     await assert.rejects(mime.put(key, Buffer.from("x")), (error) => assertSanitized(error) && /HTTP 415, invalid_mime_type: mime type image\/webp is not supported/.test((error as Error).message))
 
     const leaky = createSupabaseStorage(config, mockFetch(json({ statusCode: "404", error: "Bucket not found", message: `no bucket at example-project.supabase.co for ${key}` }, 400)).fetchImpl)
-    await assert.rejects(leaky.put(key, Buffer.from("x")), (error) => assertSanitized(error) && /HTTP 404, Bucket not found\)/.test((error as Error).message))
+    await assert.rejects(leaky.put(key, Buffer.from("x")), (error) => assertSanitized(error) && /HTTP 404, Bucket not found: no bucket at \[redacted\] for \[redacted\]/.test((error as Error).message))
   })
 
   test("an existing object is never replaced (409, or 400 with a Duplicate body)", async () => {
@@ -201,5 +201,83 @@ describe("Storage › Supabase driver", () => {
     const big = new Response("x", { status: 200, headers: { "Content-Length": String(50 * 1024 * 1024) } })
     const storage = createSupabaseStorage(config, mockFetch(big).fetchImpl)
     await assert.rejects(storage.read(key), (error) => assertSanitized(error))
+  })
+})
+
+describe("Storage › redaction and diagnostics", () => {
+  // Made-up samples, assembled here so no whole key-shaped string sits in the source (secret scanners)
+  const fakeJwt = ["eyJhbGciOiJub25lIn0", "eyJ0ZXN0Ijp0cnVlfQ", "c2lnbmF0dXJl"].join(".")
+  const fakeSecretKey = ["sb", "secret", "AbCdEf123456"].join("_")
+  const fakePublishableKey = ["sb", "publishable", "XyZ789"].join("_")
+
+  test("redaction removes the given values, their encoded forms and every token-like pattern", () => {
+    const known = [SECRET, config.url, "example-project.supabase.co", "example-project", key]
+    const samples = [
+      `bad key ${SECRET}`,
+      `bad key ${encodeURIComponent(SECRET)}`,
+      `BAD KEY ${SECRET.toUpperCase()}`,
+      "Authorization: Bearer abc.def.ghi rejected",
+      `token ${fakeJwt} expired`,
+      `key ${fakeSecretKey} and ${fakePublishableKey} refused`,
+      "see https://other-project.supabase.co/storage/v1/object/x for details",
+      "host other-project.supabase.co refused",
+      `object ${key} and ${encodeURIComponent(key)} missing`,
+      "id 9d3c1f2e-4b5a-4c6d-8e7f-0a1b2c3d4e5f missing",
+      "owner owner@example.com",
+      "blob QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9w",
+    ]
+    for (const sample of samples) {
+      const out = redact(sample, 200, known) ?? ""
+      assert.match(out, /\[redacted\]/, sample)
+      for (const leak of [SECRET.toLowerCase(), "abc.def.ghi", "eyj", "sb_secret_", "sb_publishable_", "supabase.co", "example-project", "other-project", "9d3c1f2e", "2f1b8c4e", "@example.com", "QUJDREVG"]) {
+        assert.ok(!out.toLowerCase().includes(leak.toLowerCase()), `${sample} -> ${out}`)
+      }
+    }
+    assert.equal(redact("mime type image/webp is not supported", 200, known), "mime type image/webp is not supported", "plain text is kept")
+    assert.equal(redact("x".repeat(500).replace(/x/g, "ab "), 30, known)?.length, 30, "length is capped")
+    assert.equal(redact(42, 30, known), undefined)
+  })
+
+  test("an unreachable Supabase is reported with a fixed reason, never the original error text", async () => {
+    const cases: [Error, RegExp][] = [
+      [Object.assign(new Error("The operation was aborted due to timeout"), { name: "TimeoutError" }), /timed out/],
+      [new TypeError("fetch failed", { cause: Object.assign(new Error("getaddrinfo ENOTFOUND example-project.supabase.co"), { code: "ENOTFOUND" }) }), /address not found/],
+      [new TypeError("fetch failed", { cause: new Error("unexpected redirect") }), /redirected/],
+      [new TypeError("fetch failed", { cause: Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" }) }), /connection refused/],
+    ]
+    for (const [failure, reason] of cases) {
+      const storage = createSupabaseStorage(config, mockFetch(failure).fetchImpl)
+      await assert.rejects(storage.put(key, Buffer.from("x")), (error) => assertSanitized(error) && (error as StorageRequestError).status === 0 && reason.test((error as Error).message))
+    }
+  })
+
+  test("the bucket check reads the bucket's settings without uploading anything", async () => {
+    const { calls, fetchImpl } = mockFetch(json({ id: "fleet-photos", name: "fleet-photos", public: false, allowed_mime_types: ["image/jpeg", "image/png"], file_size_limit: 5242880 }))
+    const result = await checkSupabaseBucket(config, fetchImpl)
+    assert.deepEqual(result, { ok: true, public: false, acceptsWebp: false, allowedMimeTypes: ["image/jpeg", "image/png"], fileSizeLimit: 5242880 })
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].url, "https://example-project.supabase.co/storage/v1/bucket/fleet-photos")
+    assert.equal(calls[0].init.method, "GET")
+    assert.equal(headersOf(calls[0]).get("apikey"), SECRET)
+
+    const open = await checkSupabaseBucket(config, mockFetch(json({ public: false, allowed_mime_types: null, file_size_limit: null })).fetchImpl)
+    assert.deepEqual(open, { ok: true, public: false, acceptsWebp: true, allowedMimeTypes: null, fileSizeLimit: null })
+    const wildcard = await checkSupabaseBucket(config, mockFetch(json({ allowed_mime_types: ["image/*"] })).fetchImpl)
+    assert.equal(wildcard.ok && wildcard.acceptsWebp, true)
+  })
+
+  test("the bucket check names the likely cause, without the secret or address", async () => {
+    const missing = await checkSupabaseBucket(config, mockFetch(json({ statusCode: "404", error: "Bucket not found", message: "Bucket not found" }, 400)).fetchImpl)
+    assert.equal(missing.ok, false)
+    assert.ok(!missing.ok && missing.status === 404 && /no bucket named "fleet-photos"/.test(missing.hint))
+
+    const refused = await checkSupabaseBucket(config, mockFetch(json({ statusCode: "403", error: "Unauthorized", message: `Invalid API key ${SECRET}` }, 400)).fetchImpl)
+    assert.ok(!refused.ok && refused.status === 403 && /refused the key/.test(refused.hint))
+    assert.ok(!JSON.stringify(refused).includes(SECRET))
+
+    const offline = await checkSupabaseBucket(config, mockFetch(new TypeError("fetch failed", { cause: Object.assign(new Error("getaddrinfo ENOTFOUND example-project.supabase.co"), { code: "ENOTFOUND" }) })).fetchImpl)
+    assert.ok(!offline.ok && offline.status === 0 && /could not be reached/.test(offline.hint))
+    // The hints may show the generic form https://<project>.supabase.co, never this project or the secret
+    for (const leak of [SECRET, "example-project", config.url]) assert.ok(!JSON.stringify([missing, refused, offline]).includes(leak), leak)
   })
 })
