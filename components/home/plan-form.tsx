@@ -23,7 +23,7 @@ import type { ServiceId } from "@/types/catalog"
 type PlanCopy = Dictionary["home"]["plan"]
 type ErrorKey = keyof PlanCopy["errors"]
 /** Each form field, named as on screen. */
-type Slot = "name" | "phone" | "email" | "serviceId" | "destination" | "departureDate" | "returnDate" | "passengers" | "notes"
+type Slot = "name" | "phone" | "email" | "serviceId" | "destination" | "departureDate" | "returnDate" | "vehicle" | "passengers" | "notes"
 
 /** API field → form field. */
 const slotByField: Record<string, Slot> = {
@@ -61,12 +61,20 @@ type Outcome =
   | { kind: "idle" }
   | { kind: "success"; enquiryId: string; whatsappHref: string }
   | { kind: "error"; message: string }
+/** A choice in "Choose Your Vehicle": its name in the visitor's language and in English (for the business). */
+export type VehicleOption = { id: string; name: string; english: string }
+
 type FormProps = {
   locale: Locale
   copy: PlanCopy
   services: { id: ServiceId; name: string }[]
+  /** The vehicles from data/fleet.ts; "Other / Help Me Choose" is added here. */
+  vehicles: VehicleOption[]
   oneWay: string
 }
+
+/** The "Other / Help Me Choose" choice. */
+const otherVehicle = "other"
 
 const noSubscribe = () => () => {}
 
@@ -84,7 +92,8 @@ function localDate() {
 
 /**
  * Reads `?service=` and `?destination=` (set by the journey and destination
- * cards), and `?people=` and `?date=` (set by the quick quote form). Values
+ * cards), `?vehicle=` (set by the Our Fleet cards), and `?people=` and
+ * `?date=` (set by the quick quote form). Values
  * that aren't a whole number or a YYYY-MM-DD date are ignored; the form's own
  * checks still apply on sending.
  */
@@ -105,6 +114,7 @@ export function PlanFormFromUrl(props: FormProps) {
 
   const people = params.get("people") ?? ""
   const date = params.get("date") ?? ""
+  const vehicle = params.get("vehicle") ?? ""
   return (
     <PlanForm
       {...props}
@@ -112,6 +122,7 @@ export function PlanFormFromUrl(props: FormProps) {
       requestedDestination={(params.get("destination") ?? "").slice(0, 80)}
       requestedPassengers={/^\d{1,3}$/.test(people) ? people : ""}
       requestedDate={/^\d{4}-\d{2}-\d{2}$/.test(date) ? date : ""}
+      requestedVehicle={vehicle === otherVehicle || props.vehicles.some((option) => option.id === vehicle) ? vehicle : ""}
     />
   )
 }
@@ -119,16 +130,30 @@ export function PlanFormFromUrl(props: FormProps) {
 /** Added to the message of a one-way enquiry. In English, because the business reads it. */
 const oneWayMarker = "[One-way trip]"
 
+/**
+ * The chosen vehicle, added to the start of the message in English (e.g.
+ * "[Vehicle: 26-Seater AC Bus]"). The enquiry record has no vehicle column, so
+ * this is how it reaches the admin panel, the notification email and the
+ * enquiry list without a database change; older enquiries simply have none.
+ */
+function vehicleMarker(vehicleId: string, vehicles: VehicleOption[]): string {
+  if (vehicleId === otherVehicle) return "[Vehicle: Other / help me choose]"
+  const option = vehicles.find((item) => item.id === vehicleId)
+  return option ? `[Vehicle: ${option.english}]` : ""
+}
+
 export function PlanForm({
   locale,
   copy,
   services,
+  vehicles,
   oneWay,
   requestedService = "",
   requestedDestination = "",
   requestedPassengers = "",
   requestedDate = "",
-}: FormProps & { requestedService?: string; requestedDestination?: string; requestedPassengers?: string; requestedDate?: string }) {
+  requestedVehicle = "",
+}: FormProps & { requestedService?: string; requestedDestination?: string; requestedPassengers?: string; requestedDate?: string; requestedVehicle?: string }) {
   const formRef = useRef<HTMLFormElement>(null)
   const serviceFromUrl = services.some((service) => service.id === requestedService) ? requestedService : ""
 
@@ -140,6 +165,7 @@ export function PlanForm({
   const [departureDate, setDepartureDate] = useState(requestedDate)
   const [returnDate, setReturnDate] = useState("")
   const [oneWayTrip, setOneWayTrip] = useState(false)
+  const [vehicle, setVehicle] = useState(requestedVehicle)
   const [passengers, setPassengers] = useState(requestedPassengers)
   const [notes, setNotes] = useState("")
   const [website, setWebsite] = useState("")
@@ -149,9 +175,16 @@ export function PlanForm({
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" })
 
   // A newer card click in the page overrides an earlier choice
-  const [seen, setSeen] = useState({ service: serviceFromUrl, destination: requestedDestination, passengers: requestedPassengers, date: requestedDate })
-  if (seen.service !== serviceFromUrl || seen.destination !== requestedDestination || seen.passengers !== requestedPassengers || seen.date !== requestedDate) {
-    setSeen({ service: serviceFromUrl, destination: requestedDestination, passengers: requestedPassengers, date: requestedDate })
+  const [seen, setSeen] = useState({ service: serviceFromUrl, destination: requestedDestination, passengers: requestedPassengers, date: requestedDate, vehicle: requestedVehicle })
+  if (
+    seen.service !== serviceFromUrl ||
+    seen.destination !== requestedDestination ||
+    seen.passengers !== requestedPassengers ||
+    seen.date !== requestedDate ||
+    seen.vehicle !== requestedVehicle
+  ) {
+    setSeen({ service: serviceFromUrl, destination: requestedDestination, passengers: requestedPassengers, date: requestedDate, vehicle: requestedVehicle })
+    if (seen.vehicle !== requestedVehicle) setVehicle(requestedVehicle)
     if (seen.service !== serviceFromUrl) setChosenService(null)
     if (seen.destination !== requestedDestination) setTypedDestination(null)
     if (seen.passengers !== requestedPassengers) setPassengers(requestedPassengers)
@@ -169,8 +202,8 @@ export function PlanForm({
     formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
   }, [attempt])
 
-  function showFieldErrors(issues: FieldIssue[]) {
-    const next: Partial<Record<Slot, string>> = {}
+  function showFieldErrors(issues: FieldIssue[], extra: Partial<Record<Slot, string>> = {}) {
+    const next: Partial<Record<Slot, string>> = { ...extra }
     for (const issue of issues) {
       const slot = slotByField[issue.field]
       if (!slot || next[slot]) continue
@@ -189,6 +222,7 @@ export function PlanForm({
     setDepartureDate("")
     setReturnDate("")
     setOneWayTrip(false)
+    setVehicle("")
     setPassengers("")
     setNotes("")
   }
@@ -208,16 +242,18 @@ export function PlanForm({
       // date for both and says so in the message, so the business sees it at once.
       returnDate: oneWayTrip ? departureDate : returnDate,
       passengerCount: passengers,
-      message: oneWayTrip ? [oneWayMarker, notes.trim()].filter(Boolean).join(" ") : notes,
+      message: [vehicleMarker(vehicle, vehicles), oneWayTrip ? oneWayMarker : "", notes.trim()].filter(Boolean).join(" "),
       locale,
       website,
     }
 
     // Same rules the server applies, so most mistakes are caught instantly
     const checked = enquiryInputSchema.safeParse(payload)
-    if (!checked.success) {
+    // The vehicle is required by the form; the enquiry API itself stays as it was
+    const vehicleError: Partial<Record<Slot, string>> = vehicle ? {} : { vehicle: copy.errors.vehicle }
+    if (!checked.success || !vehicle) {
       setOutcome({ kind: "idle" })
-      showFieldErrors(toFieldIssues(checked.error))
+      showFieldErrors(checked.success ? [] : toFieldIssues(checked.error), vehicleError)
       return
     }
 
@@ -344,6 +380,19 @@ export function PlanForm({
             )}
           </Field>
         )}
+        <Field label={copy.vehicle} hint={copy.vehicleHint} error={errors.vehicle}>
+          {(field) => (
+            <Select id={field.id} name="vehicle" required value={vehicle} invalid={field.invalid} describedBy={field.describedBy} onChange={(event) => setVehicle(event.target.value)}>
+              <option value="">{copy.vehiclePlaceholder}</option>
+              {vehicles.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+              <option value={otherVehicle}>{copy.vehicleOther}</option>
+            </Select>
+          )}
+        </Field>
         <Field label={copy.passengers} hint={copy.passengersHint} error={errors.passengers}>
           {(field) => (
             <Input
@@ -352,7 +401,7 @@ export function PlanForm({
               type="number"
               inputMode="numeric"
               min={1}
-              max={businessRules.passengerCapacity}
+              max={businessRules.maxGroupSize}
               step={1}
               value={passengers}
               invalid={field.invalid}

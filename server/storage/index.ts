@@ -25,7 +25,7 @@ export type StorageStatus =
   | { enabled: false; driver: "none"; persistent: false; reason: string }
 
 /** Keys are always a known folder plus a random UUID file name: nothing user-controlled. */
-export const storageKeyPattern = /^(gallery|reviews|offers|destinations|services|content)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.webp$/
+export const storageKeyPattern = /^(gallery|reviews|offers|destinations|services|content|fleet)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.webp$/
 
 // The upload folder is runtime data, so it is left out of build-time file tracing.
 export function uploadRoot(): string {

@@ -35,9 +35,6 @@ export const aboutPhotos = {
   inset: { category: "traveller", name: "interior-kalika", position: "50% 58%" },
 } satisfies Record<string, ImageRef>
 
-/** The large photograph of our Traveller. */
-export const travellerFeature: ImageRef = { category: "traveller", name: "monsoon-side", position: "50% 60%" }
-
 /** How many approved reviews the carousel shows. */
 export const REVIEW_COUNT = 9
 

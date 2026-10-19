@@ -1,6 +1,8 @@
 import { Suspense } from "react"
 import { ArrowUpRight, ChevronDown, Mail, MapPin, Phone, UserRound, UsersRound } from "lucide-react"
 import { PlanForm, PlanFormFromUrl } from "@/components/home/plan-form"
+import { activeFleet } from "@/data/fleet"
+import { getDictionary } from "@/lib/i18n/get-dictionary"
 import { InstagramIcon, WhatsAppIcon } from "@/components/ui/icons"
 import { focusRing } from "@/components/ui/styles"
 import { business, callNumbers, formatLocation } from "@/data/business"
@@ -165,7 +167,10 @@ export function PlanFormCard({
   headingLevel?: "h2" | "h3"
 }) {
   const plan = dictionary.home.plan
-  const formProps = { locale, copy: plan, services, oneWay: dictionary.rules.oneWay }
+  // The vehicles from data/fleet.ts, named in the visitor's language and in English (for the business)
+  const english = getDictionary("en").fleet.vehicles
+  const vehicles = activeFleet.map((vehicle) => ({ id: vehicle.id, name: dictionary.fleet.vehicles[vehicle.id].name, english: english[vehicle.id].name }))
+  const formProps = { locale, copy: plan, services, vehicles, oneWay: dictionary.rules.oneWay }
   const Heading = headingLevel
   return (
     <div id="plan" aria-labelledby="plan-title" role="region" className="rounded-panel bg-white p-6 shadow-card ring-1 ring-forest/5 sm:p-8 lg:p-10">

@@ -1,36 +1,37 @@
 import { OffersSection } from "@/components/home/offers-section"
 import { AboutTeaser } from "@/components/home/landing/about-teaser"
-import { FeaturedTravellers } from "@/components/home/landing/featured-travellers"
+import { ExploreFleet } from "@/components/home/landing/explore-fleet"
 import { Hero } from "@/components/home/landing/hero"
 import {
   MIN_REVIEWS_FOR_AVERAGE,
   REVIEW_COUNT,
   aboutPhotos,
   heroSlides,
-  travellerFeature,
 } from "@/components/home/landing/landing-content"
 import { JaliDivider } from "@/components/home/landing/landing-heading"
 import { ReviewsTeaser } from "@/components/home/landing/reviews-teaser"
 import { ServicesTeaser } from "@/components/home/landing/services-teaser"
 import { UpcomingTours } from "@/components/home/landing/upcoming-tours"
 import { journeyOrder, type ImageRef } from "@/components/home/home-content"
+import { fleetViews } from "@/components/fleet/fleet-view"
 import { resolvePhoto } from "@/components/media/photo"
 import { builtInDestinationGroups } from "@/components/pages/destination-groups"
 import { upcomingTours } from "@/components/pages/upcoming-tours"
 import { shell } from "@/components/ui/styles"
 import { PageCTA } from "@/components/sections/page-cta"
+import { activeFleet } from "@/data/fleet"
 import { photoCredits } from "@/data/photo-credits"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 import type { Locale } from "@/lib/i18n/locales"
 import { cn } from "@/lib/utils/cn"
 import { listLiveDestinations } from "@/server/cms/destinations"
 import { listLiveOffers } from "@/server/cms/offers"
-import { getLiveHero } from "@/server/cms/sections-public"
+import { getLiveHero, getLiveTraveller } from "@/server/cms/sections-public"
 import { listLiveServices } from "@/server/cms/services"
 import { listApprovedReviews } from "@/server/content/reviews"
 
 /**
- * The homepage: the hero, upcoming tour packages, who we are, our Traveller,
+ * The homepage: the hero, upcoming tour packages, who we are, our fleet,
  * the kinds of trip we run, the latest reviews, and the shared closing call to
  * action (components/sections/page-cta.tsx). Any current admin offer sits just
  * under the hero.
@@ -44,12 +45,13 @@ import { listApprovedReviews } from "@/server/content/reviews"
  */
 export async function HomePage({ locale, dictionary, preview }: { locale: Locale; dictionary: Dictionary; preview: boolean }) {
   const copy = dictionary.home
-  const [offers, hero, services, destinations, reviews] = await Promise.all([
+  const [offers, hero, services, destinations, reviews, traveller] = await Promise.all([
     listLiveOffers(locale, preview, dictionary.cms.offers.cta),
     getLiveHero(preview),
     listLiveServices(locale, preview),
     listLiveDestinations(locale, preview),
     listApprovedReviews(),
+    getLiveTraveller(locale, preview),
   ])
 
   // The average covers every approved review (as on the Reviews page); the carousel shows the latest few
@@ -63,8 +65,8 @@ export async function HomePage({ locale, dictionary, preview }: { locale: Locale
       <Hero locale={locale} copy={copy.hero} landing={copy.landing.hero} overrides={hero} rating={rating} />
       <OffersSection locale={locale} copy={dictionary.cms} whatsappLabel={dictionary.nav.whatsapp} offers={offers} />
       <UpcomingTours locale={locale} copy={copy.landing.tours} tours={dictionary.pages.destinations.tours.items} />
-      <AboutTeaser locale={locale} copy={copy.landing.about} story={dictionary.pages.about.story} places={places} trips={trips} />
-      <FeaturedTravellers locale={locale} copy={copy.landing.traveller} traveller={dictionary.pages.traveller} />
+      <AboutTeaser locale={locale} copy={copy.landing.about} vehicles={activeFleet.length} places={places} trips={trips} />
+      <ExploreFleet locale={locale} dictionary={dictionary} vehicles={fleetViews(locale, dictionary, traveller)} />
       <ServicesTeaser locale={locale} copy={copy.landing.services} journeys={copy.journeys} managed={services} />
       <JaliDivider className="bg-ivory" />
       <ReviewsTeaser locale={locale} dictionary={dictionary} reviews={reviews.slice(0, REVIEW_COUNT)} />
@@ -80,7 +82,6 @@ const homeImages: ImageRef[] = [
   ...upcomingTours.flatMap((tour) => (tour.image ? [tour.image] : [])),
   aboutPhotos.main,
   aboutPhotos.inset,
-  travellerFeature,
 ]
 
 /** Credits for photographs by other people that appear on this page, as their licences require. */

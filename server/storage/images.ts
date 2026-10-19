@@ -64,7 +64,7 @@ export async function processImageUpload(file: File, options: ProcessOptions) {
 
 /** Processes and stores an upload. Throws 503 when image storage is not configured. */
 /** Folders uploads may be stored in; keep in step with storageKeyPattern in ./index.ts. */
-export type ImageFolder = "gallery" | "reviews" | "offers" | "destinations" | "services" | "content"
+export type ImageFolder = "gallery" | "reviews" | "offers" | "destinations" | "services" | "content" | "fleet"
 
 export async function storeImageUpload(file: File, folder: ImageFolder, options: ProcessOptions) {
   const storage = getImageStorage()
