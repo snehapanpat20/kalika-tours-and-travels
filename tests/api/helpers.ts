@@ -23,7 +23,7 @@ export const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionStrin
 
 /** Empties every table. Only ever runs against a *_test database (checked above). */
 export async function resetDatabase() {
-  await prisma.$executeRawUnsafe(`TRUNCATE TABLE enquiries, admins, rate_limit_buckets, gallery_items, reviews, offers, announcements, site_content, destinations, services, audit_logs`)
+  await prisma.$executeRawUnsafe(`TRUNCATE TABLE enquiries, admins, rate_limit_buckets, gallery_items, reviews, offers, announcements, site_content, destinations, services, vehicles, vehicle_photos, audit_logs`)
 }
 
 /** Test-only credentials for the *_test database. Never real accounts. */
