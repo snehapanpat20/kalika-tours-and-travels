@@ -27,7 +27,7 @@ export default async function AdminSeoPage() {
       />
       <div className="flex flex-wrap items-center gap-2 rounded-card bg-ivory p-4 text-sm ring-1 ring-line">
         <span className="text-muted">
-          Website address: <strong className="text-ink">{siteUrl}</strong> (set by the server&rsquo;s NEXT_PUBLIC_SITE_URL)
+          Website address: <strong className="text-ink">{siteUrl}</strong> (the server&rsquo;s NEXT_PUBLIC_SITE_URL, or https://kalikayatra.com on the live site)
         </span>
         <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className={link}>
           Sitemap <ExternalLink aria-hidden="true" className="size-3.5" />
