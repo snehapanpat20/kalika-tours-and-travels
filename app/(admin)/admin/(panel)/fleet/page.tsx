@@ -16,7 +16,7 @@ export default async function AdminFleetPage() {
     <div className="grid gap-6">
       <AdminPageHeader
         title="Fleet"
-        description="The vehicles on the Our Fleet page, in the order shown there. Only published vehicles appear on the website; drafts stay here until you publish them."
+        description="The vehicles on the homepage and Our Fleet page, in the order shown there. The website lists the 20-Seater Traveller, Maruti Suzuki Ertiga and Toyota Innova Crysta when they are published; drafts and other vehicles stay here only."
       />
       <FleetManager items={items} totalAll={counts.all} uploads={images.uploads} />
     </div>

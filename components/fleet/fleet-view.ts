@@ -1,4 +1,4 @@
-import { activeFleet, type Vehicle, type VehicleCategory } from "@/data/fleet"
+import type { VehicleCategory, VehicleId } from "@/data/fleet"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 import type { Locale } from "@/lib/i18n/locales"
 import { planPath } from "@/lib/routes"
@@ -12,7 +12,10 @@ export type VehiclePhotoView = { id: string; src: string; alt: string; caption: 
 export type VehicleView = {
   id: string
   name: string
+  /** The short description, on the card. */
   description: string
+  /** The longer description, under "View details" (where the site has one for this vehicle). */
+  details: string
   /** Short facts: seats, AC / non-AC, sleeper, the push-back option (only those confirmed). */
   facts: string[]
   categories: VehicleCategory[]
@@ -27,58 +30,23 @@ export type VehicleView = {
 // No "ac": the Traveller can be booked AC or non-AC, which its card already says
 const travellerFeatures: VehicleFeatureKey[] = ["seats", "legroom", "luggage", "audio", "clean", "windows", "driver"]
 
-function facts(vehicle: Vehicle, copy: Dictionary["fleet"]): string[] {
-  const list: string[] = []
-  if (vehicle.capacity !== null) list.push(copy.seats.replace("{n}", String(vehicle.capacity)))
-  // One chip for the air conditioning: "AC / Non-AC" when it can be booked either way
-  if (vehicle.acOptions.length === 2) list.push(copy.acOrNonAc)
-  else if (vehicle.acOptions.length === 1) list.push(vehicle.acOptions[0] === "ac" ? copy.ac : copy.nonAc)
-  if (vehicle.sleeper) list.push(copy.sleeper)
-  if (vehicle.pushBackOption) list.push(copy.pushBackOption)
-  return list
+/** The site's own wording for a vehicle imported from the starting list (data/fleet.ts), by its key. */
+function builtInCopy(dictionary: Dictionary, key: string | null) {
+  const vehicles = dictionary.fleet.vehicles as Partial<Record<string, Dictionary["fleet"]["vehicles"][VehicleId]>>
+  return key ? vehicles[key] : undefined
 }
 
-/**
- * The active vehicles, in order, as the pages draw them. The Traveller's
- * photos and features come from the admin panel when it has published some
- * (Admin › Website content › Our Fleet: the Traveller), and from data/fleet.ts
- * otherwise. "Enquire Now" opens the trip planner with the vehicle chosen.
- */
-export function fleetViews(locale: Locale, dictionary: Dictionary, managedTraveller?: LiveTraveller | null, vehicles: Vehicle[] = activeFleet): VehicleView[] {
-  const copy = dictionary.fleet
-  return vehicles.map((vehicle) => {
-    const builtInPhotos: VehiclePhotoView[] = [vehicle.exterior, ...vehicle.interior].flatMap((photo) =>
-      photo ? [{ id: photo.id, src: photo.src, position: photo.position, alt: copy.photos[photo.id].alt, caption: copy.photos[photo.id].caption }] : [],
-    )
-    const isTraveller = vehicle.id === "traveller"
-    const photos = isTraveller && managedTraveller?.photos?.length ? managedTraveller.photos.map(({ id, src, alt, caption }) => ({ id, src, alt, caption })) : builtInPhotos
-    const features = isTraveller
-      ? (managedTraveller?.features?.map((feature) => feature.label) ?? travellerFeatures.map((key) => dictionary.home.traveller.features[key]))
-      : []
-
-    return {
-      id: vehicle.id,
-      name: copy.vehicles[vehicle.id].name,
-      description: copy.vehicles[vehicle.id].description,
-      facts: facts(vehicle, copy),
-      categories: vehicle.categories,
-      photo: photos[0] ?? null,
-      photos,
-      features,
-      enquireHref: planPath(locale, { vehicle: vehicle.id }),
-    }
-  })
-}
-
-/** Vehicles the trip planner can pre-select (the rest open it without a vehicle). */
-const plannerVehicles = new Set<string>(activeFleet.map((vehicle) => vehicle.id))
+/** What the trip form and "Enquire Now" links call a vehicle: its stable key, or its id. */
+export const vehicleChoiceId = (vehicle: Pick<PublicVehicle, "id" | "key">) => vehicle.key ?? vehicle.id
 
 /**
- * Vehicles managed in Admin › Fleet, drawn the same way. Photos and wording
- * come from the admin panel; the 20 seater Traveller (key "traveller") keeps
- * its "On board" list from Admin › Website content › Our Fleet: the Traveller.
+ * The published vehicles from Admin › Fleet, in order, as the pages draw them
+ * (the homepage, the Our Fleet page). Photos and wording come from the admin
+ * panel; the 20 seater Traveller (key "traveller") keeps its "On board" list
+ * from Admin › Website content › Our Fleet: the Traveller. "Enquire Now" opens
+ * the trip planner with the vehicle chosen.
  */
-export function managedFleetViews(locale: Locale, dictionary: Dictionary, vehicles: PublicVehicle[], managedTraveller?: LiveTraveller | null): VehicleView[] {
+export function fleetViews(locale: Locale, dictionary: Dictionary, vehicles: PublicVehicle[], managedTraveller?: LiveTraveller | null): VehicleView[] {
   const copy = dictionary.fleet
   return vehicles.map((vehicle) => {
     const categories: VehicleCategory[] =
@@ -99,12 +67,18 @@ export function managedFleetViews(locale: Locale, dictionary: Dictionary, vehicl
       id: vehicle.id,
       name: vehicle.name,
       description: vehicle.description ?? "",
+      details: builtInCopy(dictionary, vehicle.key)?.details ?? "",
       facts: list,
       categories,
       photo: photos[0] ?? null,
       photos,
       features,
-      enquireHref: planPath(locale, vehicle.key && plannerVehicles.has(vehicle.key) ? { vehicle: vehicle.key } : {}),
+      enquireHref: planPath(locale, { vehicle: vehicleChoiceId(vehicle) }),
     }
   })
+}
+
+/** The trip form's "Choose Your Vehicle" options: the same published vehicles, in the visitor's language and in English. */
+export function vehicleChoices(vehicles: PublicVehicle[]) {
+  return vehicles.map((vehicle) => ({ id: vehicleChoiceId(vehicle), name: vehicle.name, english: vehicle.englishName }))
 }

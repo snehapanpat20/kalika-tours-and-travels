@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Bus, Images } from "lucide-react"
+import { ArrowRight, Bus, Car, Images } from "lucide-react"
 import type { VehicleView } from "@/components/fleet/fleet-view"
 import { focusRing } from "@/components/ui/styles"
 import type { Dictionary } from "@/lib/i18n/dictionary"
@@ -40,7 +40,11 @@ export function VehicleCard({
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[repeating-linear-gradient(135deg,transparent_0_14px,rgb(42_26_18/0.035)_14px_28px)] text-muted">
-            <Bus aria-hidden="true" strokeWidth={1.4} className="size-10 text-highlight" />
+            {vehicle.categories.includes("car") ? (
+              <Car aria-hidden="true" strokeWidth={1.4} className="size-10 text-highlight" />
+            ) : (
+              <Bus aria-hidden="true" strokeWidth={1.4} className="size-10 text-highlight" />
+            )}
             <span className="text-sm font-medium">{copy.photoComingSoon}</span>
           </div>
         )}
@@ -61,9 +65,10 @@ export function VehicleCard({
         ) : null}
         {compact ? null : <p className="mt-4 leading-relaxed text-muted">{vehicle.description}</p>}
 
-        {!compact && (vehicle.features.length || vehicle.photos.length > 1) ? (
+        {!compact && (vehicle.details || vehicle.features.length || vehicle.photos.length > 1) ? (
           <details className="group/details mt-4 text-sm">
             <summary className={cn("inline-flex min-h-11 cursor-pointer items-center gap-1.5 font-semibold text-teal-deep", focusRing)}>{copy.viewDetails}</summary>
+            {vehicle.details ? <p className="mt-2 leading-relaxed text-ink/85">{vehicle.details}</p> : null}
             {vehicle.features.length ? (
               <>
                 <p className="mt-2 text-xs font-semibold tracking-[0.16em] text-muted uppercase">{copy.onBoard}</p>

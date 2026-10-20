@@ -19,7 +19,6 @@ import { builtInDestinationGroups } from "@/components/pages/destination-groups"
 import { upcomingTours } from "@/components/pages/upcoming-tours"
 import { shell } from "@/components/ui/styles"
 import { PageCTA } from "@/components/sections/page-cta"
-import { activeFleet } from "@/data/fleet"
 import { photoCredits } from "@/data/photo-credits"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 import type { Locale } from "@/lib/i18n/locales"
@@ -27,6 +26,7 @@ import { cn } from "@/lib/utils/cn"
 import { listLiveDestinations } from "@/server/cms/destinations"
 import { listLiveOffers } from "@/server/cms/offers"
 import { getLiveHero, getLiveTraveller } from "@/server/cms/sections-public"
+import { listPublicVehicles } from "@/server/cms/vehicles"
 import { listLiveServices } from "@/server/cms/services"
 import { listApprovedReviews } from "@/server/content/reviews"
 
@@ -45,13 +45,15 @@ import { listApprovedReviews } from "@/server/content/reviews"
  */
 export async function HomePage({ locale, dictionary, preview }: { locale: Locale; dictionary: Dictionary; preview: boolean }) {
   const copy = dictionary.home
-  const [offers, hero, services, destinations, reviews, traveller] = await Promise.all([
+  const [offers, hero, services, destinations, reviews, traveller, vehicles] = await Promise.all([
     listLiveOffers(locale, preview, dictionary.cms.offers.cta),
     getLiveHero(preview),
     listLiveServices(locale, preview),
     listLiveDestinations(locale, preview),
     listApprovedReviews(),
     getLiveTraveller(locale, preview),
+    // The same published vehicles as the Our Fleet page (Admin › Fleet), never a built-in list
+    listPublicVehicles(locale, preview),
   ])
 
   // The average covers every approved review (as on the Reviews page); the carousel shows the latest few
@@ -65,8 +67,8 @@ export async function HomePage({ locale, dictionary, preview }: { locale: Locale
       <Hero locale={locale} copy={copy.hero} landing={copy.landing.hero} overrides={hero} rating={rating} />
       <OffersSection locale={locale} copy={dictionary.cms} whatsappLabel={dictionary.nav.whatsapp} offers={offers} />
       <UpcomingTours locale={locale} copy={copy.landing.tours} tours={dictionary.pages.destinations.tours.items} />
-      <AboutTeaser locale={locale} copy={copy.landing.about} vehicles={activeFleet.length} places={places} trips={trips} />
-      <ExploreFleet locale={locale} dictionary={dictionary} vehicles={fleetViews(locale, dictionary, traveller)} />
+      <AboutTeaser locale={locale} copy={copy.landing.about} vehicles={vehicles?.length ?? null} places={places} trips={trips} />
+      <ExploreFleet locale={locale} dictionary={dictionary} vehicles={fleetViews(locale, dictionary, vehicles ?? [], traveller)} />
       <ServicesTeaser locale={locale} copy={copy.landing.services} journeys={copy.journeys} managed={services} />
       <JaliDivider className="bg-ivory" />
       <ReviewsTeaser locale={locale} dictionary={dictionary} reviews={reviews.slice(0, REVIEW_COUNT)} />

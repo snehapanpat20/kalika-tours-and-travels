@@ -39,36 +39,89 @@ describe("Admin › Fleet", () => {
     assert.equal(await prisma.vehicle.count(), 0)
   })
 
-  test("before anything is added, Our Fleet shows the built-in list, including the new vehicles", async () => {
-    const html = (await page("/en/traveller")).html
-    for (const name of ["20 Seater Traveller", "17 Seater AC Traveller", "17 Seater Non-AC Traveller", "Innova Crysta — 7 Seater", "Ertiga — 6 Seater", "45 Seater Bus"]) {
-      assert.ok(html.includes(name), name)
+  /** What a public page offers of a vehicle: its "Enquire Now" link, or its trip-form option. */
+  const listed = (html: string, key: string) => html.includes(`vehicle=${key}`) || html.includes(`value="${key}"`)
+  const publicPages = async () => ({
+    home: (await page("/en")).html,
+    fleet: (await page("/en/traveller")).html,
+    form: (await page("/en/plan-your-trip")).html,
+  })
+
+  test("before any vehicle is published, no page shows a built-in list", async () => {
+    const pages = await publicPages()
+    assert.ok(pages.fleet.includes("Our vehicles will be listed here soon."), "Our Fleet shows the empty state")
+    assert.ok(!pages.home.includes('id="explore-fleet-title"'), "the homepage fleet section is left out")
+    for (const key of ["traveller", "ertiga", "innova", "bus45", "sleeper34"]) {
+      for (const [name, html] of Object.entries(pages)) assert.ok(!listed(html, key), `${name} lists ${key}`)
     }
   })
 
-  test("importing copies the website's vehicles once, with a draft push-back vehicle, and never duplicates", async () => {
+  test("importing copies only the Traveller, Ertiga and Innova Crysta, once, and they appear everywhere", async () => {
     const first = await api("/api/admin/vehicles/import", { cookie, body: {} })
     assert.equal(first.status, 201)
-    assert.equal(first.json.count, 10)
+    assert.equal(first.json.count, 3)
     const again = await api("/api/admin/vehicles/import", { cookie, body: {} })
     assert.equal(again.status, 200)
     assert.equal(again.json.count, 0)
-    assert.equal(await prisma.vehicle.count(), 10)
-
-    const pushBack = await prisma.vehicle.findUniqueOrThrow({ where: { key: "pushBackVehicle" } })
-    assert.equal(pushBack.published, false)
-    assert.equal(pushBack.capacity, null)
+    assert.deepEqual((await prisma.vehicle.findMany({ orderBy: { sortOrder: "asc" } })).map((row) => [row.key, row.name, row.published]), [
+      ["traveller", "20-Seater Traveller", true],
+      ["ertiga", "Maruti Suzuki Ertiga", true],
+      ["innova", "Toyota Innova Crysta", true],
+    ])
     const traveller = await prisma.vehicle.findUniqueOrThrow({ where: { key: "traveller" }, include: { photos: true } })
     assert.equal(traveller.photos.length, 2)
     assert.equal(traveller.photos.filter((item) => item.isCover).length, 1)
 
-    const html = (await page("/en/traveller")).html
-    assert.ok(html.includes("Innova Crysta — 7 Seater") && html.includes("17 Seater AC Traveller"))
-    assert.ok(!html.includes("Push-Back Seat Vehicle"), "drafts stay off the website")
-    assert.ok((await page("/mr/traveller")).html.includes("इनोव्हा क्रिस्टा — 7 आसनी"), "Marathi names")
+    const pages = await publicPages()
+    for (const key of ["traveller", "ertiga", "innova"]) {
+      for (const [name, html] of Object.entries(pages)) assert.ok(listed(html, key), `${name} lists ${key}`)
+    }
+    assert.ok(pages.fleet.includes("Travel together comfortably in our 20-passenger Traveller"), "the Traveller's longer description is under View details")
+    assert.ok((await page("/mr/traveller")).html.includes("टोयोटा इनोव्हा क्रिस्टा"), "Marathi names")
   })
 
-  test("create, validate, publish, unpublish and delete a vehicle", async () => {
+  test("editing a listed vehicle's name and description updates the public pages in both languages", async () => {
+    const innova = await prisma.vehicle.findUniqueOrThrow({ where: { key: "innova" } })
+    const body = { name: "Innova Crysta Test Name", nameMr: "इनोव्हा चाचणी नाव", description: "Edited test description.", descriptionMr: "बदललेले चाचणी वर्णन." }
+    assert.equal((await api(`/api/admin/vehicles/${innova.id}`, { cookie, method: "PATCH", body })).status, 200)
+    const [home, fleet, mr] = [(await page("/en")).html, (await page("/en/traveller")).html, (await page("/mr/traveller")).html]
+    assert.ok(home.includes("Innova Crysta Test Name") && fleet.includes("Innova Crysta Test Name"))
+    assert.ok(fleet.includes("Edited test description."))
+    assert.ok(mr.includes("इनोव्हा चाचणी नाव") && mr.includes("बदललेले चाचणी वर्णन."))
+    // The longer description under "View details" is the site's own text for the Innova
+    assert.ok(fleet.includes("Its spacious MPV layout and comfortable cabin"))
+    // Put the original wording back
+    const original = { name: innova.name, nameMr: innova.nameMr, description: innova.description, descriptionMr: innova.descriptionMr }
+    assert.equal((await api(`/api/admin/vehicles/${innova.id}`, { cookie, method: "PATCH", body: original })).status, 200)
+  })
+
+  test("a deleted or unpublished vehicle leaves every public page, and nothing built-in replaces it", async () => {
+    const ertiga = await prisma.vehicle.findUniqueOrThrow({ where: { key: "ertiga" } })
+    assert.equal((await api(`/api/admin/vehicles/${ertiga.id}`, { cookie, method: "DELETE" })).status, 200)
+    let pages = await publicPages()
+    for (const [name, html] of Object.entries(pages)) {
+      assert.ok(!listed(html, "ertiga"), `${name} still lists the deleted Ertiga`)
+      assert.ok(listed(html, "innova"), `${name} lost the Innova`)
+    }
+
+    const innova = await prisma.vehicle.findUniqueOrThrow({ where: { key: "innova" } })
+    assert.equal((await api(`/api/admin/vehicles/${innova.id}`, { cookie, method: "PATCH", body: { published: false } })).status, 200)
+    pages = await publicPages()
+    for (const [name, html] of Object.entries(pages)) assert.ok(!listed(html, "innova"), `${name} still lists the unpublished Innova`)
+
+    // With nothing published, the pages are empty rather than falling back to an old list
+    const traveller = await prisma.vehicle.findUniqueOrThrow({ where: { key: "traveller" } })
+    assert.equal((await api(`/api/admin/vehicles/${traveller.id}`, { cookie, method: "PATCH", body: { published: false } })).status, 200)
+    pages = await publicPages()
+    assert.ok(pages.fleet.includes("Our vehicles will be listed here soon."))
+    for (const [name, html] of Object.entries(pages)) assert.ok(!listed(html, "traveller") && !listed(html, "ertiga"), `${name} shows a vehicle`)
+
+    // Put the Innova and the Traveller back for the tests that follow (re-import brings the Ertiga back)
+    for (const id of [innova.id, traveller.id]) await api(`/api/admin/vehicles/${id}`, { cookie, method: "PATCH", body: { published: true } })
+    assert.equal((await api("/api/admin/vehicles/import", { cookie, body: {} })).json.count, 1)
+  })
+
+  test("create, validate, publish, unpublish and delete a vehicle (other vehicles stay off the website)", async () => {
     const bad = await api("/api/admin/vehicles", { cookie, body: { name: "", category: "SPACESHIP", capacity: "0" } })
     assert.equal(bad.status, 422)
     const fields = new Set(bad.json.errors.map((issue: { field: string }) => issue.field))
@@ -81,8 +134,9 @@ describe("Admin › Fleet", () => {
     assert.ok(!(await page("/en/traveller")).html.includes("Test Mini Coach"))
 
     assert.equal((await api(`/api/admin/vehicles/${id}`, { cookie, method: "PATCH", body: { published: true } })).status, 200)
-    const published = (await page("/en/traveller")).html
-    assert.ok(published.includes("Test Mini Coach") && published.includes("15 seats"))
+    // Only the Traveller, Ertiga and Innova Crysta are listed, even when another vehicle is published
+    for (const path of ["/en", "/en/traveller", "/en/plan-your-trip"]) assert.ok(!(await page(path)).html.includes("Test Mini Coach"), path)
+    assert.equal((await api(`/api/admin/vehicles/${id}`, { cookie })).json.vehicle.published, true, "it is still published in Admin › Fleet")
 
     assert.equal((await api(`/api/admin/vehicles/${id}`, { cookie, method: "PATCH", body: { published: false } })).status, 200)
     assert.ok(!(await page("/en/traveller")).html.includes("Test Mini Coach"))
@@ -142,8 +196,7 @@ describe("Admin › Fleet", () => {
     assert.equal(await fileStatus(newUrl), 200)
     assert.equal(await fileStatus(uploaded.url), 404, "the replaced file is removed")
 
-    const html = (await page("/en/traveller")).html
-    assert.ok(html.includes("Photo Test Bus") && html.includes("AC / Non-AC"))
+    assert.ok(!(await page("/en/traveller")).html.includes("Photo Test Bus"), "not one of the three listed vehicles")
 
     // Remove the cover: the other photo becomes the cover
     const removed = await api(`/api/admin/vehicles/${id}/photos/${website.id}`, { cookie, method: "DELETE" })

@@ -11,7 +11,7 @@ export const en = {
   meta: {
     siteName: brand,
     description:
-      `${brand} in Hadapsar, Pune: tours, a 20 seater Traveller and buses for family, group, pilgrimage, corporate and outstation trips.`,
+      `${brand} in Hadapsar, Pune: tours, a 20 seater Traveller, a Maruti Suzuki Ertiga and a Toyota Innova Crysta for family, group, pilgrimage, corporate and outstation trips.`,
   },
   tagline: business.tagline.en,
   foundation: {
@@ -120,18 +120,25 @@ export const en = {
     shown: "{n} vehicles shown",
     vehicles: {
       traveller: {
-        name: "20 Seater Traveller",
-        description: "Our Traveller gives the whole group room to travel together, with comfort for the long stretches. Available AC or non-AC.",
+        name: "20-Seater Traveller",
+        description: "Spacious group travel for family trips, pilgrimages, corporate outings, and outstation journeys.",
+        details:
+          "Travel together comfortably in our 20-passenger Traveller, suitable for family holidays, group tours, pilgrimages, corporate outings, and long-distance journeys. Designed for group convenience, it offers generous seating space and luggage capacity for trips together.",
       },
-      traveller17Ac: { name: "17 Seater AC Traveller", description: "An air-conditioned 17-seat Traveller for mid-sized groups." },
-      traveller17NonAc: { name: "17 Seater Non-AC Traveller", description: "A non-AC 17-seat Traveller for mid-sized groups." },
-      innova: { name: "Innova Crysta — 7 Seater", description: "A 7-seat car for small families and groups." },
-      ertiga: { name: "Ertiga — 6 Seater", description: "A 6-seat car for small families and groups." },
-      bus32: { name: "32 Seater Bus", description: "A 32-seat bus for mid-sized groups, available AC or non-AC." },
-      bus45: { name: "45 Seater Bus", description: "A 45-seat bus for large groups travelling together, available AC or non-AC." },
-      bus26: { name: "26 Seater Bus", description: "A 26-seat bus for smaller groups, available AC or non-AC, with push-back seats if you'd like them." },
-      sleeper34: { name: "34 Seater Sleeper Bus", description: "A sleeper bus for 34 travellers, for overnight journeys, available AC or non-AC." },
+      ertiga: {
+        name: "Maruti Suzuki Ertiga",
+        description: "A practical choice for family outings, small groups, airport transfers, and outstation trips.",
+      },
+      innova: {
+        name: "Toyota Innova Crysta",
+        description: "A premium, spacious vehicle for family, corporate, and outstation travel.",
+        details:
+          "Choose the Toyota Innova Crysta for family holidays, business travel, airport transfers, and outstation journeys. Its spacious MPV layout and comfortable cabin make it suitable for customers looking for a more premium travel experience.",
+      },
     },
+    empty: "Our vehicles will be listed here soon.",
+    unavailable: "Our vehicle list can't be shown right now.",
+    askUs: "Tell us about your trip and we'll suggest a vehicle.",
     photos: {
       travellerExterior: { alt: "A white Force Traveller seen from behind, parked on an open road", caption: "Our Traveller" },
       travellerInterior: { alt: "Rows of orange and dark-brown leather push-back seats inside the Traveller, with yellow curtains", caption: "Inside the Traveller" },
@@ -148,7 +155,7 @@ export const en = {
       eyebrow: "Our Fleet",
       lead: "Explore our",
       accent: "fleet",
-      description: "From our 20 seater Traveller to buses for larger groups: pick the vehicle that suits your group.",
+      description: "Our 20-Seater Traveller for groups, and the Maruti Suzuki Ertiga and Toyota Innova Crysta for families and smaller groups.",
       viewAll: "View our fleet",
     },
   },
@@ -241,7 +248,7 @@ export const en = {
           action: "Plan your trip",
         },
         trust: {
-          seats: "Traveller and buses",
+          seats: "Traveller, Ertiga and Innova Crysta",
           base: "Based in Hadapsar, Pune",
           direct: "Talk to us directly",
           rating: "{rating}★ from {count} reviews",
@@ -264,7 +271,7 @@ export const en = {
         title: "Who we are",
         body: `${brand} helps make every journey comfortable and well planned. From family outings and group tours to pilgrimages and corporate travel, we offer a range of vehicles to suit different group sizes and travel needs, and we're with you from your first enquiry to your return.`,
         link: "Our story",
-        stats: { vehicles: "Seating options: from a 20 seater Traveller to 45-seater buses", places: "Places we plan trips to", trips: "Kinds of trip we run" },
+        stats: { vehicles: "Vehicles in our fleet", places: "Places we plan trips to", trips: "Kinds of trip we run" },
         photoAlt: `The ${brand} Traveller driving on a wet ghat road, with a waterfall on the hillside behind`,
         insetAlt: "Rows of orange seats with red curtains inside the Kalika Traveller",
       },
@@ -274,7 +281,7 @@ export const en = {
         accent: "plan",
         description: "From a weekend away to a pilgrimage across India: tell us the kind of trip, and we'll shape the journey around it.",
         viewAll: "View all services",
-        rental: { title: "Vehicles on hire", body: "Hire our 20 seater Traveller or one of our buses for your own plan." },
+        rental: { title: "Vehicles on hire", body: "Hire our 20 seater Traveller, Ertiga or Innova Crysta for your own plan." },
       },
       reviews: {
         eyebrow: "Reviews",
@@ -570,17 +577,17 @@ export const en = {
       home: {
         title: `${brand} | Tours & Traveller Rental in Pune`,
         description:
-          "Tours and travels from Hadapsar, Pune: a 20 seater Traveller and buses for family, group, pilgrimage, corporate and outstation trips. Plan your trip online.",
+          "Tours and travels from Hadapsar, Pune: a 20 seater Traveller, an Ertiga and an Innova Crysta for family, group, pilgrimage, corporate and outstation trips. Plan your trip online.",
       },
       about: {
         title: `About ${brand} | Hadapsar, Pune`,
         description:
-          "A local tours and travels service in Hadapsar, Pune, run by Umesh Panpat. We plan comfortable journeys for families, groups and teams, with a Traveller and buses for different group sizes.",
+          "A local tours and travels service in Hadapsar, Pune, run by Umesh Panpat. We plan comfortable journeys for families, groups and teams, with a 20 seater Traveller, an Ertiga and an Innova Crysta for different group sizes.",
       },
       services: {
         title: `Tour & Travel Services in Pune | ${brand}`,
         description:
-          "Family tours, group tours, pilgrimage tours, corporate trips and outstation journeys from Pune, in our 20 seater Traveller or one of our buses. Find your trip.",
+          "Family tours, group tours, pilgrimage tours, corporate trips and outstation journeys from Pune, in our 20 seater Traveller, Ertiga or Innova Crysta. Find your trip.",
       },
       destinations: {
         title: `Travel Destinations from Pune | ${brand}`,
@@ -588,9 +595,9 @@ export const en = {
           "Hill stations, coast and temple towns in Maharashtra, trips to Goa, Rajasthan, Kerala and beyond, and pilgrimages across India. Plan a group trip from Pune.",
       },
       traveller: {
-        title: `Our Fleet: Traveller and Bus Hire in Pune | ${brand}`,
+        title: `Our Fleet: Traveller, Ertiga and Innova Crysta Hire in Pune | ${brand}`,
         description:
-          "Hire our 20 seater Traveller or a bus from Pune, AC or non-AC: buses for 26 to 45 people, a sleeper bus and push-back seating, for family trips, group tours and pilgrimages.",
+          "Hire our 20 seater Traveller (AC or non-AC), a Maruti Suzuki Ertiga or a Toyota Innova Crysta from Pune, for family trips, group tours, pilgrimages, corporate travel and outstation journeys.",
       },
       gallery: {
         title: `Travel Photos | ${brand}, Pune`,
@@ -756,10 +763,10 @@ export const en = {
       moreBody: "Don't see your destination? Share the place you have in mind and we'll plan the journey around it.",
     },
     traveller: {
-      eyebrow: "Traveller and buses",
+      eyebrow: "Traveller and cars",
       titleLead: "Our Fleet",
       titleFollow: "",
-      description: "Different vehicles for different group sizes and journeys: from our 20 seater Traveller to buses for larger groups.",
+      description: "The right vehicle for your group: our 20-Seater Traveller for groups, and the Maruti Suzuki Ertiga and Toyota Innova Crysta for families and smaller groups.",
       imageAlt: "The Kalika Traveller driving on a wet ghat road, with a waterfall on the hillside behind",
       specsEyebrow: "On board",
       specsTitle: "Room for everyone, and their luggage.",
@@ -916,19 +923,17 @@ export const en = {
         quote: "Does “Get a Quote” give an instant price?",
         fleetTypes: `What types of vehicles are available with ${brand}?`,
         groupSize: "Which vehicle should I choose for my group size?",
-        acNonAc: "Are AC and non-AC buses available?",
-        sleeper: "Do you have sleeper buses for longer journeys?",
+        acNonAc: "Can I book a vehicle with or without AC?",
         tripKinds: "Can I enquire about a vehicle for a family trip, group tour, pilgrimage or corporate trip?",
         availability: "How can I check vehicle availability and pricing?",
         specificVehicle: "Can I request a specific vehicle when planning my trip?",
       },
       answers: {
-        kinds: "Outstation, family, group, pilgrimage and corporate trips from Pune, in our 20 seater Traveller or one of our buses.",
+        kinds: "Outstation, family, group, pilgrimage and corporate trips from Pune, in our 20 seater Traveller, Ertiga or Innova Crysta.",
         book: "Send an enquiry from the Plan Your Trip page, or call or WhatsApp us.",
         fleetTypes: "Our fleet: {vehicles}. Each one is listed with its seats on the Our Fleet page.",
-        groupSize: "Start with how many people are travelling: our Traveller seats 20, our buses seat 26, 32 or 45, and the sleeper bus 34. Each vehicle's seats are listed on the Our Fleet page. If you're unsure, choose “Other / Help Me Choose” in the trip form and we'll suggest a suitable vehicle.",
-        acNonAc: "Yes. Each of our vehicles, from the 20 seater Traveller to the 45 seater bus, can be booked AC or non-AC. Tell us which you'd prefer when you enquire, and we'll confirm what's available for your dates.",
-        sleeper: "Yes, a 34 seater sleeper bus, suited to overnight journeys, available AC or non-AC. Tell us your route and dates when you enquire.",
+        groupSize: "Start with how many people are travelling: our Traveller seats 20 passengers plus the driver, the Innova Crysta is a 7-seater and the Ertiga a 6-seater. Each vehicle's seats are listed on the Our Fleet page. If you're unsure, choose “Other / Help Me Choose” in the trip form and we'll suggest a suitable vehicle.",
+        acNonAc: "Our 20-Seater Traveller can be booked AC or non-AC. Tell us which you'd prefer when you enquire, and we'll confirm what's available for your dates.",
         tripKinds: "Yes. You can enquire about any of our vehicles for a family trip, group tour, pilgrimage, corporate trip or outstation journey. Tell us the kind of trip in the form.",
         availability: "Send an enquiry from the Plan a Trip page, or call or WhatsApp us. We confirm which vehicles are free for your dates, and the final price for your route, when we reply. The website does not show live availability or fixed prices.",
         specificVehicle: "Yes. Pick it in the “Choose Your Vehicle” field of the trip form, or choose “Other / Help Me Choose” and we'll suggest one. We'll confirm whether it is available for your dates.",
