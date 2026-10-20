@@ -72,25 +72,28 @@ export function Hero({
       <div className={cn(shell, "flex flex-1 flex-col pt-[calc(7rem+var(--announcement-h,0px))] pb-8 lg:pt-[calc(8.5rem+var(--announcement-h,0px))]")}>
         {/* The text: label, name, rule, tagline, buttons */}
         <div className="my-auto max-w-3xl">
-          <p className="hero-up text-xs font-semibold tracking-[0.28em] text-teal-light uppercase sm:text-sm" style={at(100)}>
-            {copy.eyebrow}
-          </p>
-          <h1 id="hero-title" className="mt-5 text-[clamp(3.75rem,1.6rem+9vw,8.75rem)] leading-[0.92] text-ivory">
-            <span className="hero-mask">
-              <span className="hero-line" style={at(200)}>
-                {first}
-              </span>
-            </span>
-            {rest.length ? (
-              <>
-                {" "}
-                <span className="hero-mask">
-                  <span className="hero-line text-teal-light italic" style={at(320)}>
-                    {rest.join(" ")}
-                  </span>
+          {/* One H1: the "Tours & Travels in Pune" label above the name, so the heading says what the business does */}
+          <h1 id="hero-title" className="text-ivory">
+            <span className="hero-up block font-sans text-xs leading-normal font-semibold tracking-[0.28em] text-teal-light uppercase sm:text-sm" style={at(100)}>
+              {copy.eyebrow}
+            </span>{" "}
+            <span className="mt-5 block text-[clamp(3.75rem,1.6rem+9vw,8.75rem)] leading-[0.92]">
+              <span className="hero-mask">
+                <span className="hero-line" style={at(200)}>
+                  {first}
                 </span>
-              </>
-            ) : null}
+              </span>
+              {rest.length ? (
+                <>
+                  {" "}
+                  <span className="hero-mask">
+                    <span className="hero-line text-teal-light italic" style={at(320)}>
+                      {rest.join(" ")}
+                    </span>
+                  </span>
+                </>
+              ) : null}
+            </span>
           </h1>
           <span aria-hidden="true" className="hero-rule mt-6 block h-0.5 w-20 rounded-full bg-teal-light" style={at(700)} />
           <p className="hero-up type-lead mt-6 max-w-xl text-balance text-white/90 sm:text-[1.3125rem]" style={at(800)}>

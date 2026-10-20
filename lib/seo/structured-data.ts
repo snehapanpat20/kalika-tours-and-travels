@@ -30,12 +30,12 @@ export function businessSchema(locale: Locale): Json {
     "@type": "TravelAgency",
     "@id": businessId(),
     name: business.name,
-    alternateName: business.localName.mr,
+    alternateName: [business.localName.mr, ...business.otherNames],
     url: absolute(`/${locale}`),
     logo: absolute(BRAND_LOGO),
     image: absolute(DEFAULT_SHARE_IMAGE),
     description:
-      "Tours and travels from Hadapsar, Pune, with a 20 seater Traveller, a Maruti Suzuki Ertiga and a Toyota Innova Crysta for family, group, pilgrimage, corporate and outstation trips.",
+      "Tours and travels from Hadapsar, Pune: outstation trips across India, family holidays, group tours, pilgrimage journeys and corporate travel, with a 20 seater Traveller, a Maruti Suzuki Ertiga and a Toyota Innova Crysta.",
     email: business.email,
     telephone: [business.phoneE164, business.callOnlyPhoneE164],
     address: {
@@ -47,6 +47,8 @@ export function businessSchema(locale: Locale): Json {
     areaServed: [
       { "@type": "City", name: "Pune" },
       { "@type": "State", name: "Maharashtra" },
+      // Outstation trips go across India
+      { "@type": "Country", name: "India" },
     ],
     sameAs: [business.instagramUrl],
     hasOfferCatalog: {

@@ -295,7 +295,7 @@ export const en = {
       },
     },
     hero: {
-      eyebrow: "Tours and Travels · India",
+      eyebrow: "Tours & Travels in Pune",
       titleLead: "Journeys with soul across incredible India,",
       titleFollow: "shaped by people who call these places home.",
       description: "Family trips, group travel, pilgrimage tours and outstation journeys from Pune, in our comfortable 20 seater Traveller.",
@@ -575,9 +575,8 @@ export const en = {
   pages: {
     meta: {
       home: {
-        title: `${brand} | Tours & Traveller Rental in Pune`,
-        description:
-          "Tours and travels from Hadapsar, Pune: a 20 seater Traveller, an Ertiga and an Innova Crysta for family, group, pilgrimage, corporate and outstation trips. Plan your trip online.",
+        title: `${brand} | Tours & Travels in Pune`,
+        description: `Plan outstation trips, family holidays, group tours, pilgrimage journeys and corporate travel with ${brand} in Pune. Explore our travel services and enquire online.`,
       },
       about: {
         title: `About ${brand} | Hadapsar, Pune`,

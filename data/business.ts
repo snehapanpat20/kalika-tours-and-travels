@@ -9,6 +9,8 @@ export const business = {
   name: "Kalika Yatra",
   /** The brand name as written in each language. */
   localName: { en: "Kalika Yatra", mr: "कालिका यात्रा" },
+  /** Other names customers search for (structured data only; the site itself says Kalika Yatra). */
+  otherNames: ["Kalika Tours and Travels"],
   tagline: { en: "Travel Together. Travel Comfortably.", mr: "एकत्र प्रवास करा. आरामात प्रवास करा." },
   owner: "Umesh Panpat",
   phone: "8329042510",
@@ -29,6 +31,7 @@ export const business = {
 } as const satisfies {
   name: string
   localName: LocalizedText
+  otherNames: readonly string[]
   tagline: LocalizedText
   owner: string
   phone: string
