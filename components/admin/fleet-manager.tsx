@@ -21,6 +21,7 @@ import {
   saveContentItem,
   updateVehiclePhoto,
 } from "@/lib/api/admin"
+import { ApiError } from "@/lib/api/client"
 import { cn } from "@/lib/utils/cn"
 import type { AdminVehicle } from "@/server/cms/vehicles"
 
@@ -32,7 +33,12 @@ const acLabels: Record<Ac, string> = { AC: "AC", NON_AC: "Non-AC", BOTH: "AC / N
 const categories = Object.keys(categoryLabels) as Category[]
 
 const accepted = ["image/jpeg", "image/png", "image/webp", "image/avif"]
-const MAX_MB = 12
+/**
+ * Largest photo this page sends. The website's host (Vercel) refuses any request
+ * over 4.5 MB, form wrapping included, before it reaches the website, so 4 MB
+ * leaves room for that. The server itself accepts up to 12 MB (IMAGE_MAX_BYTES).
+ */
+const MAX_MB = 4
 const PHOTO_LIMIT = 12
 
 type Bi = { en: string; mr: string }
@@ -100,7 +106,7 @@ function factsOf(item: AdminVehicle) {
  * reorder and delete vehicles, and manage each vehicle's photos. Only
  * published vehicles appear on the website.
  */
-export function FleetManager({ items, totalAll, bundledImages, uploads }: { items: AdminVehicle[]; totalAll: number; bundledImages: string[]; uploads: UploadsStatus }) {
+export function FleetManager({ items, totalAll, uploads }: { items: AdminVehicle[]; totalAll: number; uploads: UploadsStatus }) {
   const save = useSave()
   const quick = useSave()
   const [editor, setEditor] = useState<{ open: boolean; item: AdminVehicle | null; session: number }>({ open: false, item: null, session: 0 })
@@ -149,7 +155,7 @@ export function FleetManager({ items, totalAll, bundledImages, uploads }: { item
     <>
       {!uploads.enabled ? (
         <Notice tone="warning">
-          Photo uploads are switched off: {uploads.reason} You can still use photos that are already part of the website.
+          Photo uploads are switched off: {uploads.reason}
         </Notice>
       ) : !uploads.persistent ? (
         <Notice tone="warning">Uploaded photos are saved on this server only and may be lost when the website is redeployed. Connect cloud storage before relying on uploads.</Notice>
@@ -287,7 +293,6 @@ export function FleetManager({ items, totalAll, bundledImages, uploads }: { item
         key={editor.session}
         open={editor.open}
         item={editor.item}
-        bundledImages={bundledImages}
         uploads={uploads}
         save={save}
         onCreated={(created) => setEditor((state) => ({ ...state, item: created }))}
@@ -320,7 +325,6 @@ export function FleetManager({ items, totalAll, bundledImages, uploads }: { item
 function VehicleEditor({
   open,
   item,
-  bundledImages,
   uploads,
   save,
   onCreated,
@@ -328,7 +332,6 @@ function VehicleEditor({
 }: {
   open: boolean
   item: AdminVehicle | null
-  bundledImages: string[]
   uploads: UploadsStatus
   save: ReturnType<typeof useSave>
   onCreated: (item: AdminVehicle) => void
@@ -409,7 +412,7 @@ function VehicleEditor({
       <CheckField label="Published" description="Show this vehicle on the Our Fleet page." checked={form.published} onChange={(value) => set("published", value)} />
 
       {item ? (
-        <PhotoManager key={item.id} vehicle={item} bundledImages={bundledImages} uploads={uploads} />
+        <PhotoManager key={item.id} vehicle={item} uploads={uploads} />
       ) : (
         <p className="rounded-control bg-stone px-4 py-3 text-sm text-muted">Photos can be added once the vehicle is saved.</p>
       )}
@@ -430,12 +433,25 @@ function fileProblem(file: File): string | undefined {
   return undefined
 }
 
-function PhotoManager({ vehicle: initial, bundledImages, uploads }: { vehicle: AdminVehicle; bundledImages: string[]; uploads: UploadsStatus }) {
+/** Why an upload failed, in words an admin can act on (the toast shows it too). */
+function uploadProblem(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.code === "NETWORK") return "Couldn't reach the website. Check the connection and try again."
+    if (error.code === "TIMEOUT") return "The upload took too long. Check the connection and try again."
+    // The host refuses large requests before they reach the website (plain-text 413, no JSON)
+    if (error.status === 413 && error.code === "INTERNAL") return `This photo is too large for the website's host to accept. Choose a photo under ${MAX_MB} MB or resize it, then try again.`
+    if (error.code !== "INTERNAL" || error.status < 500) return error.errors[0]?.message ?? error.message
+  }
+  return "This photo could not be uploaded. Try again or choose another."
+}
+
+function PhotoManager({ vehicle: initial, uploads }: { vehicle: AdminVehicle; uploads: UploadsStatus }) {
   const action = useSave()
   const [vehicle, setVehicle] = useState(initial)
   const [pending, setPending] = useState<Pending[]>([])
   const [chooserError, setChooserError] = useState<string | null>(null)
-  const [websitePhoto, setWebsitePhoto] = useState("")
+  /** The batch being uploaded, for the "Uploading 2 of 5…" line. */
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const [removing, setRemoving] = useState<AdminVehicle["photos"][number] | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const replaceRef = useRef<HTMLInputElement>(null)
@@ -475,28 +491,29 @@ function PhotoManager({ vehicle: initial, bundledImages, uploads }: { vehicle: A
   }
 
   async function upload(items: Pending[]) {
-    for (const item of items) {
+    if (!items.length) return
+    setProgress({ done: 0, total: items.length })
+    for (const [index, item] of items.entries()) {
       const data = new FormData()
       data.set("image", item.file)
-      const result = await action.run(() => addVehiclePhoto<{ vehicle: AdminVehicle }>(vehicle.id, data), { success: "Photo added", description: item.file.name, failure: "Photo not added" })
+      let failure: unknown = null
+      const result = await action.run(
+        () =>
+          addVehiclePhoto<{ vehicle: AdminVehicle }>(vehicle.id, data).catch((error: unknown) => {
+            failure = error
+            throw error
+          }),
+        { success: "Photo added", description: item.file.name, failure: "Photo not added" },
+      )
       if (result) {
         setVehicle(result.vehicle)
         discard(item.id)
       } else {
-        setPending((current) => current.map((entry) => (entry.id === item.id ? { ...entry, error: "This photo could not be uploaded. Try again or choose another.", retry: true } : entry)))
+        setPending((current) => current.map((entry) => (entry.id === item.id ? { ...entry, error: uploadProblem(failure), retry: true } : entry)))
       }
+      setProgress({ done: index + 1, total: items.length })
     }
-  }
-
-  async function addWebsitePhoto() {
-    if (!websitePhoto) return
-    const data = new FormData()
-    data.set("imagePath", websitePhoto)
-    const result = await action.run(() => addVehiclePhoto<{ vehicle: AdminVehicle }>(vehicle.id, data), { success: "Photo added", failure: "Photo not added" })
-    if (result) {
-      setVehicle(result.vehicle)
-      setWebsitePhoto("")
-    }
+    setProgress(null)
   }
 
   async function arrange(ids: string[], coverId: string) {
@@ -571,7 +588,7 @@ function PhotoManager({ vehicle: initial, bundledImages, uploads }: { vehicle: A
 
       <input ref={replaceRef} type="file" accept={accepted.join(",")} className="sr-only" tabIndex={-1} aria-hidden="true" onChange={(event) => replace(event.target.files?.[0])} />
 
-      {/* Add photos: upload from the computer, or reuse one already on the website */}
+      {/* Add photos from the computer; each one uploads as soon as it is chosen */}
       <div className="grid gap-3 rounded-control bg-stone/70 p-4">
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -589,11 +606,16 @@ function PhotoManager({ vehicle: initial, bundledImages, uploads }: { vehicle: A
             className={cn(actionClass, "cursor-pointer", (!uploads.enabled || room <= 0) && "pointer-events-none opacity-50")}
             aria-disabled={!uploads.enabled || room <= 0}
           >
-            <ImagePlus aria-hidden="true" className="size-4" /> Add photos
+            <ImagePlus aria-hidden="true" className="size-4" /> Add Photos
           </label>
-          <span className="text-xs text-muted">JPG, PNG, WebP or AVIF, up to {MAX_MB} MB each. They upload as soon as you choose them.</span>
+          <span className="text-xs text-muted">JPG, PNG, WebP or AVIF, up to {MAX_MB} MB each (the most the website&apos;s host accepts). They upload as soon as you choose them.</span>
         </div>
-        {!uploads.enabled ? <p className="text-xs text-muted">Uploads are switched off here; use a photo already on the website below.</p> : null}
+        {!uploads.enabled ? <p className="text-xs text-muted">Photo uploads are switched off on this website, so photos can&apos;t be added right now.</p> : null}
+        {progress ? (
+          <p role="status" className="text-sm font-semibold text-forest">
+            Uploading {Math.min(progress.done + 1, progress.total)} of {progress.total}…
+          </p>
+        ) : null}
         {chooserError ? (
           <p role="alert" className="text-sm text-danger">
             {chooserError}
@@ -645,26 +667,6 @@ function PhotoManager({ vehicle: initial, bundledImages, uploads }: { vehicle: A
           </ul>
         ) : null}
 
-        {bundledImages.length ? (
-          <div className="flex flex-wrap items-end gap-2">
-            <label className="grid min-w-0 flex-1 gap-1 text-sm font-semibold text-forest">
-              Or use a photo already on the website
-              <select value={websitePhoto} onChange={(event) => setWebsitePhoto(event.target.value)} className={inputClass} disabled={room <= 0}>
-                <option value="">Choose a photo</option>
-                {bundledImages
-                  .filter((path) => path.startsWith("/images/fleet/") || path.startsWith("/images/traveller/"))
-                  .map((path) => (
-                    <option key={path} value={path}>
-                      {path.replace("/images/", "")}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <button type="button" disabled={!websitePhoto || action.busy || room <= 0} onClick={addWebsitePhoto} className={cn(actionClass, "min-h-11")}>
-              Add
-            </button>
-          </div>
-        ) : null}
       </div>
 
       <ConfirmDialog

@@ -18,7 +18,7 @@ export default async function AdminFleetPage() {
         title="Fleet"
         description="The vehicles on the Our Fleet page, in the order shown there. Only published vehicles appear on the website; drafts stay here until you publish them."
       />
-      <FleetManager items={items} totalAll={counts.all} bundledImages={images.bundledImages} uploads={images.uploads} />
+      <FleetManager items={items} totalAll={counts.all} uploads={images.uploads} />
     </div>
   )
 }
