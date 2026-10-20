@@ -7,7 +7,7 @@ const developmentSiteUrl = "http://localhost:3000"
  * deployment address (*.vercel.app), so those never end up in canonical
  * links, the sitemap or robots.txt.
  */
-export const productionSiteUrl = "https://kalikayatra.com"
+export const productionSiteUrl = "https://www.kalikayatra.com"
 
 /** Addresses that are never the public website: localhost and Vercel deployment URLs. */
 const nonCanonicalHost = /^(localhost|127\.0\.0\.1|\[::1\]|.+\.vercel\.app)$/i

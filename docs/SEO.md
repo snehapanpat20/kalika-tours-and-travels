@@ -6,13 +6,13 @@ the business's reputation and its Google Business Profile.
 
 ## 1. Before going live
 
-1. The canonical address is `https://kalikayatra.com` (`productionSiteUrl` in `lib/config/site.ts`). Canonical URLs,
+1. The canonical address is `https://www.kalikayatra.com` (`productionSiteUrl` in `lib/config/site.ts`). Canonical URLs,
    the sitemap, robots.txt, Open Graph images and structured data all come from it. A production build uses
    `NEXT_PUBLIC_SITE_URL` only when it is a real domain; when it is missing, `localhost` or a Vercel deployment
-   address (`*.vercel.app`), it uses `https://kalikayatra.com` and prints a `[seo]` warning at start-up.
+   address (`*.vercel.app`), it uses `https://www.kalikayatra.com` and prints a `[seo]` warning at start-up.
 2. Make that host name the primary domain and redirect the other one to it (in Vercel: Settings › Domains, with
-   `www.kalikayatra.com` redirecting to `kalikayatra.com`). Submit `https://kalikayatra.com/sitemap.xml` to Search
-   Console, in a property that covers `https://kalikayatra.com` (a Domain property covers both).
+   `kalikayatra.com` redirecting to `www.kalikayatra.com`). Submit `https://www.kalikayatra.com/sitemap.xml` to
+   Search Console, in a property that covers `https://www.kalikayatra.com` (a Domain property covers both).
 3. Serve the site over HTTPS only.
 4. Run `npx prisma migrate deploy` so destinations get their web-address (`slug`) and SEO columns.
 

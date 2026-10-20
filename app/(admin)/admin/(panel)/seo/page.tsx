@@ -4,7 +4,7 @@ import { AdminPageHeader } from "@/components/admin/kit/page-header"
 import { SectionEditor } from "@/components/admin/section-editor"
 import { focusRing } from "@/components/ui/styles"
 import { can } from "@/lib/auth/permissions"
-import { getSiteUrl } from "@/lib/config/site"
+import { getSiteUrl, productionSiteUrl } from "@/lib/config/site"
 import { cn } from "@/lib/utils/cn"
 import { getImageOptions } from "@/server/admin/image-options"
 import { requireAdminPage } from "@/server/auth/admin-page"
@@ -27,7 +27,7 @@ export default async function AdminSeoPage() {
       />
       <div className="flex flex-wrap items-center gap-2 rounded-card bg-ivory p-4 text-sm ring-1 ring-line">
         <span className="text-muted">
-          Website address: <strong className="text-ink">{siteUrl}</strong> (the server&rsquo;s NEXT_PUBLIC_SITE_URL, or https://kalikayatra.com on the live site)
+          Website address: <strong className="text-ink">{siteUrl}</strong> (the server&rsquo;s NEXT_PUBLIC_SITE_URL, or {productionSiteUrl} on the live site)
         </span>
         <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className={link}>
           Sitemap <ExternalLink aria-hidden="true" className="size-3.5" />
