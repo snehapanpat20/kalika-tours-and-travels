@@ -10,30 +10,31 @@ import { pagePath } from "@/lib/routes"
 import { cn } from "@/lib/utils/cn"
 
 /**
- * "Who we are": the first lines of our story (from the About page), a link to
- * it, two overlapping arch-framed photos, and a row of numbers. The numbers
- * are facts the site already states or counts: the Traveller's seats, the
+ * "Who we are": a short introduction, a link to the About page's story,
+ * two overlapping arch-framed photos, and a row of numbers. The numbers
+ * are facts the site already states or counts: the vehicle options on the
+ * Our Fleet page, the
  * places listed on the Destinations page and the kinds of trip on the
  * Services page. No invented traveller counts or years.
  */
 export function AboutTeaser({
   locale,
   copy,
-  story,
+  vehicles,
   places,
   trips,
 }: {
   locale: Locale
   copy: Dictionary["home"]["landing"]["about"]
-  /** The About page's story paragraphs; the first one is shown. */
-  story: string[]
+  /** How many vehicle options the Our Fleet page lists. */
+  vehicles: number
   /** How many destinations the Destinations page lists. */
   places: number
   /** How many kinds of trip the Services page lists. */
   trips: number
 }) {
   const stats = [
-    { key: "seats", value: 20, suffix: "+1", label: copy.stats.seats },
+    { key: "vehicles", value: vehicles, suffix: "", label: copy.stats.vehicles },
     { key: "places", value: places, suffix: "", label: copy.stats.places },
     { key: "trips", value: trips, suffix: "", label: copy.stats.trips },
   ]
@@ -46,7 +47,7 @@ export function AboutTeaser({
           <h2 id="about-teaser-title" className="type-h2 mt-4 text-forest">
             {copy.title}
           </h2>
-          <p className="mt-6 max-w-xl text-[1.125rem] leading-relaxed text-ink/85">{story[0]}</p>
+          <p className="mt-6 max-w-xl text-[1.125rem] leading-relaxed text-ink/85">{copy.body}</p>
           <ArrowLink href={pagePath(locale, "about")} className="mt-4">
             {copy.link}
           </ArrowLink>

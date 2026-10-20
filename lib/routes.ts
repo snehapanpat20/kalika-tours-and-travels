@@ -20,11 +20,12 @@ export function pagePath(locale: Locale, page: PageKey, hash?: string): string {
   return `/${locale}${slug ? `/${slug}` : ""}${hash ? `#${hash}` : ""}`
 }
 
-/** The trip planner, optionally pre-filled with a service, destination, number of people and travel date (YYYY-MM-DD). */
-export function planPath(locale: Locale, prefill: { service?: string; destination?: string; people?: string; date?: string } = {}): string {
+/** The trip planner, optionally pre-filled with a service, destination, vehicle (data/fleet.ts id), number of people and travel date (YYYY-MM-DD). */
+export function planPath(locale: Locale, prefill: { service?: string; destination?: string; vehicle?: string; people?: string; date?: string } = {}): string {
   const query = new URLSearchParams()
   if (prefill.service) query.set("service", prefill.service)
   if (prefill.destination) query.set("destination", prefill.destination)
+  if (prefill.vehicle) query.set("vehicle", prefill.vehicle)
   if (prefill.people) query.set("people", prefill.people)
   if (prefill.date) query.set("date", prefill.date)
   const text = query.toString()

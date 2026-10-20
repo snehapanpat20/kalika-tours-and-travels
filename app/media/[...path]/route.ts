@@ -1,9 +1,12 @@
 import { readStoredFile } from "@/server/storage"
 
 /**
- * Serves images saved by the local storage driver (uploads live outside
- * public/, because Next.js only serves public files that existed at build time).
- * File names are random UUIDs, so responses can be cached for a long time.
+ * Serves uploaded images from the configured storage (this server's disk, or
+ * Supabase Storage read with the server-only key, so the bucket can stay private).
+ * Uploads live outside public/, because Next.js only serves public files that
+ * existed at build time. Only "<folder>/<uuid>.webp" keys are looked up.
+ * File names are random UUIDs and never overwritten, so responses are cached
+ * for a long time, by browsers and by the CDN (s-maxage).
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const key = (await params).path.join("/")
@@ -14,7 +17,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pat
     headers: {
       "Content-Type": "image/webp",
       "Content-Length": String(file.byteLength),
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
       "X-Content-Type-Options": "nosniff",
       "Content-Security-Policy": "default-src 'none'; sandbox",
     },

@@ -14,7 +14,7 @@ export const linkablePages: { key: PageKey; label: string }[] = [
   { key: "home", label: "Home page" },
   { key: "services", label: "Services page" },
   { key: "destinations", label: "Destinations page" },
-  { key: "traveller", label: "Our Traveller page" },
+  { key: "traveller", label: "Our Fleet page" },
   { key: "gallery", label: "Gallery page" },
   { key: "reviews", label: "Reviews page" },
   { key: "about", label: "About page" },

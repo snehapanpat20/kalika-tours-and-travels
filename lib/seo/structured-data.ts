@@ -35,7 +35,7 @@ export function businessSchema(locale: Locale): Json {
     logo: absolute(BRAND_LOGO),
     image: absolute(DEFAULT_SHARE_IMAGE),
     description:
-      "Tours and travels from Hadapsar, Pune, with a 20+1 seater Traveller for family, group, pilgrimage, corporate and outstation trips.",
+      "Tours and travels from Hadapsar, Pune, with a 20 seater Traveller and buses for family, group, pilgrimage, corporate and outstation trips.",
     email: business.email,
     telephone: [business.phoneE164, business.callOnlyPhoneE164],
     address: {
@@ -135,14 +135,14 @@ export function graph(nodes: Json[]): Json {
   return { "@context": "https://schema.org", "@graph": nodes }
 }
 
-/** The Traveller page's service: renting the 20+1 seater Traveller with a driver. */
+/** The Our Fleet page's service: renting the 20 seater Traveller with a driver. */
 export function travellerServiceSchema(locale: Locale): Json {
   return serviceSchema({
-    name: locale === "mr" ? "चालकासह 20+1 आसनी ट्रॅव्हलर भाड्याने" : "20+1 seater Traveller rental with driver",
+    name: locale === "mr" ? "चालकासह 20 आसनी ट्रॅव्हलर भाड्याने" : "20 seater Traveller rental with driver",
     description:
       locale === "mr"
-        ? "पुण्याहून कौटुंबिक, ग्रुप, तीर्थयात्रा, कॉर्पोरेट आणि आउटस्टेशन सहलींसाठी वातानुकूलित 20+1 आसनी फोर्स ट्रॅव्हलर, अनुभवी चालकासह."
-        : "An air-conditioned 20+1 seater Force Traveller with an experienced driver, for family, group, pilgrimage, corporate and outstation trips from Pune.",
+        ? "पुण्याहून कौटुंबिक, ग्रुप, तीर्थयात्रा, कॉर्पोरेट आणि आउटस्टेशन सहलींसाठी एसी किंवा नॉन-एसी 20 आसनी फोर्स ट्रॅव्हलर, अनुभवी चालकासह."
+        : "A 20 seater Force Traveller, AC or non-AC, with an experienced driver, for family, group, pilgrimage, corporate and outstation trips from Pune.",
     serviceType: "Tempo Traveller rental",
     url: `/${locale}/traveller`,
   })

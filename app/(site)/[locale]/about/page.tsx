@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { Armchair, HeartHandshake, MapPin, Route, Users } from "lucide-react"
 import { PageHero } from "@/components/layout/page-hero"
-import { Photo } from "@/components/media/photo"
+import { VehicleCarousel } from "@/components/fleet/vehicle-carousel"
 import { ImageReveal, Reveal, Stagger, StaggerItem } from "@/components/motion/reveal"
 import { pageImages } from "@/components/pages/page-images"
 import { SectionHeading } from "@/components/ui/section-heading"
@@ -9,6 +9,7 @@ import { shell } from "@/components/ui/styles"
 import { PageCTA } from "@/components/sections/page-cta"
 import { PageStructuredData, pageCrumbs } from "@/components/seo/page-structured-data"
 import { formatLocation } from "@/data/business"
+import { fleetGallery } from "@/data/fleet"
 import { isLocale } from "@/lib/i18n/locales"
 import { resolvePageLocale, type LocaleParams } from "@/lib/i18n/page-locale"
 import { createPageMetadata } from "@/lib/seo/metadata"
@@ -59,8 +60,12 @@ export default async function AboutPage(props: LocaleParams) {
             </p>
           </Reveal>
           <div className="lg:col-span-6 xl:col-span-5">
+            {/* Our vehicles, one photo at a time (the business's own photos, data/fleet.ts) */}
             <ImageReveal className="relative aspect-[4/5] overflow-hidden rounded-panel bg-stone-deep">
-              <Photo image={pageImages.aboutStory} alt={dictionary.pages.traveller.imageAlt} sizes="(min-width: 1024px) 40vw, 100vw" />
+              <VehicleCarousel
+                photos={fleetGallery.map((photo) => ({ id: photo.id, src: photo.src, position: photo.position, alt: dictionary.fleet.photos[photo.id].alt }))}
+                labels={dictionary.fleet.carousel}
+              />
             </ImageReveal>
           </div>
         </div>

@@ -27,6 +27,11 @@ const actionLabels: Record<string, string> = {
   password_change: "Changed password",
   import: "Imported",
   discard_draft: "Discarded draft",
+  reorder: "Changed order",
+  photo_add: "Added photo",
+  photo_update: "Changed photo",
+  photo_delete: "Removed photo",
+  photo_arrange: "Arranged photos",
 }
 
 const entityLabels: Record<string, string> = {
@@ -38,6 +43,7 @@ const entityLabels: Record<string, string> = {
   SiteContent: "Website content",
   Destination: "Destination",
   Service: "Service",
+  Vehicle: "Vehicle",
   Admin: "Admin user",
 }
 

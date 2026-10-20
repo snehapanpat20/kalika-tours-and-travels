@@ -199,19 +199,40 @@ The admin panel has **Gallery** and **Reviews** under *Content* (`/admin/gallery
 
 ### Where uploaded photos are stored
 
-Uploads go through a small storage layer (`server/storage`). Today it has one driver, **local
-disk**: files are resized, re-saved as WebP (removing phone location data) and written to
-`UPLOAD_DIR` (default `storage/uploads`, outside `public/`), then served at `/media/...`.
+Uploads go through a small storage layer (`server/storage`). Files are resized and re-saved as
+WebP (removing phone location data), stored under a key such as `fleet/<random-uuid>.webp`, and
+always served by this website at `/media/<key>`, whichever driver stores them:
+
+- **local**: written to `UPLOAD_DIR` (default `storage/uploads`, outside `public/`).
+- **supabase**: written to one Supabase Storage bucket, under the same key (folders `fleet/`,
+  `gallery/`, `reviews/`, `offers/`, `destinations/`, `services/`, `content/`). The server reads
+  them back with the secret key, so the bucket can (and should) stay **private**, and the
+  Supabase address and key never reach the browser.
 
 | Where you run the site | Uploads |
 |---|---|
-| Your computer (`npm run dev`) | On by default |
+| Your computer (`npm run dev`) | On by default (local disk) |
 | A VPS, or Render/Railway **with a persistent disk** | Set `STORAGE_DRIVER=local` and point `UPLOAD_DIR` at the disk. Back the folder up with the database |
-| Vercel / Netlify | **Not possible with local disk**: files vanish between requests, so uploads are refused. Gallery photos can still use images committed to `public/images`, and the review form hides its photo field |
+| Vercel | Set `STORAGE_DRIVER=supabase` and the three `SUPABASE_*` variables below. Local disk is refused there (files vanish between requests) |
+| Netlify | Use `supabase`; local disk loses files on every deploy |
 
-In production uploads are **off** unless `STORAGE_DRIVER=local` is set. **Settings** in the
-admin panel shows the current state. A free cloud provider (for example Cloudinary or Supabase
-Storage) can be added later as a second driver behind the same interface; that is not built yet.
+In production uploads are **off** unless `STORAGE_DRIVER` is set. If any `SUPABASE_*` variable
+is missing, uploads stay off and **Settings** in the admin panel names the missing variable.
+
+**Setting up Supabase Storage**
+
+1. In Supabase → Storage, create a bucket (this site uses `fleet-photos`). Keep it **private**.
+   If you set an allowed-file-type list on the bucket, include `image/webp`.
+2. In Supabase → Project Settings → API Keys, copy the project URL and a **secret** key
+   (`sb_secret_…`; the legacy `service_role` key also works). The secret key bypasses Row Level
+   Security, so it must only ever be a server variable: never `NEXT_PUBLIC_…`, never in code.
+3. In Vercel → Settings → Environment Variables, add for each environment that should accept
+   uploads: `STORAGE_DRIVER=supabase`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY` (mark it
+   *Sensitive*), `SUPABASE_STORAGE_BUCKET=fleet-photos`. Redeploy.
+4. Check **Settings** in the admin panel: "Photo uploads" should say *Supabase Storage*.
+
+Only signed-in admins (and the public review form, for one moderated photo per review) can upload,
+always through the server, which checks and re-encodes every file. Nobody gets direct access to the bucket.
 
 ## 9c. Roles and the CMS
 
@@ -288,7 +309,9 @@ start command `npm run start`, plus the same environment variables.
 | `NOTIFY_EMAIL` | `kalikatourstravels15@gmail.com` |
 | `EMAIL_TRANSPORT` | `smtp` |
 | `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_FROM` | From step 9 |
-| `STORAGE_DRIVER`, `UPLOAD_DIR` | Only on a host with a persistent disk: `local` and the disk path. Otherwise leave empty (uploads off). See step 9b |
+| `STORAGE_DRIVER` | `supabase` on Vercel (with the three variables below). `local` only on a host with a persistent disk. Empty = uploads off. See step 9b |
+| `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET` | With `STORAGE_DRIVER=supabase`: the project URL, a **secret** key (server-only, mark *Sensitive*) and the bucket (`fleet-photos`) |
+| `UPLOAD_DIR` | Only with `STORAGE_DRIVER=local`: the disk path |
 
 The host sets `NODE_ENV=production` itself. In production the admin cookie becomes
 `Secure` with the `__Host-` prefix, and HTTPS is enforced with HSTS.

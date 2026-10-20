@@ -55,7 +55,8 @@ export const pageCtas: Record<PageCtaKey, PageCtaConfig> = {
   // No India map asset exists, so a light dotted-route pattern stands in for one
   destinations: { variant: "gradient", primary: { page: "plan" }, visual: { kind: "route" } },
   // The upcoming tours are on the Destinations page
-  traveller: { variant: "cream", primary: { page: "destinations" }, visual: { kind: "circles", photos: travellerPhotos } },
+  // No vehicle photos here: the page above already shows the fleet's own photos
+  traveller: { variant: "cream", primary: { page: "destinations" }, visual: { kind: "arches" } },
   gallery: { variant: "dark", primary: { page: "destinations" }, secondary: { external: "instagram" }, visual: { kind: "prints", photos: travellerPhotos.slice(0, 3) } },
   reviews: { variant: "gradient", primary: { page: "plan" }, visual: { kind: "stars" } },
 }

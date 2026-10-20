@@ -30,13 +30,23 @@ const serverEnvSchema = z.object({
   TRUSTED_PROXY_COUNT: z.coerce.number().int().min(0).max(5).default(1),
   /**
    * Where uploaded images (gallery photos, review photos) are stored.
-   * local = files on this server's disk (development, or a server with a persistent disk)
-   * none  = uploads switched off
+   * local    = files on this server's disk (development, or a server with a persistent disk)
+   * supabase = Supabase Storage (needed on Vercel); uses the three SUPABASE_* settings below
+   * none     = uploads switched off
    * Defaults to local in development and none in production.
    */
-  STORAGE_DRIVER: z.enum(["local", "none"]).optional(),
+  STORAGE_DRIVER: z.enum(["local", "supabase", "none"]).optional(),
   /** Folder for the local driver. Kept outside public/ and served through /media. */
   UPLOAD_DIR: z.string().min(1).optional(),
+  /** Supabase project URL (https://<project>.supabase.co). Server-only: never NEXT_PUBLIC_. */
+  SUPABASE_URL: z.url({ protocol: /^https?$/, error: "SUPABASE_URL must be the project URL." }).optional(),
+  /** Supabase secret key (sb_secret_…, or the legacy service_role key). Server-only; bypasses Row Level Security. */
+  SUPABASE_SECRET_KEY: z.string().min(20, "SUPABASE_SECRET_KEY looks incomplete.").optional(),
+  /** Bucket for uploaded images. Every folder (fleet/, gallery/, …) goes into this one bucket. */
+  SUPABASE_STORAGE_BUCKET: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9_-]{1,62}$/, "SUPABASE_STORAGE_BUCKET must be a bucket name such as fleet-photos.")
+    .optional(),
 })
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>

@@ -20,6 +20,11 @@ export type AuditAction =
   | "password_change"
   | "import"
   | "discard_draft"
+  | "reorder"
+  | "photo_add"
+  | "photo_update"
+  | "photo_delete"
+  | "photo_arrange"
 
 export type AuditEntityType =
   | "Enquiry"
@@ -30,6 +35,7 @@ export type AuditEntityType =
   | "SiteContent"
   | "Destination"
   | "Service"
+  | "Vehicle"
   | "Admin"
 
 export type AuditEntry = {

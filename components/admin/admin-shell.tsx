@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { AnimatePresence, m } from "motion/react"
 import {
   Bell,
+  Bus,
   BusFront,
   ChevronDown,
   ExternalLink,
@@ -73,6 +74,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
       { href: "/admin/announcements", label: "Announcements", icon: Megaphone, permission: "announcements.read" },
       { href: "/admin/destinations", label: "Destinations", icon: MapPinned, permission: "destinations.read" },
       { href: "/admin/services", label: "Services", icon: FileText, permission: "services.read" },
+      { href: "/admin/fleet", label: "Fleet", icon: Bus, permission: "fleet.read" },
       { href: "/admin/traveller", label: "Our Traveller", icon: BusFront, permission: "traveller.read" },
     ],
   },

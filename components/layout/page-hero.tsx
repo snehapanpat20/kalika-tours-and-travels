@@ -10,7 +10,8 @@ const step = (i: number) => ({ "--i": i }) as CSSProperties
  * Opening of an inner page: the page's own photograph behind a dark shade,
  * with a small gold label, a large serif heading and a sentence. Kept to a
  * moderate height so the page's content starts near the top. Each page passes
- * its photograph (`components/pages/page-images.ts`, or the admin's choice).
+ * its photograph (`components/pages/page-images.ts`, or the admin's choice);
+ * without one the band is plain ink under a faint lattice.
  */
 export function PageHero({
   id,
@@ -29,8 +30,8 @@ export function PageHero({
   titleLead: string
   titleFollow?: string
   description?: string
-  image: PhotoSource
-  imageAlt: string
+  image?: PhotoSource
+  imageAlt?: string
   /** Responsive object-position classes to keep the subject in frame. */
   imageClassName?: string
   /** No longer used: it chose a lighter shade for collage photos. Kept so pages need not change. */
@@ -41,10 +42,16 @@ export function PageHero({
 }) {
   return (
     <section aria-labelledby={id} className="relative isolate overflow-hidden bg-forest-deep text-white">
-      <div className="hero-bg absolute inset-0 -z-20">
-        <Photo image={image} alt={imageAlt} sizes="100vw" preload className={imageClassName} />
-      </div>
-      <div aria-hidden="true" className="hero-ink absolute inset-0 -z-10" />
+      {image ? (
+        <>
+          <div className="hero-bg absolute inset-0 -z-20">
+            <Photo image={image} alt={imageAlt ?? ""} sizes="100vw" preload className={imageClassName} />
+          </div>
+          <div aria-hidden="true" className="hero-ink absolute inset-0 -z-10" />
+        </>
+      ) : (
+        <div aria-hidden="true" className="landing-jali absolute inset-0 -z-10 opacity-[0.06]" />
+      )}
 
       <div className={shell}>
         <div className="flex max-w-3xl flex-col py-16 sm:py-20 lg:py-24">

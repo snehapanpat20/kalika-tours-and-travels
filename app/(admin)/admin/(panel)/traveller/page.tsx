@@ -16,7 +16,7 @@ export default async function AdminTravellerPage() {
     <div className="grid gap-4">
       <AdminPageHeader
         title="Our Traveller"
-        description="The 20+1 seater Traveller on the homepage and the Our Traveller page: its description, features and photos. Only list features the vehicle really has."
+        description="The 20 seater Traveller on the Our Fleet page: its description, features and photos. Only list features the vehicle really has."
       />
       <SectionEditor {...data} bundledImages={images.bundledImages} uploads={images.uploads} canEdit={can(admin.role, "traveller.write")} />
     </div>

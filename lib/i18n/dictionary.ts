@@ -8,6 +8,7 @@ import type {
 } from "@/types/home"
 import type { PageKey } from "@/lib/routes"
 import type { PageCtaKey } from "@/data/pageCtas"
+import type { FleetPhotoId, VehicleCategory, VehicleId } from "@/data/fleet"
 import type { DestinationPlaceId, HeroSlideId, TravelTypeKey, UpcomingTourId } from "@/types/home"
 import type { ServiceId, VehicleFeatureId } from "@/types/catalog"
 
@@ -68,6 +69,34 @@ export type Dictionary = {
    * (components/sections/page-cta.tsx; layout and links in data/pageCtas.ts).
    * The headline is in three parts so exactly one phrase can be highlighted.
    */
+  /** The vehicles (data/fleet.ts): the Our Fleet page and the homepage's "Explore Our Fleet". */
+  fleet: {
+    /** The About page's photo carousel. */
+    carousel: { label: string; previous: string; next: string; pause: string; play: string; counter: string }
+    /** Label of the group of filter buttons. */
+    filtersLabel: string
+    all: string
+    categories: Record<VehicleCategory, string>
+    /** e.g. "{n} seats". */
+    seats: string
+    ac: string
+    nonAc: string
+    /** A vehicle offered both ways. */
+    acOrNonAc: string
+    sleeper: string
+    pushBackOption: string
+    photoComingSoon: string
+    viewPhotos: string
+    viewDetails: string
+    onBoard: string
+    enquire: string
+    /** Announced when a filter changes, e.g. "{n} vehicles shown". */
+    shown: string
+    vehicles: Record<VehicleId, { name: string; description: string }>
+    photos: Record<FleetPhotoId, { alt: string; caption: string }>
+    /** The homepage section. */
+    home: { eyebrow: string; lead: string; accent: string; description: string; viewAll: string }
+  }
   pageCtas: {
     items: Record<PageCtaKey, { lead: string; accent: string; tail: string; subtext: string; primary: string; secondary?: string }>
     /** The small quote form on the Services page's band. */
@@ -98,8 +127,7 @@ export type Dictionary = {
         scroll: string
       }
       tours: { eyebrow: string; lead: string; accent: string; description: string; duration: string; enquire: string; viewAll: string; previous: string; next: string }
-      about: { eyebrow: string; title: string; link: string; stats: { seats: string; places: string; trips: string }; photoAlt: string; insetAlt: string }
-      traveller: { eyebrow: string; lead: string; accent: string; link: string; perfectFor: string }
+      about: { eyebrow: string; title: string; body: string; link: string; stats: { vehicles: string; places: string; trips: string }; photoAlt: string; insetAlt: string }
       services: { eyebrow: string; lead: string; accent: string; description: string; viewAll: string; rental: { title: string; body: string } }
       reviews: { eyebrow: string; lead: string; accent: string; readAll: string; previous: string; next: string; pause: string; play: string }
     }
@@ -222,6 +250,11 @@ export type Dictionary = {
       return: string
       passengers: string
       passengersHint: string
+      /** The "Choose Your Vehicle" field (options come from data/fleet.ts). */
+      vehicle: string
+      vehiclePlaceholder: string
+      vehicleOther: string
+      vehicleHint: string
       notes: string
       notesPlaceholder: string
       /** The "round trip" choice. */
@@ -254,6 +287,7 @@ export type Dictionary = {
         returnDate: string
         returnMissing: string
         passengers: string
+        vehicle: string
         notes: string
         notesLinks: string
       }
@@ -448,8 +482,25 @@ export type Dictionary = {
     faq: {
       eyebrow: string
       title: string
-      questions: Record<"capacity" | "ac" | "driver" | "tempo" | "night" | "oneWay" | "price" | "kinds" | "book" | "cancel" | "quote", string>
-      answers: Record<"capacity" | "ac" | "driver" | "tempo" | "kinds" | "book", string>
+      questions: Record<
+        | "night"
+        | "oneWay"
+        | "price"
+        | "kinds"
+        | "book"
+        | "cancel"
+        | "quote"
+        | "fleetTypes"
+        | "groupSize"
+        | "acNonAc"
+        | "sleeper"
+        | "tripKinds"
+        | "availability"
+        | "specificVehicle",
+        string
+      >
+      /** `fleetTypes` has a {vehicles} placeholder, filled from data/fleet.ts. */
+      answers: Record<"kinds" | "book" | "fleetTypes" | "groupSize" | "acNonAc" | "sleeper" | "tripKinds" | "availability" | "specificVehicle", string>
     }
     notFoundLinks: string
   }

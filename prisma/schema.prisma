@@ -363,3 +363,69 @@ model Service {
   @@index([published, sortOrder])
   @@map("services")
 }
+
+enum VehicleCategory {
+  TRAVELLER
+  BUS
+  SLEEPER_BUS
+  CAR
+}
+
+/// How a vehicle can be booked. Null on the vehicle means "not confirmed yet" (not shown).
+enum VehicleAc {
+  AC
+  NON_AC
+  /// Can be booked either way; shown as "AC / Non-AC"
+  BOTH
+}
+
+/// A vehicle on the Our Fleet page, managed in Admin › Fleet. Enquiries do not
+/// reference vehicles (the chosen vehicle is written into the enquiry message),
+/// so editing or deleting a vehicle never changes an enquiry.
+model Vehicle {
+  id            String          @id @default(uuid()) @db.Uuid
+  /// Stable id for vehicles imported from the website (e.g. "traveller"); null for ones added in admin.
+  /// Keeps the import from creating duplicates.
+  key           String?         @unique @db.VarChar(40)
+  name          String          @db.VarChar(80)
+  nameMr        String?         @db.VarChar(80)
+  /// Passenger seats; null until confirmed (not shown)
+  capacity      Int?
+  ac            VehicleAc?
+  category      VehicleCategory
+  /// "Push-back seats available" on the card
+  pushBackSeats Boolean         @default(false)
+  /// Optional verified seating detail, e.g. "2 + 2 seating"
+  seatingType   String?         @db.VarChar(120)
+  seatingTypeMr String?         @db.VarChar(120)
+  description   String?         @db.VarChar(600)
+  descriptionMr String?         @db.VarChar(600)
+  published     Boolean         @default(false)
+  sortOrder     Int             @default(0)
+  photos        VehiclePhoto[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([published, sortOrder])
+  @@map("vehicles")
+}
+
+/// A photo of a vehicle: an upload (key set) or a photo bundled with the website (key null).
+model VehiclePhoto {
+  id        String   @id @default(uuid()) @db.Uuid
+  vehicleId String   @db.Uuid
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  url       String   @db.VarChar(500)
+  key       String?  @db.VarChar(300)
+  width     Int
+  height    Int
+  alt       String?  @db.VarChar(200)
+  altMr     String?  @db.VarChar(200)
+  /// The card's main photo; at most one per vehicle
+  isCover   Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([vehicleId, sortOrder])
+  @@map("vehicle_photos")
+}

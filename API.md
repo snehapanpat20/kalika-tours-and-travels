@@ -126,7 +126,9 @@ The review is **always stored as `PENDING`**; any `status` sent is ignored.
 
 ### `GET /media/:folder/:file`
 
-Serves uploaded photos (`gallery/…webp`, `reviews/…webp`) with a long cache. Anything else is `404`.
+Serves uploaded photos (`<folder>/<uuid>.webp`, where folder is `gallery`, `reviews`, `offers`,
+`destinations`, `services`, `content` or `fleet`) with a long browser and CDN cache, from the
+configured storage (local disk or a private Supabase Storage bucket). Anything else is `404`.
 
 ### `GET /api/health`
 
