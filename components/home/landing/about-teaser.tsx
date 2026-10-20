@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils/cn"
 /**
  * "Who we are": a short introduction, a link to the About page's story,
  * two overlapping arch-framed photos, and a row of numbers. The numbers
- * are facts the site already states or counts: the vehicle options on the
- * Our Fleet page, the
+ * are facts the site already states or counts: the vehicles published on the
+ * Our Fleet page (left out when none are), the
  * places listed on the Destinations page and the kinds of trip on the
  * Services page. No invented traveller counts or years.
  */
@@ -26,15 +26,15 @@ export function AboutTeaser({
 }: {
   locale: Locale
   copy: Dictionary["home"]["landing"]["about"]
-  /** How many vehicle options the Our Fleet page lists. */
-  vehicles: number
+  /** How many vehicles the Our Fleet page lists (null or 0: the figure is left out). */
+  vehicles: number | null
   /** How many destinations the Destinations page lists. */
   places: number
   /** How many kinds of trip the Services page lists. */
   trips: number
 }) {
   const stats = [
-    { key: "vehicles", value: vehicles, suffix: "", label: copy.stats.vehicles },
+    ...(vehicles ? [{ key: "vehicles", value: vehicles, suffix: "", label: copy.stats.vehicles }] : []),
     { key: "places", value: places, suffix: "", label: copy.stats.places },
     { key: "trips", value: trips, suffix: "", label: copy.stats.trips },
   ]
@@ -52,7 +52,7 @@ export function AboutTeaser({
             {copy.link}
           </ArrowLink>
 
-          <dl className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-highlight/40 pt-8">
+          <dl className={cn("mt-10 grid max-w-xl gap-4 border-t border-highlight/40 pt-8", stats.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
             {stats.map((stat) => (
               <div key={stat.key}>
                 <dt className="sr-only">{stat.label}</dt>

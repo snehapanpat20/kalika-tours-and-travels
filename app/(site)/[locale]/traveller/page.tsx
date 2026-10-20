@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 import { FleetCatalogue } from "@/components/fleet/fleet-catalogue"
-import { fleetViews, managedFleetViews } from "@/components/fleet/fleet-view"
+import { fleetViews } from "@/components/fleet/fleet-view"
 import { journeyOrder, serviceIcons } from "@/components/home/home-content"
 import { PageHero } from "@/components/layout/page-hero"
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal"
@@ -17,9 +17,8 @@ import { pagePath } from "@/lib/routes"
 import { createPageMetadata } from "@/lib/seo/metadata"
 import { travellerServiceSchema } from "@/lib/seo/structured-data"
 import { cn } from "@/lib/utils/cn"
-import { fleetPageVehicles } from "@/data/fleet"
 import { getLiveTraveller } from "@/server/cms/sections-public"
-import { listLiveVehicles } from "@/server/cms/vehicles"
+import { listPublicVehicles } from "@/server/cms/vehicles"
 
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
   const { locale } = await params
@@ -28,8 +27,8 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 
 /**
  * Our Fleet (at the Traveller page's address, so existing links keep
- * working): every vehicle from data/fleet.ts with filters, photos and an
- * enquiry link, then the kinds of trip they suit and the Traveller FAQs.
+ * working): the published vehicles from Admin › Fleet with filters, photos and
+ * an enquiry link, then the kinds of trip they suit and the fleet FAQs.
  * Only the business's own vehicle photos appear; the header has no photo.
  */
 export default async function FleetPage(props: LocaleParams) {
@@ -37,9 +36,9 @@ export default async function FleetPage(props: LocaleParams) {
   const crumbs = pageCrumbs(locale, dictionary, "traveller")
   const copy = dictionary.pages.traveller
   const gallery = dictionary.home.traveller.gallery
-  const [traveller, managed] = await Promise.all([getLiveTraveller(locale, preview), listLiveVehicles(locale, preview)])
-  // The vehicles from Admin › Fleet (published ones only), or the built-in list until any are added there
-  const vehicles = managed ? managedFleetViews(locale, dictionary, managed, traveller) : fleetViews(locale, dictionary, traveller, fleetPageVehicles)
+  const [traveller, published] = await Promise.all([getLiveTraveller(locale, preview), listPublicVehicles(locale, preview)])
+  // Only Admin › Fleet's published vehicles; never a built-in list (it would bring back deleted vehicles)
+  const vehicles = published ? fleetViews(locale, dictionary, published, traveller) : []
 
   return (
     <>
@@ -55,11 +54,20 @@ export default async function FleetPage(props: LocaleParams) {
 
       <section aria-label={dictionary.fleet.all} className="brand-palette bg-ivory py-(--spacing-section)">
         <div className={shell}>
-          <FleetCatalogue
-            vehicles={vehicles}
-            copy={dictionary.fleet}
-            galleryLabels={{ close: gallery.close, previous: gallery.previous, next: gallery.next, counter: gallery.counter }}
-          />
+          {vehicles.length ? (
+            <FleetCatalogue
+              vehicles={vehicles}
+              copy={dictionary.fleet}
+              galleryLabels={{ close: gallery.close, previous: gallery.previous, next: gallery.next, counter: gallery.counter }}
+            />
+          ) : (
+            <p role="status" className="mx-auto max-w-2xl rounded-card bg-white px-6 py-8 text-center leading-relaxed text-muted shadow-soft ring-1 ring-line">
+              {published ? dictionary.fleet.empty : dictionary.fleet.unavailable}{" "}
+              <Link href={pagePath(locale, "plan")} className="font-semibold text-teal-deep underline-offset-4 hover:underline">
+                {dictionary.fleet.askUs}
+              </Link>
+            </p>
+          )}
         </div>
       </section>
 
@@ -93,7 +101,7 @@ export default async function FleetPage(props: LocaleParams) {
         </div>
       </section>
 
-      <FaqSection id="traveller-faq-title" faqs={fleetFaqs(dictionary, locale)} copy={dictionary.seo.faq} className="bg-ivory" />
+      <FaqSection id="traveller-faq-title" faqs={fleetFaqs(dictionary, locale, vehicles.map((vehicle) => vehicle.name))} copy={dictionary.seo.faq} className="bg-ivory" />
       <PageCTA pageKey="traveller" locale={locale} dictionary={dictionary} />
     </>
   )

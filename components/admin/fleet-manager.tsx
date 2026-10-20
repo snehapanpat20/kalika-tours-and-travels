@@ -22,6 +22,7 @@ import {
   updateVehiclePhoto,
 } from "@/lib/api/admin"
 import { ApiError } from "@/lib/api/client"
+import { isWebsiteVehicle } from "@/data/fleet"
 import { cn } from "@/lib/utils/cn"
 import type { AdminVehicle } from "@/server/cms/vehicles"
 
@@ -253,7 +254,15 @@ export function FleetManager({ items, totalAll, uploads }: { items: AdminVehicle
                   <div className="flex flex-wrap items-center gap-1.5">
                     <h3 className="font-bold text-forest">{item.name}</h3>
                     <StatusPill status={item.published ? "PUBLISHED" : "DRAFT"} />
+                    {isWebsiteVehicle(item.key) ? null : (
+                      <span className="rounded-full bg-stone px-2.5 py-0.5 text-xs font-semibold text-muted ring-1 ring-line">Not on website</span>
+                    )}
                   </div>
+                  {isWebsiteVehicle(item.key) ? null : (
+                    <p className="mt-1 text-xs text-muted">
+                      The website lists only the 20-Seater Traveller, Maruti Suzuki Ertiga and Toyota Innova Crysta, so this vehicle stays in the admin panel only.
+                    </p>
+                  )}
                   {item.nameMr ? <p className="text-sm text-muted">{item.nameMr}</p> : null}
                   <p className="mt-1 text-sm text-ink/80">{factsOf(item)}</p>
                   <p className="mt-0.5 text-xs text-muted">

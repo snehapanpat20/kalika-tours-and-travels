@@ -35,7 +35,7 @@ export function businessSchema(locale: Locale): Json {
     logo: absolute(BRAND_LOGO),
     image: absolute(DEFAULT_SHARE_IMAGE),
     description:
-      "Tours and travels from Hadapsar, Pune, with a 20 seater Traveller and buses for family, group, pilgrimage, corporate and outstation trips.",
+      "Tours and travels from Hadapsar, Pune, with a 20 seater Traveller, a Maruti Suzuki Ertiga and a Toyota Innova Crysta for family, group, pilgrimage, corporate and outstation trips.",
     email: business.email,
     telephone: [business.phoneE164, business.callOnlyPhoneE164],
     address: {

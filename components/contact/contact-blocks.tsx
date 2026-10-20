@@ -1,14 +1,14 @@
 import { Suspense } from "react"
 import { ArrowUpRight, ChevronDown, Mail, MapPin, Phone, UserRound, UsersRound } from "lucide-react"
 import { PlanForm, PlanFormFromUrl } from "@/components/home/plan-form"
-import { activeFleet } from "@/data/fleet"
-import { getDictionary } from "@/lib/i18n/get-dictionary"
+import { vehicleChoices } from "@/components/fleet/fleet-view"
 import { InstagramIcon, WhatsAppIcon } from "@/components/ui/icons"
 import { focusRing } from "@/components/ui/styles"
 import { business, callNumbers, formatLocation } from "@/data/business"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 import type { Locale } from "@/lib/i18n/locales"
 import { cn } from "@/lib/utils/cn"
+import { listPublicVehicles } from "@/server/cms/vehicles"
 import type { ServiceId } from "@/types/catalog"
 
 /**
@@ -155,7 +155,7 @@ export function TripTerms({ copy, rules, className }: { copy: ContactCopy; rules
 }
 
 /** The trip enquiry form in its card. Posts to the existing /api/enquiries. */
-export function PlanFormCard({
+export async function PlanFormCard({
   locale,
   dictionary,
   services,
@@ -167,9 +167,9 @@ export function PlanFormCard({
   headingLevel?: "h2" | "h3"
 }) {
   const plan = dictionary.home.plan
-  // The vehicles from data/fleet.ts, named in the visitor's language and in English (for the business)
-  const english = getDictionary("en").fleet.vehicles
-  const vehicles = activeFleet.map((vehicle) => ({ id: vehicle.id, name: dictionary.fleet.vehicles[vehicle.id].name, english: english[vehicle.id].name }))
+  // The published vehicles (as on the Our Fleet page), named in the visitor's language and in English
+  // (for the business). If they can't be read, the form still offers "Other / Help Me Choose".
+  const vehicles = vehicleChoices((await listPublicVehicles(locale, false)) ?? [])
   const formProps = { locale, copy: plan, services, vehicles, oneWay: dictionary.rules.oneWay }
   const Heading = headingLevel
   return (

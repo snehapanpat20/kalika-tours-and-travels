@@ -1,7 +1,7 @@
 import "server-only"
 import { z } from "zod"
 import type { Prisma, Vehicle, VehicleAc, VehicleCategory, VehiclePhoto } from "@/generated/prisma/client"
-import { fleetPageVehicles, type AcOption, type Vehicle as BuiltInVehicle } from "@/data/fleet"
+import { builtInFleet, websiteVehicleKeys, type AcOption, type Vehicle as BuiltInVehicle } from "@/data/fleet"
 import { getDictionary } from "@/lib/i18n/get-dictionary"
 import type { Locale } from "@/lib/i18n/locales"
 import { AppError } from "@/lib/errors/app-error"
@@ -322,10 +322,10 @@ const categoryOf = (vehicle: BuiltInVehicle): VehicleCategory =>
 const acOf = (options: AcOption[]): VehicleAc | null => (options.length === 2 ? "BOTH" : options[0] === "ac" ? "AC" : options[0] === "nonAc" ? "NON_AC" : null)
 
 /**
- * Copies the vehicles the Our Fleet page shows today (with their photos) into
- * Admin › Fleet, published as they are now. Also adds a draft "push-back seat
- * vehicle" whose seats and AC are still to be confirmed. Vehicles are matched
- * by their stable key, so running it again adds only what is missing.
+ * Copies the starting list (data/fleet.ts: the 20 seater Traveller, the Ertiga
+ * and the Innova Crysta, with their photos) into Admin › Fleet, published.
+ * Vehicles are matched by their stable key, so running it again adds only
+ * what is missing; it never changes or removes an existing vehicle.
  */
 export async function importBuiltInVehicles(): Promise<number> {
   const prisma = getPrisma()
@@ -335,7 +335,7 @@ export async function importBuiltInVehicles(): Promise<number> {
   let next = ((await prisma.vehicle.aggregate({ _max: { sortOrder: true } }))._max.sortOrder ?? -1) + 1
   let added = 0
 
-  const rows: { key: string; data: Omit<Prisma.VehicleCreateInput, "key">; photos: { src: string; position?: string; alt: string; altMr: string }[] }[] = fleetPageVehicles.map((vehicle) => ({
+  const rows: { key: string; data: Omit<Prisma.VehicleCreateInput, "key">; photos: { src: string; position?: string; alt: string; altMr: string }[] }[] = builtInFleet.map((vehicle) => ({
     key: vehicle.id,
     data: {
       name: en.vehicles[vehicle.id].name,
@@ -350,20 +350,6 @@ export async function importBuiltInVehicles(): Promise<number> {
     },
     photos: [vehicle.exterior, ...vehicle.interior].flatMap((photo) => (photo ? [{ src: photo.src, alt: en.photos[photo.id].alt, altMr: mr.photos[photo.id].alt }] : [])),
   }))
-  rows.push({
-    key: "pushBackVehicle",
-    data: {
-      name: "Push-Back Seat Vehicle",
-      nameMr: "पुश-बॅक आसनांचे वाहन",
-      capacity: null,
-      ac: null,
-      category: "BUS",
-      pushBackSeats: true,
-      description: null,
-      published: false,
-    },
-    photos: [],
-  })
 
   for (const row of rows) {
     if (existingKeys.has(row.key)) continue
@@ -385,6 +371,8 @@ export type PublicVehicle = {
   id: string
   key: string | null
   name: string
+  /** The English name, for the business (e.g. the trip form's "[Vehicle: …]" note). */
+  englishName: string
   description: string | null
   capacity: number | null
   ac: VehicleAc | null
@@ -395,15 +383,23 @@ export type PublicVehicle = {
 }
 
 /**
- * Published vehicles for the Our Fleet page (drafts too while an admin
- * previews), in the visitor's language; null when no vehicle has been added in
- * the admin panel yet, so the built-in list stays. Only public fields leave here.
+ * The website's only source of vehicles: the published ones in Admin › Fleet
+ * that are one of the three listed vehicles (data/fleet.ts websiteVehicleKeys:
+ * the 20-Seater Traveller, Ertiga and Innova Crysta), in order, in the
+ * visitor's language. While an admin previews, drafts of those three too.
+ * Used by the homepage, the Our Fleet page, the trip form and the FAQ.
+ * An empty list means none are published; null means the database could not
+ * be read, and the pages then say so instead of showing an old list.
+ * Only public fields leave here.
  */
-export async function listLiveVehicles(locale: Locale, preview: boolean): Promise<PublicVehicle[] | null> {
+export async function listPublicVehicles(locale: Locale, preview: boolean): Promise<PublicVehicle[] | null> {
   try {
     const prisma = getPrisma()
-    if ((await prisma.vehicle.count()) === 0) return null
-    const rows = await prisma.vehicle.findMany({ where: preview ? {} : { published: true }, include: withPhotos, orderBy: adminOrder })
+    const rows = await prisma.vehicle.findMany({
+      where: { key: { in: [...websiteVehicleKeys] }, ...(preview ? {} : { published: true }) },
+      include: withPhotos,
+      orderBy: adminOrder,
+    })
     return rows.map((item) => {
       const name = pick(locale, item.name, item.nameMr)
       const photos = [...item.photos].sort((a, b) => Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder)
@@ -411,6 +407,7 @@ export async function listLiveVehicles(locale: Locale, preview: boolean): Promis
         id: item.id,
         key: item.key,
         name,
+        englishName: item.name,
         description: pick(locale, item.description, item.descriptionMr),
         capacity: item.capacity,
         ac: item.ac,
@@ -421,7 +418,7 @@ export async function listLiveVehicles(locale: Locale, preview: boolean): Promis
       }
     })
   } catch (error) {
-    // The page falls back to the built-in list rather than failing
+    // Never fall back to a built-in list: it would bring back deleted vehicles
     logger.error("fleet_list_failed", { error: describeError(error) })
     return null
   }

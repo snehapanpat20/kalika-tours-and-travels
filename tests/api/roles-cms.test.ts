@@ -252,19 +252,21 @@ describe("Roles, permissions and the CMS", () => {
     assert.equal(discarded.json.section.draft.text.en.titleLead, "A draft headline")
   })
 
-  test("Traveller: features and photos replace the built-in ones only when published", async () => {
+  test("Traveller: its features replace the built-in ones on the Traveller's card only when published", async () => {
+    // The card exists only for a vehicle published in Admin › Fleet (its photos are managed there)
+    assert.equal((await api("/api/admin/vehicles/import", { cookie: contentCookie, body: {} })).status, 201)
     const data = {
       text: { en: { homeTitle: "Our comfortable Traveller" }, mr: {} },
       links: {},
       image: { kind: "keep" },
-      features: [{ icon: "ac", text: { en: "Air conditioning", mr: "वातानुकूलित" } }],
+      features: [{ icon: "ac", text: { en: "Unique test feature", mr: "वातानुकूलित" } }],
       photos: [{ kind: "website", path: "/images/traveller/front.jpg", alt: { en: "Front of the Traveller", mr: "" }, caption: { en: "Unique test caption", mr: "" } }],
     }
     assert.equal((await saveSection("traveller", data)).status, 200)
-    assert.ok(!(await page("/en/traveller")).html.includes("Unique test caption"))
+    assert.ok(!(await page("/en/traveller")).html.includes("Unique test feature"))
     assert.equal((await api("/api/admin/content/traveller/publish", { cookie: contentCookie, body: {} })).status, 200)
     const traveller = (await page("/en/traveller")).html
-    assert.ok(traveller.includes("Unique test caption"))
+    assert.ok(traveller.includes("Unique test feature"))
   })
 
   // ─── Destinations and services ───────────────────────────

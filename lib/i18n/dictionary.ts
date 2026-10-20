@@ -92,7 +92,16 @@ export type Dictionary = {
     enquire: string
     /** Announced when a filter changes, e.g. "{n} vehicles shown". */
     shown: string
-    vehicles: Record<VehicleId, { name: string; description: string }>
+    /**
+     * The starting list's wording (copied into Admin › Fleet by "Import current vehicles"):
+     * the name, the short description for cards, and an optional longer one for "View details".
+     */
+    vehicles: Record<VehicleId, { name: string; description: string; details?: string }>
+    /** The Our Fleet page when no vehicle is published, or the list could not be loaded. */
+    empty: string
+    unavailable: string
+    /** Link to the trip form after those messages. */
+    askUs: string
     photos: Record<FleetPhotoId, { alt: string; caption: string }>
     /** The homepage section. */
     home: { eyebrow: string; lead: string; accent: string; description: string; viewAll: string }
@@ -493,14 +502,13 @@ export type Dictionary = {
         | "fleetTypes"
         | "groupSize"
         | "acNonAc"
-        | "sleeper"
         | "tripKinds"
         | "availability"
         | "specificVehicle",
         string
       >
       /** `fleetTypes` has a {vehicles} placeholder, filled from data/fleet.ts. */
-      answers: Record<"kinds" | "book" | "fleetTypes" | "groupSize" | "acNonAc" | "sleeper" | "tripKinds" | "availability" | "specificVehicle", string>
+      answers: Record<"kinds" | "book" | "fleetTypes" | "groupSize" | "acNonAc" | "tripKinds" | "availability" | "specificVehicle", string>
     }
     notFoundLinks: string
   }

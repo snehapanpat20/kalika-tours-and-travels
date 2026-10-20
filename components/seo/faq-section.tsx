@@ -2,7 +2,6 @@ import { ChevronDown } from "lucide-react"
 import { Reveal } from "@/components/motion/reveal"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { focusRing, shell } from "@/components/ui/styles"
-import { activeFleet } from "@/data/fleet"
 import type { Dictionary } from "@/lib/i18n/dictionary"
 import type { Locale } from "@/lib/i18n/locales"
 import { cn } from "@/lib/utils/cn"
@@ -14,21 +13,19 @@ export type Faq = { question: string; answer: string }
  * services and its trip rules). Shown as visible text; deliberately no FAQPage
  * markup, which Google now reserves for government and health sites.
  *
- * The Our Fleet page's questions: about the fleet (the list of vehicles comes
- * from data/fleet.ts), then trip rules.
+ * The Our Fleet page's questions: about the fleet (the list of vehicles is the
+ * published vehicles the page shows), then trip rules.
  * Availability and prices are always left to the enquiry.
  */
-export function fleetFaqs(dictionary: Dictionary, locale: Locale): Faq[] {
+export function fleetFaqs(dictionary: Dictionary, locale: Locale, vehicleNames: string[]): Faq[] {
   const { questions: q, answers: a } = dictionary.seo.faq
   const rules = dictionary.rules
-  const vehicles = new Intl.ListFormat(locale === "mr" ? "mr" : "en", { type: "conjunction" }).format(
-    activeFleet.map((vehicle) => dictionary.fleet.vehicles[vehicle.id].name),
-  )
+  const vehicles = new Intl.ListFormat(locale === "mr" ? "mr" : "en", { type: "conjunction" }).format(vehicleNames)
   return [
-    { question: q.fleetTypes, answer: a.fleetTypes.replace("{vehicles}", vehicles) },
+    // Only when vehicles are listed: the answer names them
+    ...(vehicleNames.length ? [{ question: q.fleetTypes, answer: a.fleetTypes.replace("{vehicles}", vehicles) }] : []),
     { question: q.groupSize, answer: a.groupSize },
     { question: q.acNonAc, answer: a.acNonAc },
-    { question: q.sleeper, answer: a.sleeper },
     { question: q.specificVehicle, answer: a.specificVehicle },
     { question: q.availability, answer: a.availability },
     { question: q.tripKinds, answer: a.tripKinds },

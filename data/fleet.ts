@@ -1,22 +1,19 @@
 /**
- * The vehicles Kalika offers: one list, used by the Our Fleet page and the
- * homepage's "Explore Our Fleet" section, so the two can never disagree.
- * Names, descriptions and photo descriptions are in the i18n dictionaries
- * (`fleet.vehicles.<id>`, `fleet.photos.<id>`), in English and Marathi.
+ * The vehicles Kalika advertises, as a starting list: Admin › Fleet's "Import
+ * current vehicles" copies them into the database. The website itself only
+ * shows the database's published vehicles (server/cms/vehicles.ts), so a
+ * vehicle deleted or unpublished in Admin › Fleet never comes back from here.
+ * Names and descriptions are in the i18n dictionaries (`fleet.vehicles.<id>`),
+ * in English and Marathi.
  *
- * Only facts the business has confirmed are recorded: seat counts, AC / non-AC
- * (each vehicle is offered both ways), sleeper, and the push-back seat option.
- * No brands, prices, amenities or availability. `null` means "not confirmed
- * yet" and is simply not shown.
+ * Only facts the business has confirmed are recorded: seat counts and AC /
+ * non-AC. `null` or an empty list means "not confirmed yet" and is not shown.
  *
- * Photos are the business's own. A photo is attached to a vehicle only when
- * it is known to show that vehicle; the others appear only in the About
- * page's carousel of "our vehicles" (fleetGallery below) until the business
- * says which vehicle each one shows.
- * A vehicle without a photo shows a neutral "photo coming soon" panel.
+ * Photos are the business's own, attached only where they are known to show
+ * that vehicle; a vehicle without one shows a neutral "photo coming soon" panel.
  */
 
-export type VehicleId = "traveller" | "traveller17Ac" | "traveller17NonAc" | "bus32" | "bus45" | "bus26" | "sleeper34" | "innova" | "ertiga"
+export type VehicleId = "traveller" | "ertiga" | "innova"
 
 /** Filter groups on the Our Fleet page. A vehicle can sit in more than one (the sleeper is also a bus). */
 export type VehicleCategory = "traveller" | "bus" | "sleeper" | "pushBack" | "car"
@@ -52,22 +49,13 @@ export type Vehicle = {
   exterior?: FleetPhoto
   /** Further photos (interiors), shown in the vehicle's gallery. */
   interior: FleetPhoto[]
-  /** Shown in the homepage's "Explore Our Fleet" section (four at most). */
-  featured?: boolean
-  /** Hidden from the site when false (e.g. a vehicle not available for hire). */
-  active: boolean
-  /**
-   * Listed on the Our Fleet page only, not yet in the trip form's vehicle list,
-   * the FAQ answer or the homepage section.
-   */
-  fleetPageOnly?: boolean
 }
 
 /** Filter order on the Our Fleet page; only groups that contain an active vehicle are shown. */
 export const categoryOrder: VehicleCategory[] = ["traveller", "bus", "sleeper", "pushBack", "car"]
 
-/** The fleet, in display order. */
-export const fleet: Vehicle[] = [
+/** The starting list, in display order: the 20 seater Traveller, the Ertiga and the Innova Crysta. */
+export const builtInFleet: Vehicle[] = [
   {
     id: "traveller",
     capacity: 20,
@@ -77,43 +65,28 @@ export const fleet: Vehicle[] = [
     // seats. To confirm: both show Kalika's own Traveller.
     exterior: { id: "travellerExterior", src: "/images/fleet/traveller-exterior-blurred.jpg", position: "50% 60%" },
     interior: [{ id: "travellerInterior", src: "/images/fleet/traveller-interior.jpg", position: "50% 55%" }],
-    featured: true,
-    active: true,
   },
-  { id: "traveller17Ac", capacity: 17, acOptions: ["ac"], categories: ["traveller"], interior: [], active: true, fleetPageOnly: true },
-  { id: "traveller17NonAc", capacity: 17, acOptions: ["nonAc"], categories: ["traveller"], interior: [], active: true, fleetPageOnly: true },
-  { id: "bus32", capacity: 32, acOptions: ["ac", "nonAc"], categories: ["bus"], interior: [], active: true },
-  { id: "bus45", capacity: 45, acOptions: ["ac", "nonAc"], categories: ["bus"], interior: [], featured: true, active: true },
-  { id: "bus26", capacity: 26, acOptions: ["ac", "nonAc"], pushBackOption: true, categories: ["bus", "pushBack"], interior: [], featured: true, active: true },
-  { id: "sleeper34", capacity: 34, acOptions: ["ac", "nonAc"], sleeper: true, categories: ["bus", "sleeper"], interior: [], featured: true, active: true },
   // AC / non-AC not confirmed for the cars yet, so it is not shown
-  { id: "innova", capacity: 7, acOptions: [], categories: ["car"], interior: [], active: true, fleetPageOnly: true },
-  { id: "ertiga", capacity: 6, acOptions: [], categories: ["car"], interior: [], active: true, fleetPageOnly: true },
-  // A second 45-seater bus is not listed until the business confirms how it differs from the 45-seater bus.
+  { id: "ertiga", capacity: 6, acOptions: [], categories: ["car"], interior: [] },
+  { id: "innova", capacity: 7, acOptions: [], categories: ["car"], interior: [] },
 ]
 
-/** The vehicles on the Our Fleet page (when none are managed in Admin › Fleet). */
-export const fleetPageVehicles = fleet.filter((vehicle) => vehicle.active)
+/**
+ * The only vehicles the website lists, by their stable key: Admin › Fleet can
+ * hold others (drafts, or vehicles added for later), but the public pages show
+ * a vehicle only when it is published and one of these.
+ */
+export const websiteVehicleKeys: readonly VehicleId[] = builtInFleet.map((vehicle) => vehicle.id)
 
-/** The vehicles in the trip form, the FAQ answer and the homepage section. */
-export const activeFleet = fleetPageVehicles.filter((vehicle) => !vehicle.fleetPageOnly)
+export const isWebsiteVehicle = (key: string | null | undefined): boolean => Boolean(key && (websiteVehicleKeys as readonly string[]).includes(key))
 
 /**
- * Photos of the business's vehicles for the About page's carousel. A
- * carousel of "our vehicles" needs no vehicle named, so it can show photos
- * not yet matched to a listing. Number plates, operator names and painted
- * phone numbers are blurred in every vehicle photo (the *-blurred files). Not
- * in the carousel yet: the Traveller from behind and the two coach photos in
- * assets/fleet-unassigned/ (not published).
+ * Photos for the About page's "our vehicles" carousel: only photos of the
+ * vehicles the website advertises (the Traveller). Number plates and painted
+ * names are blurred (the *-blurred files). The bus and coach photos stay in
+ * public/images/fleet/ but are not shown anywhere.
  */
 export const fleetGallery: FleetPhoto[] = [
-  { id: "eicherSide", src: "/images/fleet/eicher-skyline-side-blurred.jpg", position: "50% 60%" },
-  { id: "interiorBlueSeats", src: "/images/fleet/interior-blue-patterned-seats.jpg" },
-  { id: "tealCoachSide", src: "/images/fleet/teal-coach-side-blurred.jpg", position: "50% 60%" },
+  { id: "travellerExterior", src: "/images/fleet/traveller-exterior-blurred.jpg", position: "50% 60%" },
   { id: "travellerInterior", src: "/images/fleet/traveller-interior.jpg" },
-  { id: "eicherFront", src: "/images/fleet/eicher-skyline-front-blurred.jpg", position: "50% 45%" },
-  { id: "interiorWhiteCovers1", src: "/images/fleet/interior-white-seat-covers-1.jpg" },
-  { id: "tealCoachFront", src: "/images/fleet/teal-coach-front-blurred.jpg", position: "50% 55%" },
-  { id: "interiorRedSeats", src: "/images/fleet/interior-red-patterned-seats.jpg" },
-  { id: "interiorWhiteCovers2", src: "/images/fleet/interior-white-seat-covers-2.jpg" },
 ]
