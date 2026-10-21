@@ -59,7 +59,8 @@ export function businessSchema(locale: Locale): Json {
   }
 }
 
-export function websiteSchema(locale: Locale): Json {
+/** The site itself, identical in every language (Google uses it for the site name in results). */
+export function websiteSchema(): Json {
   return {
     "@type": "WebSite",
     "@id": websiteId(),
@@ -67,7 +68,9 @@ export function websiteSchema(locale: Locale): Json {
     name: business.name,
     inLanguage: ["en-IN", "mr-IN"],
     publisher: { "@id": businessId() },
-    ...(locale === "mr" ? { alternateName: business.localName.mr } : {}),
+    // The same on every homepage version (Google reads the /en or /mr page that / redirects to):
+    // other names in order of preference, "Kalika Tours and Travels" first, then the Marathi name
+    alternateName: [...business.otherNames, business.localName.mr],
   }
 }
 

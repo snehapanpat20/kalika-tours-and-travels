@@ -59,7 +59,7 @@ export default async function LocaleLayout({
   return (
     <Document locale={locale} theme="site">
       {/* Who runs the site: the business and the website, referenced by every page's WebPage node */}
-      <JsonLd data={graph([businessSchema(locale), websiteSchema(locale)])} />
+      <JsonLd data={graph([businessSchema(locale), websiteSchema()])} />
       <SiteFrame locale={locale} dictionary={dictionary} services={footerServices} announcement={announcement} preview={preview}>
         {children}
       </SiteFrame>
